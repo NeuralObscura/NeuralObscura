@@ -35,12 +35,12 @@ class ChainerDataReader(object):
         s = ""
         for key, data in self.parameters:
             print(key)
-            s += ("  let %s_Path = StyleModelData(modelName: \"%s\",rawFileName: \"%s\")\n" % (key, self.model_name, key))
+            s += ("  layerData[\"%s\"] = StyleModelData(modelName: \"%s\",rawFileName: \"%s\")\n" % (key, self.model_name, key))
             s += ("  //%s shape = %s\n" % (key, data.shape))
 
             # Save the individual files.
             g = open(dst_path + "/" + key + ".dat", "wb")
-            convert(data).tofile(g)
+            convert(data.ravel()).tofile(g)
             g.close()
 
         print("\nCopy this code:")
