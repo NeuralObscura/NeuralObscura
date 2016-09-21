@@ -19,7 +19,7 @@ class ChainerDataReader(object):
         children = [c for c in self.model.children()]
 
         def rename_layer(child_name, layer_name):
-            return (self.model_name + '_' + child_name + layer_name).replace("/", "_")
+            return (child_name + layer_name).replace("/", "_")
 
         self.parameters = list(itertools.chain(*[[( rename_layer(child.name, param[0]), param[1].data) for param in child.namedparams()] for child in children]))
 
@@ -35,7 +35,7 @@ class ChainerDataReader(object):
         s = ""
         for key, data in self.parameters:
             print(key)
-            s += ("  layerData[\"%s\"] = StyleModelData(modelName: \"%s\",rawFileName: \"%s\")\n" % (key, self.model_name, key))
+            s += ("  layerData[\"%s\"] = StyleModelData(modelName: \"%s\", rawFileName: \"%s\")\n" % (key, self.model_name, key))
             s += ("  //%s shape = %s\n" % (key, data.shape))
 
             # Save the individual files.
