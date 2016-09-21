@@ -7,13 +7,33 @@
 //
 
 import UIKit
+import MetalKit
+import MetalPerformanceShaders
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     @IBOutlet weak var imageView: UIImageView!
+    private var device: MTLDevice!
+    private var ciContext : CIContext!
+    private var textureLoader : MTKTextureLoader!
+    private var commandQueue: MTLCommandQueue!
+    var sourceTexture : MTLTexture? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view, typically from a nib.
+
+        device = MTLCreateSystemDefaultDevice()
+
+        guard MPSSupportsMTLDevice(device) else {
+            print("Error: Metal Performance Shaders not supported on this device")
+            return
+        }
+
+        ciContext = CIContext.init(mtlDevice: device)
+
+        textureLoader = MTKTextureLoader(device: device!)
+
+        commandQueue = device!.newCommandQueue()
+
     }
 
     override func didReceiveMemoryWarning() {
@@ -50,6 +70,30 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         imageView.image = image
 
         dismiss(animated: true, completion: nil)
+    }
+
+    @IBAction func doStyling(_ sender: AnyObject) {
+        var image = imageView.image!.cgImage
+        if (image == nil) {
+            let ciImage = CIImage(image: imageView.image!)
+            image = ciContext.createCGImage(ciImage!, from: ciImage!.extent)
+        }
+
+        do {
+            sourceTexture = try textureLoader.newTexture(with: image!, options: [:])
+        }
+        catch let error as NSError {
+            fatalError("Unexpected error ocurred: \(error.localizedDescription).")
+        }
+
+        //TODO: get output image by running model
+        let model = CompositionModel()
+
+        print("done")
+
+        // Comes out flipped over x axis and oddly colored
+        let ciImage = CIImage(mtlTexture: sourceTexture!)
+        imageView.image = UIImage(ciImage: ciImage!)
     }
 
 }

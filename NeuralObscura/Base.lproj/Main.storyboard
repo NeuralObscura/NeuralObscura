@@ -34,7 +34,11 @@
                                         </connections>
                                     </barButtonItem>
                                     <barButtonItem style="plain" systemItem="flexibleSpace" id="G7T-JG-qg6"/>
-                                    <barButtonItem systemItem="done" id="cHl-Um-weT"/>
+                                    <barButtonItem systemItem="done" id="cHl-Um-weT">
+                                        <connections>
+                                            <action selector="doStyling:" destination="Ioc-AN-U4W" id="fQf-G9-bOb"/>
+                                        </connections>
+                                    </barButtonItem>
                                 </items>
                             </toolbar>
                         </subviews>

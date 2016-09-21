@@ -35,7 +35,7 @@ class ChainerDataReader(object):
         s = ""
         for key, data in self.parameters:
             print(key)
-            s += ("  let %s_Path = Bundle.main.path( forResource: %s, ofType: \"dat\")\n" % (key, key))
+            s += ("  let %s_Path = StyleModelData(modelName: \"%s\",rawFileName: \"%s\")\n" % (key, self.model_name, key))
             s += ("  //%s shape = %s\n" % (key, data.shape))
 
             # Save the individual files.
