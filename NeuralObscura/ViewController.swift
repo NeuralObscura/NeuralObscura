@@ -32,7 +32,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
         textureLoader = MTKTextureLoader(device: device!)
 
-        commandQueue = device!.newCommandQueue()
+        commandQueue = device!.makeCommandQueue()
 
     }
 

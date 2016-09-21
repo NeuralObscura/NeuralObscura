@@ -20,15 +20,20 @@ class StyleModelData {
     init(modelName: String, rawFileName: String) {
         self.modelName = modelName
         self.rawFileName = rawFileName
+
+        loadRawFile(rawFileName: self.rawFileName)
     }
 
     private func loadRawFile(rawFileName: String) {
-        let path = Bundle.main.path( forResource: rawFileName, ofType: "dat")
+        let path = Bundle.main.path(forResource: rawFileName, ofType: "dat", inDirectory: self.modelName + "_model_data")
+
+        assert(path != nil, "Error: failed to find file \(rawFileName)")
+
         do {
             let attr = try FileManager.default.attributesOfItem(atPath: path!)
 
-            if let fsize = attr[FileAttributeKey.size] as? UInt64 {
-                fileSize = fsize
+            if let fsize = attr[FileAttributeKey.size] as? NSNumber {
+                fileSize = fsize.uint64Value
             } else {
                 print("Failed to get a size attribute from path: \(path)")
             }
@@ -39,11 +44,11 @@ class StyleModelData {
         // open file descriptors in read-only mode to parameter files
         let fd = open( path!, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
 
-        assert(fd != -1, "Error: failed to open output file at \""+path!+"\"  errno = \(errno)\n")
+        assert(fd != -1, "Error: failed to open file at \""+path!+"\"  errno = \(errno)\n")
 
         let hdr = mmap(nil, Int(fileSize), PROT_READ, MAP_FILE | MAP_SHARED, fd, 0)
 
-        print("Opened: "+path!)
+        print("Opened: \(path!) (\(fileSize))")
 
         let numBytes = Int(fileSize) / MemoryLayout<Float>.size
         ptr = hdr!.bindMemory(to: Float.self, capacity: numBytes)
@@ -53,7 +58,7 @@ class StyleModelData {
     }
 
     deinit{
-        print("deinit \(self)")
+        print("deinit \(self) \(modelName) \(rawFileName)")
 
         if let hdr = hdr {
             let result = munmap(hdr, Int(fileSize))
