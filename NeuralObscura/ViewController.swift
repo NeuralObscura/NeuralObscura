@@ -87,6 +87,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
         do {
             sourceTexture = try textureLoader.newTexture(with: image!, options: [:])
+            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: sourceTexture!.pixelFormat, width: sourceTexture!.width, height: sourceTexture!.height, mipmapped: false)
+            sourceTexture = device.makeTexture(descriptor: textureDescriptor)
         }
         catch let error as NSError {
             fatalError("Unexpected error ocurred: \(error.localizedDescription).")
@@ -114,7 +116,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
             let adjustedMeanImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: input_id)
 
             let encoder = commandBuffer.makeComputeCommandEncoder()
-            encoder.setComputePipelineState(true ? pipelineBGR : pipelineRGB)
+            //encoder.setComputePipelineState(true ? pipelineBGR : pipelineRGB)
+            //encoder.setComputePipelineState(pipelineRGB)
+            encoder.setComputePipelineState(pipelineBGR)
             encoder.setTexture(sourceTexture, at: 0)
             encoder.setTexture(adjustedMeanImage.texture, at: 1)
             let threadsPerGroups = MTLSizeMake(8, 8, 1)
@@ -138,32 +142,23 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 
     func imageFromTexture(texture: MTLTexture) -> UIImage {
-
-        // The total number of bytes of the texture
+        print(texture.pixelFormat.rawValue)
         let imageByteCount = texture.width * texture.height * bytesPerPixel
-
-        // The number of bytes for each image row
         let bytesPerRow = texture.width * bytesPerPixel
-
-        // An empty buffer that will contain the image
         var src = [UInt8](repeating: 0, count: Int(imageByteCount))
 
-        // Gets the bytes from the texture
         let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
         texture.getBytes(&src, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
 
-        // Creates an image context
         let bitmapInfo = CGBitmapInfo(rawValue: (CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue))
+
+        let colorSpaceRef = CGColorSpaceCreateDeviceRGB()
         let bitsPerComponent = 8
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
-        let context = CGContext(data: &src, width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: colorSpace, bitmapInfo: bitmapInfo.rawValue);
+        let context = CGContext(data: &src, width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: colorSpaceRef, bitmapInfo: bitmapInfo.rawValue);
 
-        // Creates the image from the graphics context
-        let dstImage = context!.makeImage();
+        let dstImageFilter = context!.makeImage();
 
-        // Creates the final UIImage
-        return UIImage(cgImage: dstImage!, scale: 0.0, orientation: UIImageOrientation.downMirrored)
+        return UIImage(cgImage: dstImageFilter!, scale: 0.0, orientation: UIImageOrientation.downMirrored)
     }
-
 }
 
