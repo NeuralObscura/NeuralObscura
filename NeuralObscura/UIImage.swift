@@ -9,7 +9,7 @@
 import UIKit
 
 extension UIImage {
-    static func MTLTextureToUIImage(texture: MTLTexture) -> UIImage {
+    static func MTLTextureToUIImage(texture: MTLTexture, orientation: UIImageOrientation) -> UIImage {
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * texture.width
         var imageBytes = [UInt8](repeating: 0, count: texture.width * texture.height * bytesPerPixel)
@@ -20,7 +20,7 @@ extension UIImage {
         let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
         let imageRef = CGImage(width: texture.width, height: texture.height, bitsPerComponent: 8, bitsPerPixel: bytesPerPixel * 8, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: providerRef!, decode: nil, shouldInterpolate: false, intent: .defaultIntent)!
 
-        return UIImage(cgImage: imageRef)
+        return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
     }
 
     func createMTLTextureForDevice(device: MTLDevice) -> MTLTexture {

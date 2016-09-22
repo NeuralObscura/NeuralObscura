@@ -17,7 +17,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
     var sourceTexture : MTLTexture? = nil
-    let bytesPerPixel: Int = 4
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -104,8 +103,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
             let encoder = commandBuffer.makeComputeCommandEncoder()
             //encoder.setComputePipelineState(true ? pipelineBGR : pipelineRGB)
-            //encoder.setComputePipelineState(pipelineRGB)
-            encoder.setComputePipelineState(pipelineBGR)
+            encoder.setComputePipelineState(pipelineRGB)
+            //encoder.setComputePipelineState(pipelineBGR)
             encoder.setTexture(sourceTexture, at: 0)
             encoder.setTexture(adjustedMeanImage.texture, at: 1)
             let threadsPerGroups = MTLSizeMake(8, 8, 1)
@@ -124,10 +123,12 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         }
 
         print("done")
-        print(imageView.image!.size)
-        print(sourceTexture!.width)
-        print(sourceTexture!.height)
-        imageView.image = UIImage.MTLTextureToUIImage(texture: sourceTexture!)
+
+        if(Int(imageView.image!.size.width) == sourceTexture!.width) {
+            imageView.image = UIImage.MTLTextureToUIImage(texture: sourceTexture!, orientation: UIImageOrientation.up)
+        } else {
+            imageView.image = UIImage.MTLTextureToUIImage(texture: sourceTexture!, orientation: UIImageOrientation.right)
+        }
     }
 }
 
