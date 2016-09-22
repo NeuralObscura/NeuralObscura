@@ -52,15 +52,12 @@ private func makeConv(device: MTLDevice,
                       bias: UnsafePointer<Float>,
                       stride: Int) -> MPSCNNConvolution {
 
-    // This should apply the equivlent of "no activation function"
-    let neuronFilter = MPSCNNNeuronLinear(device: device, a: 1, b:0)
-
     // All VGGNet conv layers use a 3x3 kernel with stride 1.
     let desc = MPSCNNConvolutionDescriptor(kernelWidth: 3,
                                            kernelHeight: 3,
                                            inputFeatureChannels: inDepth,
                                            outputFeatureChannels: outDepth,
-                                           neuronFilter: neuronFilter)
+                                           neuronFilter: nil)
     desc.strideInPixelsX = stride
     desc.strideInPixelsY = stride
 
