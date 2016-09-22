@@ -79,20 +79,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         let pipelineBGR: MTLComputePipelineState
         let outputImage: MPSImage
 
-        var image = imageView.image!.cgImage
-        if (image == nil) {
-            let ciImage = CIImage(image: imageView.image!)
-            image = ciContext.createCGImage(ciImage!, from: ciImage!.extent)
-        }
-
-        do {
-            sourceTexture = try textureLoader.newTexture(with: image!, options: [:])
-            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: sourceTexture!.pixelFormat, width: sourceTexture!.width, height: sourceTexture!.height, mipmapped: false)
-            sourceTexture = device.makeTexture(descriptor: textureDescriptor)
-        }
-        catch let error as NSError {
-            fatalError("Unexpected error ocurred: \(error.localizedDescription).")
-        }
+        sourceTexture = imageView.image!.createMTLTextureForDevice(device: self.device)
 
         // Before we pass an image into the network, we need to adjust its RGB
         // values. This is done with a custom compute kernel. Here we load that
@@ -137,28 +124,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         }
 
         print("done")
-
-        imageView.image = imageFromTexture(texture: sourceTexture!)
-    }
-
-    func imageFromTexture(texture: MTLTexture) -> UIImage {
-        print(texture.pixelFormat.rawValue)
-        let imageByteCount = texture.width * texture.height * bytesPerPixel
-        let bytesPerRow = texture.width * bytesPerPixel
-        var src = [UInt8](repeating: 0, count: Int(imageByteCount))
-
-        let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
-        texture.getBytes(&src, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
-
-        let bitmapInfo = CGBitmapInfo(rawValue: (CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue))
-
-        let colorSpaceRef = CGColorSpaceCreateDeviceRGB()
-        let bitsPerComponent = 8
-        let context = CGContext(data: &src, width: texture.width, height: texture.height, bitsPerComponent: bitsPerComponent, bytesPerRow: bytesPerRow, space: colorSpaceRef, bitmapInfo: bitmapInfo.rawValue);
-
-        let dstImageFilter = context!.makeImage();
-
-        return UIImage(cgImage: dstImageFilter!, scale: 0.0, orientation: UIImageOrientation.downMirrored)
+        print(imageView.image!.size)
+        print(sourceTexture!.width)
+        print(sourceTexture!.height)
+        imageView.image = UIImage.MTLTextureToUIImage(texture: sourceTexture!)
     }
 }
 
