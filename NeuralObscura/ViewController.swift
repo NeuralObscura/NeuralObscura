@@ -76,9 +76,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         // The custom compute kernels for preprocessing the input images.
         let pipelineRGB: MTLComputePipelineState
         let pipelineBGR: MTLComputePipelineState
+        let pipelineIdentity: MTLComputePipelineState
         let outputImage: MPSImage
 
+
         sourceTexture = imageView.image!.createMTLTextureForDevice(device: self.device)
+
+        let output_id = MPSImageDescriptor(channelFormat: .unorm8, width: sourceTexture!.width, height: sourceTexture!.height, featureChannels: 3)
+        outputImage = MPSImage(device: device, imageDescriptor: output_id)
 
         // Before we pass an image into the network, we need to adjust its RGB
         // values. This is done with a custom compute kernel. Here we load that
@@ -90,26 +95,33 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
             let adjust_mean_bgr = library.makeFunction(name: "adjust_mean_bgr")
             pipelineBGR = try device.makeComputePipelineState(function: adjust_mean_bgr!)
+
+            let identity = library.makeFunction(name: "identity")
+            pipelineIdentity = try device.makeComputePipelineState(function: identity!)
         } catch {
             fatalError("Error initializing compute pipeline")
         }
 
         let input_id  = MPSImageDescriptor(channelFormat: .float16, width: 224, height: 224, featureChannels: 3)
 
-        autoreleasepool{
+        autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
 
             let adjustedMeanImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: input_id)
 
             let encoder = commandBuffer.makeComputeCommandEncoder()
             //encoder.setComputePipelineState(true ? pipelineBGR : pipelineRGB)
-            encoder.setComputePipelineState(pipelineRGB)
+            //encoder.setComputePipelineState(pipelineRGB)
             //encoder.setComputePipelineState(pipelineBGR)
+            encoder.setComputePipelineState(pipelineIdentity)
             encoder.setTexture(sourceTexture, at: 0)
-            encoder.setTexture(adjustedMeanImage.texture, at: 1)
+            //encoder.setTexture(adjustedMeanImage.texture, at: 1)
+            encoder.setTexture(outputImage.texture, at: 1)
             let threadsPerGroups = MTLSizeMake(8, 8, 1)
+/*            let threadGroups = MTLSizeMake(sourceTexture!.width / threadsPerGroups.width,
+                                           adjustedMeanImage.texture.height / threadsPerGroups.height, 1)*/
             let threadGroups = MTLSizeMake(sourceTexture!.width / threadsPerGroups.width,
-                                           adjustedMeanImage.texture.height / threadsPerGroups.height, 1)
+                                           outputImage.texture.height / threadsPerGroups.height, 1)
             encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroups)
             encoder.endEncoding()
             adjustedMeanImage.readCount -= 1
@@ -124,10 +136,16 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
         print("done")
 
-        if(Int(imageView.image!.size.width) == sourceTexture!.width) {
-            imageView.image = UIImage.MTLTextureToUIImage(texture: sourceTexture!, orientation: UIImageOrientation.up)
+        //setImageViewToTexture(texture: sourceTexture!)
+        //sleep(3)
+        setImageViewToTexture(texture: outputImage.texture)
+    }
+
+    func setImageViewToTexture(texture: MTLTexture) {
+        if(Int(imageView.image!.size.width) == texture.width) {
+            imageView.image = UIImage.MTLTextureToUIImage(texture: texture, orientation: UIImageOrientation.up)
         } else {
-            imageView.image = UIImage.MTLTextureToUIImage(texture: sourceTexture!, orientation: UIImageOrientation.right)
+            imageView.image = UIImage.MTLTextureToUIImage(texture: texture, orientation: UIImageOrientation.right)
         }
     }
 }
