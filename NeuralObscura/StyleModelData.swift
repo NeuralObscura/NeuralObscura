@@ -69,4 +69,8 @@ class StyleModelData {
         }
     }
 
+    func pointer() -> UnsafeMutablePointer<Float> {
+        return ptr
+    }
+
 }

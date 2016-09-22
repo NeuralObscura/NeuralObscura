@@ -1,11 +1,3 @@
-//
-//  UIImage.swift
-//  SpaceShooter
-//
-//  Created by Andreas Binnewies on 11/21/15.
-//  Copyright © 2015 drtyhbo productions. All rights reserved.
-//
-
 import UIKit
 
 extension UIImage {
