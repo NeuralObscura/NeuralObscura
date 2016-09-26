@@ -9,11 +9,91 @@
 import Foundation
 import MetalPerformanceShaders
 
-class CompositionModel: NeuralModel {
+private func makeConv(device: MTLDevice,
+                      inDepth: Int,
+                      outDepth: Int,
+                      weights: UnsafePointer<Float>,
+                      bias: UnsafePointer<Float>,
+                      stride: Int) -> MPSCNNConvolution {
+    
+    // All VGGNet conv layers use a 3x3 kernel with stride 1.
+    let desc = MPSCNNConvolutionDescriptor(kernelWidth: 3,
+                                           kernelHeight: 3,
+                                           inputFeatureChannels: inDepth,
+                                           outputFeatureChannels: outDepth,
+                                           neuronFilter: nil)
+    desc.strideInPixelsX = stride
+    desc.strideInPixelsY = stride
+    
+    let conv = MPSCNNConvolution(device: device,
+                                 convolutionDescriptor: desc,
+                                 kernelWeights: weights,
+                                 biasTerms: bias,
+                                 flags: MPSCNNConvolutionFlags.none)
+    
+    // To preserve the width and height between conv layers, VGGNet assumes one
+    // pixel of padding around the edges. Metal apparently has no problem reading
+    // outside the source image, so we don't have to do anything special here.
+    conv.edgeMode = .zero
+    
+    return conv
+}
 
-    override init(device: MTLDevice) {
-        super.init(device: device)
-        // PASTE INIT DATA HERE
+class NeuralStyleModel {
+    let device: MTLDevice
+    let commandQueue: MTLCommandQueue
+    let modelName: String
+    var c1, c2, c3: SlimMPSCNNConvolution
+    var b1, b2, b3, b4, b5: BatchNormalization?
+    var r1, r2, r3, r4, r5: ResidualBlock?
+    var d1, d2, d3: Deconvolution2D?
+    // var r1_c1, r1_c2, r2_c1, r2_c2, r3_c1, r3_c2, r4_c1, r4_c2, r5_c1, r5_c2: MPSCNNConvolution?
+    // var r1_b1, r1_b2, r2_b1, r2_b2, r3_b1, r3_b2, r4_b1, r4_b2, r5_b1, r5_b2: BatchNormalization?
+
+    init(device: MTLDevice, modelName: String = "composition") {
+        self.device = device
+        commandQueue = device.makeCommandQueue()
+        self.modelName = modelName
+        setupModel()
+    }
+    
+    private func setupModel() {
+        // c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
+        c1 = makeConv(device: device,
+                      inDepth: 3,
+                      outDepth: 32,
+                      weights: layerData["c1_W"]!.pointer(),
+                      bias: layerData["c1_b"]!.pointer(),
+                      stride: 1)
+        // c2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
+        c2 = makeConv(device: device,
+                      inDepth: 32,
+                      outDepth: 64,
+                      weights: layerData["c2_W"]!.pointer(),
+                      bias: layerData["c2_b"]!.pointer(),
+                      stride: 2)
+        // c3=L.Convolution2D(64, 128, 4,stride=2, pad=1),
+        c3 = makeConv(device: device,
+                      inDepth: 64,
+                      outDepth: 128,
+                      weights: layerData["c3_W"]!.pointer(),
+                      bias: layerData["c3_b"]!.pointer(),
+                      stride: 2)
+        
+        // r1=ResidualBlock(128, 128),
+        // r2=ResidualBlock(128, 128),
+        // r3=ResidualBlock(128, 128),
+        // r4=ResidualBlock(128, 128),
+        // r5=ResidualBlock(128, 128),
+        // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
+        // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
+        // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
+        // b1=L.BatchNormalization(32),
+        // b2=L.BatchNormalization(64),
+        // b3=L.BatchNormalization(128),
+        // b4=L.BatchNormalization(64),
+        // b5=L.BatchNormalization(32),
+        
         layerData["r4_c2_W"] = StyleModelData(modelName: "composition", rawFileName: "r4_c2_W")
         //r4_c2_W shape = (128, 128, 3, 3)
         layerData["r4_c2_b"] = StyleModelData(modelName: "composition", rawFileName: "r4_c2_b")
@@ -138,7 +218,127 @@ class CompositionModel: NeuralModel {
         //d1_W shape = (128, 64, 4, 4)
         layerData["d1_b"] = StyleModelData(modelName: "composition", rawFileName: "d1_b")
         //d1_b shape = (64,)
-        // END PASTE
-        self.setup_model()
     }
 }
+//
+//  NeuralModel.swift
+//  NeuralObscura
+//
+//  Created by Paul Bergeron on 9/23/16.
+//  Copyright © 2016 Paul Bergeron. All rights reserved.
+//
+
+
+/*
+ class FastStyleNet(chainer.Chain):
+ def __init__(self):
+ super(FastStyleNet, self).__init__(
+ c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
+ c2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
+ c3=L.Convolution2D(64, 128, 4,stride=2, pad=1),
+ r1=ResidualBlock(128, 128),
+ r2=ResidualBlock(128, 128),
+ r3=ResidualBlock(128, 128),
+ r4=ResidualBlock(128, 128),
+ r5=ResidualBlock(128, 128),
+ d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
+ d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
+ d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
+ b1=L.BatchNormalization(32),
+ b2=L.BatchNormalization(64),
+ b3=L.BatchNormalization(128),
+ b4=L.BatchNormalization(64),
+ b5=L.BatchNormalization(32),
+ )
+ 
+ def __call__(self, x, test=False):
+ h = self.b1(F.elu(self.c1(x)), test=test)
+ h = self.b2(F.elu(self.c2(h)), test=test)
+ h = self.b3(F.elu(self.c3(h)), test=test)
+ h = self.r1(h, test=test)
+ h = self.r2(h, test=test)
+ h = self.r3(h, test=test)
+ h = self.r4(h, test=test)
+ h = self.r5(h, test=test)
+ h = self.b4(F.elu(self.d1(h)), test=test)
+ h = self.b5(F.elu(self.d2(h)), test=test)
+ y = self.d3(h)
+ return (F.tanh(y)+1)*127.5
+ */
+
+class NeuralModel {
+    var layerData = [String: StyleModelData]()
+    let device: MTLDevice
+    let commandQueue: MTLCommandQueue
+    var c1, c2, c3: MPSCNNConvolution?
+    
+    init(device: MTLDevice) {
+        self.device = device
+        commandQueue = device.makeCommandQueue()
+        c1 = nil
+        c2 = nil
+        c3 = nil
+    }
+    
+    func setup_model() {
+        // c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
+        c1 = makeConv(device: device,
+                      inDepth: 3,
+                      outDepth: 32,
+                      weights: layerData["c1_W"]!.pointer(),
+                      bias: layerData["c1_b"]!.pointer(),
+                      stride: 1)
+        // c2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
+        c2 = makeConv(device: device,
+                      inDepth: 32,
+                      outDepth: 64,
+                      weights: layerData["c2_W"]!.pointer(),
+                      bias: layerData["c2_b"]!.pointer(),
+                      stride: 2)
+        // c3=L.Convolution2D(64, 128, 4,stride=2, pad=1),
+        c3 = makeConv(device: device,
+                      inDepth: 64,
+                      outDepth: 128,
+                      weights: layerData["c3_W"]!.pointer(),
+                      bias: layerData["c3_b"]!.pointer(),
+                      stride: 2)
+        
+        // r1=ResidualBlock(128, 128),
+        // r2=ResidualBlock(128, 128),
+        // r3=ResidualBlock(128, 128),
+        // r4=ResidualBlock(128, 128),
+        // r5=ResidualBlock(128, 128),
+        // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
+        // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
+        // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
+        // b1=L.BatchNormalization(32),
+        // b2=L.BatchNormalization(64),
+        // b3=L.BatchNormalization(128),
+        // b4=L.BatchNormalization(64),
+        // b5=L.BatchNormalization(32),
+    }
+    
+    //    func transform(texture: MTLTexture) -> MTLTexture {
+    //
+    //    }
+}
+
+// let output_id = MPSImageDescriptor(channelFormat: .unorm8, width: sourceTexture!.width, height: sourceTexture!.height, featureChannels: 3)
+// let outputImage = MPSImage(device: device, imageDescriptor: output_id)
+// let commandBuffer = commandQueue.makeCommandBuffer()
+// encoder.setComputePipelineState(pipelineIdentity)
+// encoder.setTexture(sourceTexture, at: 0)
+// encoder.setTexture(outputImage.texture, at: 1)
+// /* Instructions for optimizing thread configuration here:
+//  *   https://developer.apple.com/library/prerelease/content/documentation/Miscellaneous/Conceptual/MetalProgrammingGuide/Compute-Ctx/Compute-Ctx.html#//apple_ref/doc/uid/TP40014221-CH6-SW2
+//  **/
+// let threadsPerGroups = MTLSizeMake(8, 8, 1)
+// let threadGroups = MTLSizeMake(sourceTexture!.width / threadsPerGroups.width,
+//                                outputImage.texture.height / threadsPerGroups.height, 1)
+// encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroups)
+// 
+// // Tell the GPU to start and wait until it's done.
+// commandBuffer.commit()
+// commandBuffer.waitUntilCompleted()
+
+

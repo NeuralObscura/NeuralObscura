@@ -50,8 +50,8 @@ class StyleModelData {
 
         print("Opened: \(path!) (\(fileSize))")
 
-        let numBytes = Int(fileSize) / MemoryLayout<Float>.size
-        ptr = hdr!.bindMemory(to: Float.self, capacity: numBytes)
+        let floatCount = Int(fileSize) / MemoryLayout<Float>.size
+        ptr = hdr!.bindMemory(to: Float.self, capacity: floatCount)
         if ptr == UnsafeMutablePointer<Float>(bitPattern: -1) {
             print("Error: mmap failed, errno = \(errno)")
         }

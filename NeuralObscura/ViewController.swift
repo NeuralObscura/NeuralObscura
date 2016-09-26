@@ -16,7 +16,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     private var ciContext : CIContext!
     private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
-    var sourceTexture : MTLTexture? = nil
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,7 +32,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         textureLoader = MTKTextureLoader(device: device!)
 
         commandQueue = device!.makeCommandQueue()
-
     }
 
     override func didReceiveMemoryWarning() {
@@ -73,54 +71,19 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 
     @IBAction func doStyling(_ sender: AnyObject) {
-        // The custom compute kernels for preprocessing the input images.
-        let pipelineIdentity: MTLComputePipelineState
-        let outputImage: MPSImage
+        let sourceTexture = imageView.image!.createMTLTextureForDevice(device: self.device)
 
-        sourceTexture = imageView.image!.createMTLTextureForDevice(device: self.device)
+        // do {
+        //     let library = device.newDefaultLibrary()!
+        //     let identity = library.makeFunction(name: "identity")
+        //     pipelineIdentity = try device.makeComputePipelineState(function: identity!)
+        // } catch {
+        //     fatalError("Error initializing compute pipeline")
+        // }
 
-        let output_id = MPSImageDescriptor(channelFormat: .unorm8, width: sourceTexture!.width, height: sourceTexture!.height, featureChannels: 3)
-        outputImage = MPSImage(device: device, imageDescriptor: output_id)
-
-        do {
-            let library = device.newDefaultLibrary()!
-            let identity = library.makeFunction(name: "identity")
-            pipelineIdentity = try device.makeComputePipelineState(function: identity!)
-        } catch {
-            fatalError("Error initializing compute pipeline")
-        }
-
-        let model = CompositionModel(device: device)
-
-        autoreleasepool {
-            let commandBuffer = commandQueue.makeCommandBuffer()
-
-            let encoder = commandBuffer.makeComputeCommandEncoder()
-
-            encoder.setComputePipelineState(pipelineIdentity)
-            encoder.setTexture(sourceTexture, at: 0)
-            encoder.setTexture(outputImage.texture, at: 1)
-            /* Instructions for optimizing thread configuration here:
-                https://developer.apple.com/library/prerelease/content/documentation/Miscellaneous/Conceptual/MetalProgrammingGuide/Compute-Ctx/Compute-Ctx.html#//apple_ref/doc/uid/TP40014221-CH6-SW2
-            */
-            let threadsPerGroups = MTLSizeMake(8, 8, 1)
-            let threadGroups = MTLSizeMake(sourceTexture!.width / threadsPerGroups.width,
-                                           outputImage.texture.height / threadsPerGroups.height, 1)
-            encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroups)
-            encoder.endEncoding()
-
-            // Tell the GPU to start and wait until it's done.
-            commandBuffer.commit()
-            commandBuffer.waitUntilCompleted()
-
-            //TODO: get output image by running model
-
-        }
-
+        let model = NeuralStyleModel(device: device)
+        let outputTexture = model.forward(sourceTexture)
         print("done")
-
-        //setImageViewToTexture(texture: sourceTexture!)
-        //sleep(3)
         setImageViewToTexture(texture: outputImage.texture)
     }
 

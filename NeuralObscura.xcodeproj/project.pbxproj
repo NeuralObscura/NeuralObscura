@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3C91D98E0010022578C /* ConvolutionLayer.swift */; };
+		077BB3CC1D98E0890022578C /* FullyConnectedLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */; };
+		077BB3CE1D98E0E50022578C /* ResidualBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3CD1D98E0E50022578C /* ResidualBlock.swift */; };
+		077BB3D01D98E5030022578C /*  MPSBinaryImageKernelExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3CF1D98E5030022578C /*  MPSBinaryImageKernelExtension.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
 		DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C601D8BAB4000ED7982 /* ViewController.swift */; };
 		DA0B0C641D8BAB4000ED7982 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C621D8BAB4000ED7982 /* Main.storyboard */; };
@@ -16,10 +20,9 @@
 		DA0B0C7F1D8BAB4000ED7982 /* NeuralObscuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */; };
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
 		DA6D1FB21D923BB500CD3F49 /* StyleModelData.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* StyleModelData.swift */; };
-		DA6D1FB41D92461400CD3F49 /* CompositionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* CompositionModel.swift */; };
+		DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */; };
 		DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DA9A565E1D9253C000E55916 /* Shaders.metal */; };
 		DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56601D938C0E00E55916 /* UIImage.swift */; };
-		DA9A56631D9658B900E55916 /* NeuralModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56621D9658B900E55916 /* NeuralModel.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -40,6 +43,10 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		077BB3C91D98E0010022578C /* ConvolutionLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayer.swift; sourceTree = "<group>"; };
+		077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FullyConnectedLayer.swift; sourceTree = "<group>"; };
+		077BB3CD1D98E0E50022578C /* ResidualBlock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResidualBlock.swift; sourceTree = "<group>"; };
+		077BB3CF1D98E5030022578C /*  MPSBinaryImageKernelExtension.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = " MPSBinaryImageKernelExtension.swift"; sourceTree = "<group>"; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA0B0C601D8BAB4000ED7982 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -55,10 +62,9 @@
 		DA0B0C801D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA6D1FAF1D92352C00CD3F49 /* composition_model_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = composition_model_data; sourceTree = "<group>"; };
 		DA6D1FB11D923BB500CD3F49 /* StyleModelData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StyleModelData.swift; sourceTree = "<group>"; };
-		DA6D1FB31D92461400CD3F49 /* CompositionModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CompositionModel.swift; sourceTree = "<group>"; };
+		DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModel.swift; sourceTree = "<group>"; };
 		DA9A565E1D9253C000E55916 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		DA9A56601D938C0E00E55916 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
-		DA9A56621D9658B900E55916 /* NeuralModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralModel.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -111,16 +117,19 @@
 			children = (
 				DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */,
 				DA0B0C601D8BAB4000ED7982 /* ViewController.swift */,
-				DA6D1FAF1D92352C00CD3F49 /* composition_model_data */,
+				DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */,
+				DA6D1FB11D923BB500CD3F49 /* StyleModelData.swift */,
+				DA9A56601D938C0E00E55916 /* UIImage.swift */,
+				DA9A565E1D9253C000E55916 /* Shaders.metal */,
+				077BB3CD1D98E0E50022578C /* ResidualBlock.swift */,
+				077BB3C91D98E0010022578C /* ConvolutionLayer.swift */,
+				077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */,
+				077BB3CF1D98E5030022578C /*  MPSBinaryImageKernelExtension.swift */,
 				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
-				DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */,
 				DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */,
 				DA0B0C6A1D8BAB4000ED7982 /* Info.plist */,
-				DA6D1FB31D92461400CD3F49 /* CompositionModel.swift */,
-				DA6D1FB11D923BB500CD3F49 /* StyleModelData.swift */,
-				DA9A565E1D9253C000E55916 /* Shaders.metal */,
-				DA9A56601D938C0E00E55916 /* UIImage.swift */,
-				DA9A56621D9658B900E55916 /* NeuralModel.swift */,
+				DA6D1FAF1D92352C00CD3F49 /* composition_model_data */,
+				DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */,
 			);
 			path = NeuralObscura;
 			sourceTree = "<group>";
@@ -211,7 +220,7 @@
 				TargetAttributes = {
 					DA0B0C5A1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = DFVY326C5E;
+						DevelopmentTeam = FJQDM4N4ZQ;
 						ProvisioningStyle = Automatic;
 					};
 					DA0B0C6E1D8BAB4000ED7982 = {
@@ -281,13 +290,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				077BB3CC1D98E0890022578C /* FullyConnectedLayer.swift in Sources */,
 				DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */,
 				DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */,
-				DA6D1FB41D92461400CD3F49 /* CompositionModel.swift in Sources */,
+				077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */,
+				DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */,
 				DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */,
-				DA9A56631D9658B900E55916 /* NeuralModel.swift in Sources */,
+				077BB3CE1D98E0E50022578C /* ResidualBlock.swift in Sources */,
 				DA6D1FB21D923BB500CD3F49 /* StyleModelData.swift in Sources */,
 				DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */,
+				077BB3D01D98E5030022578C /*  MPSBinaryImageKernelExtension.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -437,7 +449,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = DFVY326C5E;
+				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -451,7 +463,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = DFVY326C5E;
+				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
