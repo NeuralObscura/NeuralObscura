@@ -82,9 +82,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         let output_id = MPSImageDescriptor(channelFormat: .unorm8, width: sourceTexture!.width, height: sourceTexture!.height, featureChannels: 3)
         outputImage = MPSImage(device: device, imageDescriptor: output_id)
 
-        // Before we pass an image into the network, we need to adjust its RGB
-        // values. This is done with a custom compute kernel. Here we load that
-        // kernel (from Shaders.metal) and set up the compute pipeline.
         do {
             let library = device.newDefaultLibrary()!
             let identity = library.makeFunction(name: "identity")
@@ -103,6 +100,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
             encoder.setComputePipelineState(pipelineIdentity)
             encoder.setTexture(sourceTexture, at: 0)
             encoder.setTexture(outputImage.texture, at: 1)
+            /* Instructions for optimizing thread configuration here:
+                https://developer.apple.com/library/prerelease/content/documentation/Miscellaneous/Conceptual/MetalProgrammingGuide/Compute-Ctx/Compute-Ctx.html#//apple_ref/doc/uid/TP40014221-CH6-SW2
+            */
             let threadsPerGroups = MTLSizeMake(8, 8, 1)
             let threadGroups = MTLSizeMake(sourceTexture!.width / threadsPerGroups.width,
                                            outputImage.texture.height / threadsPerGroups.height, 1)
