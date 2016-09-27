@@ -10,9 +10,10 @@ import Foundation
 import MetalPerformanceShaders
 
 class ResidualBlock {
-    let c1, c2: MPSCNNConvolution!
-    let b1, b2: BatchNormalization!
-    let m: ResidualSum!
+    let device: MTLDevice
+    let c1, c2: ConvolutionLayer
+    let b1, b2: BatchNormalizationLayer
+    let kernelSize: UInt!
     
     /**
      * A property to keep info from init time whether we will pad input image or not for use during encode call
@@ -35,10 +36,13 @@ class ResidualBlock {
      */
     
     
-    init(device: MTLDevice, layerPrefix: String, channelsIn: UInt, channelsOut: UInt, stride: UInt, kernelSize: UInt){
+    init(device: MTLDevice, layerPrefix: String, channelsIn: UInt, channelsOut: UInt, kernelSize: UInt = 3, stride: UInt = 1){
         self.device = device
-        
-        c1 = ConvolutionLayer
+        self.kernelSize = kernelSize
+        c1 = ConvolutionLayer(device: device, channelsIn: channelsIn, channelsOut: channelsOut, kernelSize: kernelSize, stride: stride)
+        c2 = ConvolutionLayer(device: device, channelsIn: channelsOut, channelsOut: channelsOut, kernelSize: kernelSize, stride: stride)
+        b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut)
+        b2 = BatchNormalizationLayer(device: device, channelsIn: channelsOut)
     }
     
     /**
@@ -56,18 +60,19 @@ class ResidualBlock {
     override func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         
         // select offset according to padding being used or not
-        if(padding){
-            let pad_along_height = ((destinationImage.height - 1) * strideInPixelsY + kernelHeight - sourceImage.height)
-            let pad_along_width  = ((destinationImage.width - 1) * strideInPixelsX + kernelWidth - sourceImage.width)
-            let pad_top = Int(pad_along_height / 2)
-            let pad_left = Int(pad_along_width / 2)
-            
-            self.offset = MPSOffset(x: ((Int(kernelWidth)/2) - pad_left), y: (Int(kernelHeight/2) - pad_top), z: 0)
-        }
-        else{
-            self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelHeight)/2, z: 0)
-        }
-        super.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        // if (padding) {
+        //     let pad_along_height = ((destinationImage.height - 1) * strideInPixelsY + kernelSize - sourceImage.height)
+        //     let pad_along_width  = ((destinationImage.width - 1) * strideInPixelsX + kernelSize - sourceImage.width)
+        //     let pad_top = Int(pad_along_height / 2)
+        //     let pad_left = Int(pad_along_width / 2)
+        //     
+        //     self.offset = MPSOffset(x: ((Int(kernelSize)/2) - pad_left), y: (Int(kernelHeight/2) - pad_top), z: 0)
+        // } else {
+        //     self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelSize)/2, z: 0)
+        // }
+        c1.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        b1.encode(commandBuffer: commandBuffer, sour)
+        c2.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
     
 }

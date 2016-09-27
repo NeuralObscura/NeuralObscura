@@ -16,6 +16,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     private var ciContext : CIContext!
     private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
+    private var model: NeuralStyleModel
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -32,6 +33,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         textureLoader = MTKTextureLoader(device: device!)
 
         commandQueue = device!.makeCommandQueue()
+        
+        // This is computationally expensive, should optimize
+        // by initializing on a background thread.
+        model = NeuralStyleModel(device: device)
     }
 
     override func didReceiveMemoryWarning() {
@@ -71,18 +76,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 
     @IBAction func doStyling(_ sender: AnyObject) {
-        let sourceTexture = imageView.image!.createMTLTextureForDevice(device: self.device)
-
-        // do {
-        //     let library = device.newDefaultLibrary()!
-        //     let identity = library.makeFunction(name: "identity")
-        //     pipelineIdentity = try device.makeComputePipelineState(function: identity!)
-        // } catch {
-        //     fatalError("Error initializing compute pipeline")
-        // }
-
-        let model = NeuralStyleModel(device: device)
-        let outputTexture = model.forward(sourceTexture)
+        let sourceImage = imageView.image!.cgImageForDevice(device: self.device)
+        let outputCgImage = model.forward(sourceTexture)
         print("done")
         setImageViewToTexture(texture: outputImage.texture)
     }

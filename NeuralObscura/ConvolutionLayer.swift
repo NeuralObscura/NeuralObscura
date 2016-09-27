@@ -26,7 +26,7 @@ class ConvolutionLayer: MPSCNNConvolution {
     fileprivate var padding = true
     
     /**
-     Initializes a fully cnn kernel.
+     Initializes a fully connected kernel.
      
      - Parameters:
      - kernelWidth: Kernel Width
@@ -46,11 +46,22 @@ class ConvolutionLayer: MPSCNNConvolution {
      */
     
     
-    init(kernelWidth: UInt, kernelHeight: UInt, inputFeatureChannels: UInt, outputFeatureChannels: UInt, neuronFilter: MPSCNNNeuron? = nil, device: MTLDevice, kernelParamsBinaryName: String, padding willPad: Bool = true, strideXY: (UInt, UInt) = (1, 1), destinationFeatureChannelOffset: UInt = 0, groupNum: UInt = 1){
+    init(
+        device: MTLDevice,
+        layerPrefix: String,
+        kernelSize: UInt,
+        inputFeatureChannels: UInt,
+        outputFeatureChannels: UInt,
+        neuronFilter: MPSCNNNeuron? = nil,
+        kernelParamsBinaryName: String,
+        padding willPad: Bool = true,
+        strideXY: (UInt, UInt) = (1, 1),
+        destinationFeatureChannelOffset: UInt = 0,
+        groupNum: UInt = 1) {
         
         // calculate the size of weights and bias required to be memory mapped into memory
         let sizeBias = outputFeatureChannels * UInt(MemoryLayout<Float>.size)
-        let sizeWeights = inputFeatureChannels * kernelHeight * kernelWidth * outputFeatureChannels * UInt(MemoryLayout<Float>.size)
+        let sizeWeights = inputFeatureChannels * kernelSize * kernelSize * outputFeatureChannels * UInt(MemoryLayout<Float>.size)
         
         // get the url to this layer's weights and bias
         let wtPath = Bundle.main.path( forResource: "weights_" + kernelParamsBinaryName, ofType: "dat")
@@ -77,8 +88,8 @@ class ConvolutionLayer: MPSCNNConvolution {
         assert(b != UnsafePointer<Float>.init(bitPattern: -1), "mmap failed with errno = \(errno)")
         
         // create appropriate convolution descriptor with appropriate stride
-        let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: Int(kernelWidth),
-                                                   kernelHeight: Int(kernelHeight),
+        let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: Int(kernelSize),
+                                                   kernelHeight: Int(kernelSize),
                                                    inputFeatureChannels: Int(inputFeatureChannels),
                                                    outputFeatureChannels: Int(outputFeatureChannels),
                                                    neuronFilter: neuronFilter)
@@ -132,13 +143,44 @@ class ConvolutionLayer: MPSCNNConvolution {
             let pad_top = Int(pad_along_height / 2)
             let pad_left = Int(pad_along_width / 2)
             
-            self.offset = MPSOffset(x: ((Int(kernelWidth)/2) - pad_left), y: (Int(kernelHeight/2) - pad_top), z: 0)
+            self.offset = MPSOffset(x: ((Int(kernelSize)/2) - pad_left), y: (Int(kernelSize/2) - pad_top), z: 0)
         }
         else{
-            self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelHeight)/2, z: 0)
+            self.offset = MPSOffset(x: Int(kernelSize)/2, y: Int(kernelSize)/2, z: 0)
         }
         super.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
+    
+    
+    // private func makeConv(device: MTLDevice,
+    //                       inDepth: Int,
+    //                       outDepth: Int,
+    //                       weights: UnsafePointer<Float>,
+    //                       bias: UnsafePointer<Float>,
+    //                       stride: Int) -> MPSCNNConvolution {
+    //     
+    //     // All VGGNet conv layers use a 3x3 kernel with stride 1.
+    //     let desc = MPSCNNConvolutionDescriptor(kernelWidth: 3,
+    //                                            kernelHeight: 3,
+    //                                            inputFeatureChannels: inDepth,
+    //                                            outputFeatureChannels: outDepth,
+    //                                            neuronFilter: nil)
+    //     desc.strideInPixelsX = stride
+    //     desc.strideInPixelsY = stride
+    //     
+    //     let conv = MPSCNNConvolution(device: device,
+    //                                  convolutionDescriptor: desc,
+    //                                  kernelWeights: weights,
+    //                                  biasTerms: bias,
+    //                                  flags: MPSCNNConvolutionFlags.none)
+    //     
+    //     // To preserve the width and height between conv layers, VGGNet assumes one
+    //     // pixel of padding around the edges. Metal apparently has no problem reading
+    //     // outside the source image, so we don't have to do anything special here.
+    //     conv.edgeMode = .zero
+    //     
+    //     return conv
+    // }
     
 }
 
