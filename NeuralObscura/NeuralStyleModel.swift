@@ -221,9 +221,9 @@ class NeuralStyleModel {
         // //d1_b shape = (64,)
     }
     
-    func forward(inputCgImage: CGImage) -> CGImage {
+    func forward(input: UIImage) -> UIImage {
         // note the configurable options
-        let inputMtlImage = MTKTextureLoader.newTexture(with: inputCgImage, options: nil)
+        let inputMtlTexture = input.createMTLTextureForDevice(device: device)
         // h = self.b1(F.elu(self.c1(x)), test=test)
         // h = self.b2(F.elu(self.c2(h)), test=test)
         // h = self.b3(F.elu(self.c3(h)), test=test)
@@ -236,5 +236,11 @@ class NeuralStyleModel {
         // h = self.b5(F.elu(self.d2(h)), test=test)
         // y = self.d3(h)
         // return (F.tanh(y)+1)*127.5
+        let outputMtlTexture = inputMtlTexture
+        if(Int(input.size.width) == outputMtlTexture.width) {
+            return UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.up)
+        } else {
+            return UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.right)
+        }
     }
 }

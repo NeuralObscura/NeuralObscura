@@ -57,7 +57,7 @@ class ResidualBlock {
      - sourceImage: A valid MPSImage object containing the source image.
      - destinationImage: A valid MPSImage to be overwritten by result image. destinationImage may not alias sourceImage
      */
-    override func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         
         // select offset according to padding being used or not
         // if (padding) {
@@ -71,7 +71,7 @@ class ResidualBlock {
         //     self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelSize)/2, z: 0)
         // }
         c1.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-        b1.encode(commandBuffer: commandBuffer, sour)
+        b1.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
         c2.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
     

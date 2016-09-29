@@ -143,10 +143,10 @@ class ConvolutionLayer: MPSCNNConvolution {
             let pad_top = Int(pad_along_height / 2)
             let pad_left = Int(pad_along_width / 2)
             
-            self.offset = MPSOffset(x: ((Int(kernelSize)/2) - pad_left), y: (Int(kernelSize/2) - pad_top), z: 0)
+            self.offset = MPSOffset(x: ((Int(kernelWidth)/2) - pad_left), y: (Int(kernelHeight/2) - pad_top), z: 0)
         }
         else{
-            self.offset = MPSOffset(x: Int(kernelSize)/2, y: Int(kernelSize)/2, z: 0)
+            self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelHeight)/2, z: 0)
         }
         super.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }

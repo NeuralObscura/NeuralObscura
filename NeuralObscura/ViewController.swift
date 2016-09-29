@@ -16,7 +16,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     private var ciContext : CIContext!
     private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
-    private var model: NeuralStyleModel
+    private var model: NeuralStyleModel!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -76,18 +76,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 
     @IBAction func doStyling(_ sender: AnyObject) {
-        let sourceImage = imageView.image!.cgImageForDevice(device: self.device)
-        let outputCgImage = model.forward(sourceTexture)
+        let output = model.forward(input: imageView.image!)
         print("done")
-        setImageViewToTexture(texture: outputImage.texture)
-    }
-
-    func setImageViewToTexture(texture: MTLTexture) {
-        if(Int(imageView.image!.size.width) == texture.width) {
-            imageView.image = UIImage.MTLTextureToUIImage(texture: texture, orientation: UIImageOrientation.up)
-        } else {
-            imageView.image = UIImage.MTLTextureToUIImage(texture: texture, orientation: UIImageOrientation.right)
-        }
+        imageView.image = output
     }
 }
 

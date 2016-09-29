@@ -15,8 +15,8 @@ extension UIImage {
         return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
     }
 
-    func cgImageForDevice(_ device: MTLDevice) -> CGImage {
-        // let colorSpace = CGColorSpaceCreateDeviceRGB()
+    func createMTLTextureForDevice(device: MTLDevice) -> MTLTexture {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
         let ciContext = CIContext.init(mtlDevice: device)
 
         var image = cgImage
@@ -24,22 +24,21 @@ extension UIImage {
             let ciImage = CIImage(image: self)
             image = ciContext.createCGImage(ciImage!, from: ciImage!.extent)
         }
-        return image!
 
-        // let width = image!.width
-        // let height = image!.height
-        // let bounds = CGRect(x: 0, y: 0, width: width, height: height)
-        // let rowBytes = width * 4
+        let width = image!.width
+        let height = image!.height
+        let bounds = CGRect(x: 0, y: 0, width: width, height: height)
+        let rowBytes = width * 4
 
-        // let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: rowBytes, space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
-        // context!.clear(bounds)
-        // context!.draw(image!, in: bounds)
+        let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: rowBytes, space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        context!.clear(bounds)
+        context!.draw(image!, in: bounds)
 
-        // let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: MTLPixelFormat.rgba8Unorm, width: width, height: height, mipmapped: false)
-        // let texture = device.makeTexture(descriptor: textureDescriptor)
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: MTLPixelFormat.rgba8Unorm, width: width, height: height, mipmapped: false)
+        let texture = device.makeTexture(descriptor: textureDescriptor)
 
-        // texture.replace(region: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0, withBytes: context!.data!, bytesPerRow: rowBytes)
-        // 
-        // return texture
+        texture.replace(region: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0, withBytes: context!.data!, bytesPerRow: rowBytes)
+        
+        return texture
     }
 }
