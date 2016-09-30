@@ -162,6 +162,7 @@ class NeuralStyleModel {
             channelsOut: 32,
             w: layerData["c1_W"]!,
             b: layerData["c1_b"]!,
+            relu: true,
             stride: 1)
         
         // b1=L.BatchNormalization(32),
@@ -174,6 +175,7 @@ class NeuralStyleModel {
             channelsOut: 64,
             w: layerData["c2_W"]!,
             b: layerData["c2_b"]!,
+            relu: true,
             stride: 2)
         
         // b2=L.BatchNormalization(64),
@@ -186,6 +188,7 @@ class NeuralStyleModel {
             channelsOut: 128,
             w: layerData["c3_W"]!,
             b: layerData["c3_b"]!,
+            relu: true,
             stride: 2)
         
         // b3=L.BatchNormalization(128),

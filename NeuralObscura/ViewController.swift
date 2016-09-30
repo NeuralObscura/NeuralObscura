@@ -38,7 +38,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         // by initializing on a background thread.
         model = NeuralStyleModel(device: device)
 
-        imageView.image! = UIImage.init(named: "tubingen.jpg")!
+        let debugImagePath = Bundle.main.path(forResource: "tubingen", ofType: "jpg")!
+
+        imageView.image = UIImage.init(contentsOfFile: debugImagePath)!
     }
 
     override func didReceiveMemoryWarning() {

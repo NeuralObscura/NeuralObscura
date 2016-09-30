@@ -32,12 +32,17 @@ class ConvolutionLayer: MPSCNNConvolution {
         channelsOut: UInt,
         w: StyleModelData,
         b: StyleModelData,
-        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
+        relu: Bool,
         padding willPad: Bool = true,
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1) {
-        
+
+        var neuronFilter: MPSCNNNeuron?
+
+        if relu {
+            neuronFilter = MPSCNNNeuronReLU(device: device, a: 0)
+        }
         
         // create appropriate convolution descriptor with appropriate stride
         let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: Int(kernelSize),
