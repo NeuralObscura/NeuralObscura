@@ -293,6 +293,4 @@ class NeuralStyleModel {
         }
     }
     
-    private func loadModel() {
-    }
 }
