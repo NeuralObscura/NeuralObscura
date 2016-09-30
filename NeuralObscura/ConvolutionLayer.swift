@@ -25,76 +25,28 @@ class ConvolutionLayer: MPSCNNConvolution {
      */
     fileprivate var padding = true
     
-    /**
-     Initializes a fully connected kernel.
-     
-     - Parameters:
-     - kernelWidth: Kernel Width
-     - kernelHeight: Kernel Height
-     - inputFeatureChannels: Number feature channels in input of this layer
-     - outputFeatureChannels: Number feature channels from output of this layer
-     - neuronFilter: A neuronFilter to add at the end as activation, default is nil
-     - device: The MTLDevice on which this SlimMPSCNNConvolution filter will be used
-     - kernelParamsBinaryName: name of the layer to fetch kernelParameters by adding a prefix "weights_" or "bias_"
-     - padding: Bool value whether to use padding or not
-     - strideXY: Stride of the filter
-     - destinationFeatureChannelOffset: FeatureChannel no. in the destination MPSImage to start writing from, helps with concat operations
-     - groupNum: if grouping is used, default value is 1 meaning no groups
-     
-     - Returns:
-     A valid SlimMPSCNNConvolution object or nil, if failure.
-     */
-    
-    
     init(
         device: MTLDevice,
-        layerPrefix: String,
         kernelSize: UInt,
-        inputFeatureChannels: UInt,
-        outputFeatureChannels: UInt,
-        neuronFilter: MPSCNNNeuron? = nil,
-        kernelParamsBinaryName: String,
+        channelsIn: UInt,
+        channelsOut: UInt,
+        w: StyleModelData,
+        b: StyleModelData,
+        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
         padding willPad: Bool = true,
-        strideXY: (UInt, UInt) = (1, 1),
+        stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1) {
         
-        // calculate the size of weights and bias required to be memory mapped into memory
-        let sizeBias = outputFeatureChannels * UInt(MemoryLayout<Float>.size)
-        let sizeWeights = inputFeatureChannels * kernelSize * kernelSize * outputFeatureChannels * UInt(MemoryLayout<Float>.size)
-        
-        // get the url to this layer's weights and bias
-        let wtPath = Bundle.main.path( forResource: "weights_" + kernelParamsBinaryName, ofType: "dat")
-        let bsPath = Bundle.main.path( forResource: "bias_" + kernelParamsBinaryName, ofType: "dat")
-        
-        // open file descriptors in read-only mode to parameter files
-        let fd_w  = open( wtPath!, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
-        let fd_b = open( bsPath!, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
-        
-        assert(fd_w != -1, "Error: failed to open output file at \""+wtPath!+"\"  errno = \(errno)\n")
-        assert(fd_b != -1, "Error: failed to open output file at \""+bsPath!+"\"  errno = \(errno)\n")
-        
-        // memory map the parameters
-        let hdrW = mmap(nil, Int(sizeWeights), PROT_READ, MAP_FILE | MAP_SHARED, fd_w, 0);
-        let hdrB = mmap(nil, Int(sizeBias), PROT_READ, MAP_FILE | MAP_SHARED, fd_b, 0);
-        
-        // cast Void pointers to Float
-        var w, b : UnsafePointer<Float>
-        w = UnsafePointer<Float>(hdrW!.assumingMemoryBound(to: Float.self))
-        b = UnsafePointer<Float>(hdrB!.assumingMemoryBound(to: Float.self))
-        
-        
-        assert(w != UnsafePointer<Float>.init(bitPattern: -1), "mmap failed with errno = \(errno)")
-        assert(b != UnsafePointer<Float>.init(bitPattern: -1), "mmap failed with errno = \(errno)")
         
         // create appropriate convolution descriptor with appropriate stride
         let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: Int(kernelSize),
                                                    kernelHeight: Int(kernelSize),
-                                                   inputFeatureChannels: Int(inputFeatureChannels),
-                                                   outputFeatureChannels: Int(outputFeatureChannels),
+                                                   inputFeatureChannels: Int(channelsIn),
+                                                   outputFeatureChannels: Int(channelsOut),
                                                    neuronFilter: neuronFilter)
-        convDesc.strideInPixelsX = Int(strideXY.0)
-        convDesc.strideInPixelsY = Int(strideXY.1)
+        convDesc.strideInPixelsX = stride
+        convDesc.strideInPixelsY = stride
         
         assert((groupNum > 0), "Group size can't be less than 1")
         convDesc.groups = Int(groupNum)
@@ -102,39 +54,20 @@ class ConvolutionLayer: MPSCNNConvolution {
         // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
         super.init(device: device,
                    convolutionDescriptor: convDesc,
-                   kernelWeights: w,
-                   biasTerms: b,
+                   kernelWeights: w.pointer(),
+                   biasTerms: b.pointer(),
                    flags: MPSCNNConvolutionFlags.none)
         self.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
         
         
         // set padding for calculation of offset during encode call
         padding = willPad
-        
-        // unmap files at initialization of MPSCNNConvolution, the weights are copied and packed internally we no longer require these
-        assert(munmap(hdrW, Int(sizeWeights)) == 0, "munmap failed with errno = \(errno)")
-        assert(munmap(hdrB, Int(sizeBias))    == 0, "munmap failed with errno = \(errno)")
-        
-        // close file descriptors
-        close(fd_w)
-        close(fd_b)
-        
-        
     }
     
-    /**
-     Encode a MPSCNNKernel into a command Buffer. The operation shall proceed out-of-place.
-     
-     We calculate the appropriate offset as per how TensorFlow calculates its padding using input image size and stride here.
-     
-     This [Link](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/ops/nn.py) has an explanation in header comments how tensorFlow pads its convolution input images.
-     
-     - Parameters:
-     - commandBuffer: A valid MTLCommandBuffer to receive the encoded filter
-     - sourceImage: A valid MPSImage object containing the source image.
-     - destinationImage: A valid MPSImage to be overwritten by result image. destinationImage may not alias sourceImage
-     */
-    override func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    override func encode(
+        commandBuffer: MTLCommandBuffer,
+        sourceImage: MPSImage,
+        destinationImage: MPSImage) {
         
         // select offset according to padding being used or not
         if(padding){

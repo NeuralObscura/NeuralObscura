@@ -13,50 +13,54 @@ class ResidualBlock {
     let device: MTLDevice
     let c1, c2: ConvolutionLayer
     let b1, b2: BatchNormalizationLayer
-    let kernelSize: UInt!
     
     /**
      * A property to keep info from init time whether we will pad input image or not for use during encode call
      */
     fileprivate var padding = true
     
-    /**
-     Initializes a residual block.
-     
-     - Parameters:
-     - device: The MTLDevice on which this SlimMPSCNNConvolution filter will be used
-     - layerPrefix
-     - channelsIn
-     - channelsOut
-     - stride
-     - kernelSize
-     
-     - Returns:
-     A valid ResidualBlock object or nil, if failure.
-     */
-    
-    
-    init(device: MTLDevice, layerPrefix: String, channelsIn: UInt, channelsOut: UInt, kernelSize: UInt = 3, stride: UInt = 1){
+    init(
+        device: MTLDevice,
+        modelName: String,
+        blockName: String,
+        channelsIn: UInt,
+        channelsOut: UInt,
+        kernelSize: UInt = 3,
+        stride: Int = 1) {
+        
         self.device = device
-        self.kernelSize = kernelSize
-        c1 = ConvolutionLayer(device: device, channelsIn: channelsIn, channelsOut: channelsOut, kernelSize: kernelSize, stride: stride)
-        c2 = ConvolutionLayer(device: device, channelsIn: channelsOut, channelsOut: channelsOut, kernelSize: kernelSize, stride: stride)
-        b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut)
-        b2 = BatchNormalizationLayer(device: device, channelsIn: channelsOut)
+        
+        /* Load the block parameters */
+        let c1_w = StyleModelData(modelName: modelName, rawFileName: blockName + "_c1_W")
+        let c1_b = StyleModelData(modelName: modelName, rawFileName: blockName + "_c1_b")
+        let c2_w = StyleModelData(modelName: modelName, rawFileName: blockName + "_c2_W")
+        let c2_b = StyleModelData(modelName: modelName, rawFileName: blockName + "_c2_b")
+        let b1_beta = StyleModelData(modelName: modelName, rawFileName: blockName + "_b1_beta")
+        let b1_gamma = StyleModelData(modelName: modelName, rawFileName: blockName + "_b1_gamma")
+        let b2_beta = StyleModelData(modelName: modelName, rawFileName: blockName + "_b2_beta")
+        let b2_gamma = StyleModelData(modelName: modelName, rawFileName: blockName + "_b2_gamma")
+        
+        /* Init block encoders */
+        c1 = ConvolutionLayer(
+            device: device,
+            kernelSize: kernelSize,
+            channelsIn: channelsIn,
+            channelsOut: channelsOut,
+            w: c1_w,
+            b: c1_b,
+            stride: stride)
+        c2 = ConvolutionLayer(
+            device: device,
+            kernelSize: kernelSize,
+            channelsIn: channelsOut,
+            channelsOut: channelsOut,
+            w: c2_w,
+            b: c2_b,
+            stride: stride)
+        b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b1_beta, gamma: b1_gamma)
+        b2 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b2_beta, gamma: b2_gamma)
     }
     
-    /**
-     Encode a MPSCNNKernel into a command Buffer. The operation shall proceed out-of-place.
-     
-     We calculate the appropriate offset as per how TensorFlow calculates its padding using input image size and stride here.
-     
-     This [Link](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/python/ops/nn.py) has an explanation in header comments how tensorFlow pads its convolution input images.
-     
-     - Parameters:
-     - commandBuffer: A valid MTLCommandBuffer to receive the encoded filter
-     - sourceImage: A valid MPSImage object containing the source image.
-     - destinationImage: A valid MPSImage to be overwritten by result image. destinationImage may not alias sourceImage
-     */
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         
         // select offset according to padding being used or not
@@ -70,6 +74,7 @@ class ResidualBlock {
         // } else {
         //     self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelSize)/2, z: 0)
         // }
+        
         c1.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
         b1.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
         c2.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)

@@ -12,7 +12,15 @@ import MetalPerformanceShaders
 class DeconvolutionLayer {
     let device: MTLDevice
     
-    init(device: MTLDevice, channelsIn: UInt) {
+    init(
+        device: MTLDevice,
+        channelsIn: UInt,
+        channelsOut: UInt,
+        kernelSize: UInt,
+        w: StyleModelData,
+        b: StyleModelData,
+        stride: UInt,
+        pad: UInt) {
         self.device = device
     }
     

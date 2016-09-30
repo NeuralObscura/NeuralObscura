@@ -57,7 +57,7 @@ class StyleModelData {
         }
     }
 
-    deinit{
+    deinit {
         print("deinit \(self) \(modelName) \(rawFileName)")
 
         if let hdr = hdr {
