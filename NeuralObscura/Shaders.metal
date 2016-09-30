@@ -9,8 +9,3 @@ kernel void identity(texture2d<float, access::read> inTexture [[texture(0)]],
     float4 outColor = inColor;
     outTexture.write(outColor, gid);
 }
-
-
-
-
-
