@@ -48,6 +48,7 @@ class ResidualBlock {
             channelsOut: channelsOut,
             w: c1_w,
             b: c1_b,
+            relu: false,
             stride: stride)
         c2 = ConvolutionLayer(
             device: device,
@@ -56,6 +57,7 @@ class ResidualBlock {
             channelsOut: channelsOut,
             w: c2_w,
             b: c2_b,
+            relu: false,
             stride: stride)
         b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b1_beta, gamma: b1_gamma)
         b2 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b2_beta, gamma: b2_gamma)
