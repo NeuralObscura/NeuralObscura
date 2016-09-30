@@ -37,6 +37,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         // This is computationally expensive, should optimize
         // by initializing on a background thread.
         model = NeuralStyleModel(device: device)
+
+        imageView.image! = UIImage.init(named: "tubingen.jpg")!
     }
 
     override func didReceiveMemoryWarning() {
