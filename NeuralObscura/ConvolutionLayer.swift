@@ -6,19 +6,17 @@
 //  Copyright © 2016 Paul Bergeron. All rights reserved.
 //
 
-/**
- This depends on MetalPerformanceShaders.framework
- 
- The SlimMPSCNNConvolution is a wrapper class around MPSCNNConvolution used to encapsulate:
- - making an MPSCNNConvolutionDescriptor,
- - adding network parameters (weights and bias binaries by memory mapping the binaries)
- - getting our convolution layer
- */
-
 import Foundation
 import MetalPerformanceShaders
 
-class ConvolutionLayer: MPSCNNConvolution {
+
+class ConvolutionLayer: CommandEncoder {
+    let device: MTLDevice
+    var top: CommandEncoder?
+    var bottom: CommandEncoder?
+    let useTemporary: Bool
+    
+    let convolution: MPSCNNConvolution
     
     /**
      A property to keep info from init time whether we will pad input image or not for use during encode call
@@ -36,8 +34,11 @@ class ConvolutionLayer: MPSCNNConvolution {
         padding willPad: Bool = true,
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
-        groupNum: UInt = 1) {
-
+        groupNum: UInt = 1,
+        useTemporary: Bool = true) {
+        
+        self.device = device
+        self.useTemporary = useTemporary
         var neuronFilter: MPSCNNNeuron?
 
         if relu {
@@ -57,69 +58,75 @@ class ConvolutionLayer: MPSCNNConvolution {
         convDesc.groups = Int(groupNum)
         
         // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
-        super.init(device: device,
-                   convolutionDescriptor: convDesc,
-                   kernelWeights: w.pointer(),
-                   biasTerms: b.pointer(),
-                   flags: MPSCNNConvolutionFlags.none)
-        self.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
+        convolution = MPSCNNConvolution(
+            device: device,
+            convolutionDescriptor: convDesc,
+            kernelWeights: w.pointer(),
+            biasTerms: b.pointer(),
+            flags: MPSCNNConvolutionFlags.none)
+        convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
+//        convolution.edgeMode = .zero
         
         
         // set padding for calculation of offset during encode call
         padding = willPad
     }
     
-    override func encode(
-        commandBuffer: MTLCommandBuffer,
-        sourceImage: MPSImage,
-        destinationImage: MPSImage) {
+    
+    func setBottom(_ bottom: CommandEncoder) {
+        self.bottom = bottom
+    }
+    
+    func getDestinationImageDescriptor() -> MPSImageDescriptor {
+        // TODO: This won't work for the first layer
+        let inDesc = top?.getDestinationImageDescriptor()
+        let inHeight = inDesc?.height
+        let inWidth = inDesc?.width
+        let channelsIn = inDesc?.featureChannels
+        
+        let kernelSize = convolution.kernelWidth
+        let stride = convolution.strideInPixelsX
+        let channelsOut = convolution.outputFeatureChannels
+        let padding = // TODO: Figure out how the hell padding workds
+        // TODO: Calculate shape of output
+        return MPSImageDescriptor(channelFormat: textureFormat, width: ???, height: ???, featureChannels: channelsOut)
+    }
+    
+    func getDestinationImage(cb: MTLCommandBuffer) -> MPSImage {
+        let destDesc = getDestinationImageDescriptor()
+        switch useTemporary {
+        case true: return MPSTemporaryImage(commandBuffer: cb, imageDescriptor: destDesc)
+        case false: return MPSImage(device: device, imageDescriptor: destDesc)
+        }
+    }
+    
+    func chain(_ top: CommandEncoder) -> CommandEncoder {
+        self.top = top
+        top.setBottom(self)
+        return self
+    }
+    
+    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
+        let destinationImage = getDestinationImage(cb: commandBuffer)
         
         // select offset according to padding being used or not
-        if(padding){
-            let pad_along_height = ((destinationImage.height - 1) * strideInPixelsY + kernelHeight - sourceImage.height)
-            let pad_along_width  = ((destinationImage.width - 1) * strideInPixelsX + kernelWidth - sourceImage.width)
+        if(padding) {
+            let pad_along_height = ((destinationImage.height - 1) * convolution.strideInPixelsY + convolution.kernelHeight - sourceImage.height)
+            let pad_along_width  = ((destinationImage.width - 1) * convolution.strideInPixelsX + convolution.kernelWidth - sourceImage.width)
             let pad_top = Int(pad_along_height / 2)
             let pad_left = Int(pad_along_width / 2)
             
-            self.offset = MPSOffset(x: ((Int(kernelWidth)/2) - pad_left), y: (Int(kernelHeight/2) - pad_top), z: 0)
+            convolution.offset = MPSOffset(x: ((Int(convolution.kernelWidth)/2) - pad_left), y: (Int(convolution.kernelHeight/2) - pad_top), z: 0)
+        } else {
+            convolution.offset = MPSOffset(x: Int(convolution.kernelWidth)/2, y: Int(convolution.kernelHeight)/2, z: 0)
         }
-        else{
-            self.offset = MPSOffset(x: Int(kernelWidth)/2, y: Int(kernelHeight)/2, z: 0)
+        
+        // TODO: Configure deconvolution encoding
+        // convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        
+        switch bottom {
+        case .some: return bottom!.encode(commandBuffer: commandBuffer, sourceImage: destinationImage)
+        case .none: return destinationImage
         }
-        super.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
-    
-    
-    // private func makeConv(device: MTLDevice,
-    //                       inDepth: Int,
-    //                       outDepth: Int,
-    //                       weights: UnsafePointer<Float>,
-    //                       bias: UnsafePointer<Float>,
-    //                       stride: Int) -> MPSCNNConvolution {
-    //     
-    //     // All VGGNet conv layers use a 3x3 kernel with stride 1.
-    //     let desc = MPSCNNConvolutionDescriptor(kernelWidth: 3,
-    //                                            kernelHeight: 3,
-    //                                            inputFeatureChannels: inDepth,
-    //                                            outputFeatureChannels: outDepth,
-    //                                            neuronFilter: nil)
-    //     desc.strideInPixelsX = stride
-    //     desc.strideInPixelsY = stride
-    //     
-    //     let conv = MPSCNNConvolution(device: device,
-    //                                  convolutionDescriptor: desc,
-    //                                  kernelWeights: weights,
-    //                                  biasTerms: bias,
-    //                                  flags: MPSCNNConvolutionFlags.none)
-    //     
-    //     // To preserve the width and height between conv layers, VGGNet assumes one
-    //     // pixel of padding around the edges. Metal apparently has no problem reading
-    //     // outside the source image, so we don't have to do anything special here.
-    //     conv.edgeMode = .zero
-    //     
-    //     return conv
-    // }
-    
 }
-
-

@@ -80,7 +80,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 
     @IBAction func doStyling(_ sender: AnyObject) {
-        let output = model.forward(input: imageView.image!)
+        // note the configurable options
+        let inputMtlTexture = input.createMTLTextureForDevice(device: device)
+        let outputMtlTexture = inputMtlTexture
+        if(Int(input.size.width) == outputMtlTexture.width) {
+            return UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.up)
+        } else {
+            return UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.right)
+        }
+        let output = model.encode(commandBuffer: commandBuffer, sourceImage: imageView.image!)
         print("done")
         imageView.image = output
     }
