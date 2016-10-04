@@ -9,14 +9,40 @@
 import Foundation
 import MetalPerformanceShaders
 
-
 class DeconvolutionLayer: CommandEncoder {
-    let device: MTLDevice
-    var top: CommandEncoder?
-    var bottom: CommandEncoder?
-    let useTemporary: Bool
-    
-    let convolution: MPSCNNConvolution
+    init(
+        device: MTLDevice,
+        channelsIn: UInt,
+        channelsOut: UInt,
+        kernelSize: UInt,
+        w: StyleModelData,
+        b: StyleModelData,
+        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
+        padding: Bool = true, // TODO: Revisit this default
+        stride: Int = 1,
+        destinationFeatureChannelOffset: UInt = 0,
+        groupNum: UInt = 1,
+        useTemporary: Bool = true) {
+        super.init(
+            device: device,
+            delegate: DeconvolutionLayerDelegate(
+                device: device,
+                channelsIn: channelsIn,
+                channelsOut: channelsOut,
+                kernelSize: kernelSize,
+                w: w,
+                b: b,
+                neuronFilter: neuronFilter,
+                padding: padding,
+                stride: stride,
+                destinationFeatureChannelOffset: destinationFeatureChannelOffset,
+                groupNum: groupNum),
+            useTemporary: useTemporary)
+    }
+}
+
+class DeconvolutionLayerDelegate: CommandEncoderDelegate {
+    private let convolution: MPSCNNConvolution
     
     /**
      A property to keep info from init time whether we will pad input image or not for use during encode call
@@ -31,59 +57,58 @@ class DeconvolutionLayer: CommandEncoder {
         w: StyleModelData,
         b: StyleModelData,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
-        pad: Int = 0, // TODO: Revisit this default
+        padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
-        groupNum: UInt = 1,
-        useTemporary: Bool = true) {
+        groupNum: UInt = 1) {
         
-        self.device = device
-        self.useTemporary = useTemporary
-        self.padding = willPad
+        self.padding = padding
         
+        // create appropriate convolution descriptor with appropriate stride
+        let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: Int(kernelSize),
+                                                   kernelHeight: Int(kernelSize),
+                                                   inputFeatureChannels: Int(channelsIn),
+                                                   outputFeatureChannels: Int(channelsOut),
+                                                   neuronFilter: neuronFilter)
+        convDesc.strideInPixelsX = stride
+        convDesc.strideInPixelsY = stride
+        
+        assert((groupNum > 0), "Group size can't be less than 1")
+        convDesc.groups = Int(groupNum)
+        
+        // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
+        convolution = MPSCNNConvolution(
+            device: device,
+            convolutionDescriptor: convDesc,
+            kernelWeights: w.pointer(),
+            biasTerms: b.pointer(),
+            flags: MPSCNNConvolutionFlags.none)
+        convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
+//        convolution.edgeMode = .zero
+        
+        
+        // set padding for calculation of offset during encode call
         
         // TODO: Configure any MPS encoders required for deconvolution
         
         // set padding for calculation of offset during encode call
     }
     
-    
-    func setBottom(_ bottom: CommandEncoder) {
-        self.bottom = bottom
-    }
-    
-    func getDestinationImageDescriptor() -> MPSImageDescriptor {
-        // TODO: This won't work for the first layer
-        let inDesc = top?.getDestinationImageDescriptor()
-        let inHeight = inDesc?.height
-        let inWidth = inDesc?.width
-        let channelsIn = inDesc?.featureChannels
+    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+        let inHeight = sourceImage!.height
+        let inWidth = sourceImage!.width
+        let channelsIn = sourceImage!.featureChannels
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX
         let channelsOut = convolution.outputFeatureChannels
-        let padding = // TODO: Figure out how the hell padding workds
+        // TODO: Figure out how the hell padding works
+        let padding = 0
         // TODO: Calculate shape of output
-        return MPSImageDescriptor(channelFormat: textureFormat, width: ???, height: ???, featureChannels: channelsOut)
+        return MPSImageDescriptor(channelFormat: textureFormat, width: inWidth, height: inHeight, featureChannels: channelsOut)
     }
     
-    func getDestinationImage(cb: MTLCommandBuffer) -> MPSImage {
-        let destDesc = getDestinationImageDescriptor()
-        switch useTemporary {
-        case true: return MPSTemporaryImage(commandBuffer: cb, imageDescriptor: destDesc)
-        case false: return MPSImage(device: device, imageDescriptor: destDesc)
-        }
-    }
-    
-    func chain(_ top: CommandEncoder) -> CommandEncoder {
-        self.top = top
-        top.setBottom(self)
-        return self
-    }
-    
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
-        let destinationImage = getDestinationImage(cb: commandBuffer)
-        
+    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         // select offset according to padding being used or not
         if(padding) {
             let pad_along_height = ((destinationImage.height - 1) * convolution.strideInPixelsY + convolution.kernelHeight - sourceImage.height)
@@ -97,11 +122,6 @@ class DeconvolutionLayer: CommandEncoder {
         }
         
         // TODO: encode deconvolution
-        
-        switch bottom {
-        case .some: return bottom!.encode(commandBuffer: commandBuffer, sourceImage: destinationImage)
-        case .none: return destinationImage
-        }
     }
 }
 
