@@ -27,6 +27,7 @@
 		DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DA9A565E1D9253C000E55916 /* Shaders.metal */; };
 		DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56601D938C0E00E55916 /* UIImage.swift */; };
 		DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56641D9E0E0C00E55916 /* tubingen.jpg */; };
+		DA9A566A1DA6165D00E55916 /* debug.png in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56691DA6165D00E55916 /* debug.png */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -73,6 +74,7 @@
 		DA9A565E1D9253C000E55916 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		DA9A56601D938C0E00E55916 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		DA9A56641D9E0E0C00E55916 /* tubingen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tubingen.jpg; sourceTree = "<group>"; };
+		DA9A56691DA6165D00E55916 /* debug.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debug.png; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -183,6 +185,7 @@
 		DA9A56681D9E1D1400E55916 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				DA9A56691DA6165D00E55916 /* debug.png */,
 				DA9A56641D9E0E0C00E55916 /* tubingen.jpg */,
 			);
 			name = Resources;
@@ -299,6 +302,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */,
+				DA9A566A1DA6165D00E55916 /* debug.png in Resources */,
 				DA0B0C661D8BAB4000ED7982 /* Assets.xcassets in Resources */,
 				DA0B0C641D8BAB4000ED7982 /* Main.storyboard in Resources */,
 				DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */,

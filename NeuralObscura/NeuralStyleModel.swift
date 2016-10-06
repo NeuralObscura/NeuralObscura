@@ -346,37 +346,22 @@ class NeuralStyleModel {
         texture.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
 
         let providerRef = CGDataProvider(data: NSData(bytes: &imageBytes, length: imageBytes.count * MemoryLayout<UInt8>.size))
-        /*
-         let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
-         let imageRef = CGImage(width: texture.width, height: texture.height, bitsPerComponent: 8, bitsPerPixel: bytesPerPixel * 8, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: providerRef!, decode: nil, shouldInterpolate: false, intent: .defaultIntent)!
-         */
         let rawData = providerRef!.data
 
         let buf = CFDataGetBytePtr(rawData)
-        let length = CFDataGetLength(rawData)
-        print(texture.width)
         print(buf![0])
         print(buf![(bytesPerRow)-4])
         print(buf![((bytesPerRow*texture.height)-bytesPerRow)])
         print(buf![(bytesPerRow*texture.height)-4])
-
-        /*
-         for i in stride(from: 0, to: length, by: 4) {
-         let r = buf![i]
-         //let g = buf![i+1]
-         //let b = buf![i+2]
-         let a = buf![i+3]
-         if(a == 255) {
-         print(i)
-         }
-         }
-         */
     }
 
 
     func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
         var outputImage: MPSImage? = nil
+
+        print("Four corners as MPSImage; inital values")
         fourCorners(image: sourceImage)
+        print("---------------------------")
 
         autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
