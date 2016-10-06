@@ -20,7 +20,7 @@ protocol Chain {
 }
 
 protocol CommandEncoderDelegate {
-    
+
     func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage)

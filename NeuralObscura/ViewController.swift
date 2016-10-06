@@ -36,7 +36,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         
         // This is computationally expensive, should optimize
         // by initializing on a background thread.
-        model = NeuralStyleModel(device: device)
+        model = NeuralStyleModel(device: device, modelName: "composition")
 
         let debugImagePath = Bundle.main.path(forResource: "tubingen", ofType: "jpg")!
 
@@ -79,18 +79,26 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         dismiss(animated: true, completion: nil)
     }
 
+    private func image(from texture: MTLTexture) -> MPSImage {
+        // We set featureChannels to 3 because the neural network is only trained
+        // on RGB data (the first 3 channels), not alpha (the 4th channel).
+        return MPSImage(texture: texture, featureChannels: 3)
+    }
+
     @IBAction func doStyling(_ sender: AnyObject) {
         // note the configurable options
+        let input = imageView.image!
         let inputMtlTexture = input.createMTLTextureForDevice(device: device)
-        let outputMtlTexture = inputMtlTexture
-        if(Int(input.size.width) == outputMtlTexture.width) {
-            return UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.up)
-        } else {
-            return UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.right)
-        }
-        let output = model.encode(commandBuffer: commandBuffer, sourceImage: imageView.image!)
+        let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
         print("done")
-        imageView.image = output
+        //TODO: fix me
+        /*
+        if(Int(input.size.width) == inputMtlTexture.width) {
+            imageView.image! = UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.up)
+        } else {
+            imageView.image! = UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.right)
+        }
+ */
     }
 }
 

@@ -42,7 +42,6 @@ class ConvolutionLayer: CommandEncoder {
 }
 
 class ConvolutionLayerDelegate: CommandEncoderDelegate {
-    let useTemporary: Bool
     let convolution: MPSCNNConvolution
     
     /**
@@ -90,8 +89,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
             biasTerms: b.pointer(),
             flags: MPSCNNConvolutionFlags.none)
         convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
-//        convolution.edgeMode = .zero
-        
+        convolution.edgeMode = .zero
         
         // set padding for calculation of offset during encode call
         padding = willPad

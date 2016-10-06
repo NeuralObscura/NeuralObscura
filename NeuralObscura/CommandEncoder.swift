@@ -7,9 +7,9 @@
 //
 
 import Foundation
+import MetalPerformanceShaders
 
-
-class CommandEncoder: Chain {
+open class CommandEncoder: Chain {
     let device: MTLDevice
     let delegate: CommandEncoderDelegate
     let useTemporary: Bool
@@ -18,7 +18,7 @@ class CommandEncoder: Chain {
     var top: CommandEncoder?
     var bottom: CommandEncoder?
     
-    open init(device: MTLDevice, delegate: CommandEncoderDelegate, useTemporary: Bool = true) {
+    init(device: MTLDevice, delegate: CommandEncoderDelegate, useTemporary: Bool = true) {
         self.device = device
         self.delegate = delegate
         self.useTemporary = useTemporary
@@ -42,8 +42,8 @@ class CommandEncoder: Chain {
         
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
         switch bottom {
-        case .some(commandEncoder):
-            return commandEncoder.forward(commandBuffer: commandBuffer, sourceImage: destinationImage)
+        case .some(_):
+            return bottom!.forward(commandBuffer: commandBuffer, sourceImage: destinationImage)
         case .none:
             return destinationImage
         }

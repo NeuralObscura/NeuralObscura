@@ -14,7 +14,7 @@ import MetalKit
 class NeuralStyleModel {
     let device: MTLDevice
     let useTemporary: Bool
-    let modelParams = [String: StyleModelData]()
+    var modelParams = [String: StyleModelData]()
     
     let c1, c2, c3: ConvolutionLayer
     let b1, b2, b3, b4, b5: BatchNormalizationLayer
@@ -166,6 +166,11 @@ class NeuralStyleModel {
             stride: 1)
         
         // b1=L.BatchNormalization(32),
+        b1 = BatchNormalizationLayer(
+            device: device,
+            channelsIn: 32,
+            beta: modelParams["b1_beta"]!,
+            gamma: modelParams["b1_gamma"]!)
         
         // c2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
         c2 = ConvolutionLayer(
@@ -179,6 +184,11 @@ class NeuralStyleModel {
             stride: 2)
         
         // b2=L.BatchNormalization(64),
+        b2 = BatchNormalizationLayer(
+            device: device,
+            channelsIn: 64,
+            beta: modelParams["b2_beta"]!,
+            gamma: modelParams["b2_gamma"]!)
         
         // c3=L.Convolution2D(64, 128, 4,stride=2, pad=1),
         c3 = ConvolutionLayer(
@@ -192,7 +202,12 @@ class NeuralStyleModel {
             stride: 2)
         
         // b3=L.BatchNormalization(128),
-        
+        b3 = BatchNormalizationLayer(
+            device: device,
+            channelsIn: 128,
+            beta: modelParams["b3_beta"]!,
+            gamma: modelParams["b3_gamma"]!)
+
         // r1=ResidualBlock(128, 128),
         r1 = ResidualBlock(
             device: device,
@@ -241,11 +256,15 @@ class NeuralStyleModel {
             kernelSize: 4,
             w: modelParams["d1_W"]!,
             b: modelParams["d1_b"]!,
-            pad: 1,
+            padding: true,
             stride: 2)
         
         // b4=L.BatchNormalization(64),
-        b4 = BatchNormalizationLayer(device: device, channelsIn: 64, beta: modelParams["b4_beta"]!, gamma: modelParams["b4_gamma"]!)
+        b4 = BatchNormalizationLayer(
+            device: device,
+            channelsIn: 64,
+            beta: modelParams["b4_beta"]!,
+            gamma: modelParams["b4_gamma"]!)
         
         // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
         d2 = DeconvolutionLayer(
@@ -255,11 +274,14 @@ class NeuralStyleModel {
             kernelSize: 4,
             w: modelParams["d2_W"]!,
             b: modelParams["d2_b"]!,
-            pad: 1,
             stride: 2)
         
         // b5=L.BatchNormalization(32),
-        b5 = BatchNormalizationLayer(device: device, channelsIn: 32, beta: modelParams["b5_beta"]!, gamma: modelParams["b5_gamma"]!)
+        b5 = BatchNormalizationLayer(
+            device: device,
+            channelsIn: 32,
+            beta: modelParams["b5_beta"]!,
+            gamma: modelParams["b5_gamma"]!)
         
         // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
         d3 = DeconvolutionLayer(
@@ -269,17 +291,16 @@ class NeuralStyleModel {
             kernelSize: 9,
             w: modelParams["d3_W"]!,
             b: modelParams["d3_b"]!,
-            pad: 4,
             stride: 1)
         
         // TODO: Init last tanh layer
         
         /* Chain model encoders together */
         var h: CommandEncoder
-        
+
         // h = self.b1(F.elu(self.c1(top)), test=test)
         h = b1.chain(c1)
-        
+
         // h = self.b2(F.elu(self.c2(h)), test=test)
         h = b2.chain(c2.chain(h))
         
@@ -312,11 +333,18 @@ class NeuralStyleModel {
         
         // return (F.tanh(y)+1)*127.5
         // TODO: chain last tanh layer
-        
+
         modelHandle = h
     }
     
-    func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
-        return modelHandle.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
+    func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
+        var outputImage: MPSImage? = nil
+
+        autoreleasepool {
+            let commandBuffer = commandQueue.makeCommandBuffer()
+            outputImage = modelHandle.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
+        }
+
+        return outputImage!
     }
 }

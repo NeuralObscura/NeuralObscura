@@ -1,5 +1,5 @@
 //
-//  ConvolutionLayer.swift
+//  DeconvolutionLayer.swift
 //  NeuralObscura
 //
 //  Created by Edward Knox on 9/25/16.
@@ -17,7 +17,7 @@ class DeconvolutionLayer: CommandEncoder {
         kernelSize: UInt,
         w: StyleModelData,
         b: StyleModelData,
-        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
+        neuronFilter: MPSCNNNeuron? = nil,
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
