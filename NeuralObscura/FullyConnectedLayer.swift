@@ -9,7 +9,34 @@
 import Foundation
 import MetalPerformanceShaders
 
-class SlimMPSCNNFullyConnected: MPSCNNFullyConnected {
+class FullyConnectedLayer: CommandEncoder {
+    init(
+        device: MTLDevice,
+        kernelSize: UInt,
+        channelsIn: UInt,
+        channelsOut: UInt,
+        w: StyleModelData,
+        b: StyleModelData,
+        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
+        destinationFeatureChannelOffset: UInt = 0,
+        useTemporary: Bool = true) {
+        super.init(
+            device: device,
+            delegate: FullyConnectedLayerDelegate(
+                device: device,
+                kernelSize: kernelSize,
+                channelsIn: channelsIn,
+                channelsOut: channelsOut,
+                w: w,
+                b: b,
+                neuronFilter: neuronFilter,
+                destinationFeatureChannelOffset: destinationFeatureChannelOffset),
+            useTemporary: useTemporary)
+    }
+}
+
+class FullyConnectedLayerDelegate: CommandEncoderDelegate {
+    let fullyConnected: MPSCNNFullyConnected
     
     init(
         device: MTLDevice,
@@ -29,12 +56,24 @@ class SlimMPSCNNFullyConnected: MPSCNNFullyConnected {
                                                    neuronFilter: neuronFilter)
         
         // initialize the convolution layer by calling the parent's (MPSCNNFullyConnected's) initializer
-        super.init(device: device,
+        fullyConnected = MPSCNNFullyConnected.init(device: device,
                    convolutionDescriptor: convDesc,
                    kernelWeights: w.pointer(),
                    biasTerms: b.pointer(),
                    flags: MPSCNNConvolutionFlags.none)
-        self.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
+        fullyConnected.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
+    }
+    
+    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+        return MPSImageDescriptor(
+            channelFormat: textureFormat,
+            width: 1,
+            height: 1,
+            featureChannels: fullyConnected.outputFeatureChannels)
+    }
+    
+    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+        fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
     
 }
