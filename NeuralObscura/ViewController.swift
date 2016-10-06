@@ -90,6 +90,9 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         let input = imageView.image!
         let inputMtlTexture = input.createMTLTextureForDevice(device: device)
         let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
+        print("-------")
+        imageView.image!.fourCorners(device: self.device)
+        print("-------")
         print("done")
         //TODO: fix me
         /*

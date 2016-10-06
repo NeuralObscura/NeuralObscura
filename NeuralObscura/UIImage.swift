@@ -15,6 +15,27 @@ extension UIImage {
         return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
     }
 
+    func fourCorners(device: MTLDevice) {
+        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        let ciContext = CIContext.init(mtlDevice: device)
+
+        var image = cgImage
+        if (image == nil) {
+            let ciImage = CIImage(image: self)
+            image = ciContext.createCGImage(ciImage!, from: ciImage!.extent)
+        }
+        let rawData = image!.dataProvider!.data
+
+        let buf = CFDataGetBytePtr(rawData)
+        let length = CFDataGetLength(rawData)
+        let bytesPerRow = 4 * image!.width
+        print(buf![0])
+        print(buf![(bytesPerRow)-4])
+        print(buf![((bytesPerRow*image!.height)-bytesPerRow)])
+        print(buf![(bytesPerRow*image!.height)-4])
+
+    }
+
     func createMTLTextureForDevice(device: MTLDevice) -> MTLTexture {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let ciContext = CIContext.init(mtlDevice: device)
