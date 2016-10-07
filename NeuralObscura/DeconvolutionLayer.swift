@@ -122,6 +122,9 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         }
         
         // TODO: encode deconvolution
+        if sourceImage is MPSTemporaryImage {
+            (sourceImage as! MPSTemporaryImage).readCount -= 1
+        }
     }
 }
 
