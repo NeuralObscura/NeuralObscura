@@ -23,7 +23,7 @@ extension MPSImage {
         let buf = CFDataGetBytePtr(rawData)
         print(buf![0],
               buf![(bytesPerRow)-bytesPerPixel],
-              buf![((bytesPerRow*texture.height)-bytesPerRow)],
+              buf![(bytesPerRow*(texture.height-1))],
               buf![(bytesPerRow*texture.height)-bytesPerPixel])
     }
 }
