@@ -13,15 +13,20 @@ open class CommandEncoder: Chain {
     let device: MTLDevice
     let delegate: CommandEncoderDelegate
     var useTemporary: Bool
+    let printCorners: Bool
     
     var head: CommandEncoder?
     var top: CommandEncoder?
     var bottom: CommandEncoder?
     
-    init(device: MTLDevice, delegate: CommandEncoderDelegate, useTemporary: Bool = true) {
+    init(device: MTLDevice,
+         delegate: CommandEncoderDelegate,
+         useTemporary: Bool = true,
+         printCorners: Bool = true) {
         self.device = device
         self.delegate = delegate
         self.useTemporary = useTemporary
+        self.printCorners = printCorners
         self.head = self
     }
     
@@ -46,6 +51,9 @@ open class CommandEncoder: Chain {
             let destinationImageTmp = (destinationImage as! MPSTemporaryImage)
             print(destinationImageTmp.readCount)
             destinationImageTmp.readCount -= 1
+        } else if (self.printCorners) {
+            // Only will work on non-temporary images
+            destinationImage.fourCorners()
         }
 
         switch bottom {
