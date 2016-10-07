@@ -14,7 +14,7 @@ import MetalKit
 class NeuralStyleModel {
     let device: MTLDevice
     let useTemporary: Bool
-    let printCorners: Bool
+    let debug: Bool
     var modelParams = [String: StyleModelData]()
     
     let c1, c2, c3: ConvolutionLayer
@@ -26,10 +26,10 @@ class NeuralStyleModel {
     init(device: MTLDevice,
          modelName: String,
          useTemporary: Bool = true,
-         printCorners: Bool = true) {
+         debug: Bool = true) {
         self.device = device
         self.useTemporary = useTemporary
-        self.printCorners = printCorners
+        self.debug = debug
 
         /* Load model parameters */
         modelParams["r4_c2_W"] = StyleModelData(modelName: modelName, rawFileName: "r4_c2_W")
@@ -346,7 +346,7 @@ class NeuralStyleModel {
     func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
         var outputImage: MPSImage? = nil
 
-        if (printCorners) {
+        if (debug) {
             print("Four corners as MPSImage; inital values")
             sourceImage.fourCorners()
             print("---------------------------")
