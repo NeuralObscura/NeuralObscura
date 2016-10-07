@@ -338,6 +338,7 @@ class NeuralStyleModel {
     }
 
     func fourCorners(image: MPSImage) {
+        print(image.featureChannels)
         let texture = image.texture
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * texture.width

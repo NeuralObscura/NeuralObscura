@@ -22,6 +22,7 @@ open class CommandEncoder: Chain {
         self.device = device
         self.delegate = delegate
         self.useTemporary = useTemporary
+        self.head = self
     }
     
     func chain(_ top: CommandEncoder) -> CommandEncoder {
@@ -41,6 +42,12 @@ open class CommandEncoder: Chain {
         }
         
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        if (self.useTemporary) {
+            let destinationImageTmp = (destinationImage as! MPSTemporaryImage)
+            print(destinationImageTmp.readCount)
+            destinationImageTmp.readCount -= 1
+        }
+
         switch bottom {
         case .some(_):
             return bottom!.forward(commandBuffer: commandBuffer, sourceImage: destinationImage)
