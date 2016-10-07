@@ -12,9 +12,9 @@ import MetalPerformanceShaders
 open class CommandEncoder: Chain {
     let device: MTLDevice
     let delegate: CommandEncoderDelegate
-    var useTemporary: Bool
     let debug: Bool
     
+    var useTemporary: Bool
     var head: CommandEncoder?
     var top: CommandEncoder?
     var bottom: CommandEncoder?
@@ -38,6 +38,7 @@ open class CommandEncoder: Chain {
     }
     
     func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
+        print("forward")
         let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
         
         var destinationImage: MPSImage! = nil
@@ -47,12 +48,8 @@ open class CommandEncoder: Chain {
         }
         
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-        if (self.useTemporary) {
-            let destinationImageTmp = (destinationImage as! MPSTemporaryImage)
-            print(destinationImageTmp.readCount)
-            destinationImageTmp.readCount -= 1
-        } else if (self.debug) {
-            // Only will work on non-temporary images
+        
+        if (!self.useTemporary && self.debug) {
             destinationImage.fourCorners()
         }
 
@@ -65,6 +62,7 @@ open class CommandEncoder: Chain {
     }
     
     func execute(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
+        print("execute")
         let destinationImage = head!.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()

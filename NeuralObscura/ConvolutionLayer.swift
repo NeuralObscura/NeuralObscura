@@ -110,6 +110,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+        print("conv encode")
         // select offset according to padding being used or not
         if(padding) {
             let pad_along_height = ((destinationImage.height - 1) * convolution.strideInPixelsY + convolution.kernelHeight - sourceImage.height)
@@ -121,6 +122,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         } else {
             convolution.offset = MPSOffset(x: Int(convolution.kernelWidth)/2, y: Int(convolution.kernelHeight)/2, z: 0)
         }
+        // decrements sourceImage.readCount
         convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
 }

@@ -47,6 +47,10 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+        print("bn encode")
         // TODO: encode batch normalization
+        if sourceImage is MPSTemporaryImage {
+            (sourceImage as! MPSTemporaryImage).readCount -= 1
+        }
     }
 }

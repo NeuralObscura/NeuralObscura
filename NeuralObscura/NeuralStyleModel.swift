@@ -340,7 +340,7 @@ class NeuralStyleModel {
         // TODO: chain last tanh layer
         
         modelHandle = h
-        modelHandle.useTemporary = false
+        modelHandle.useTemporary = false // We need a CPU-accessible image as the result
     }
 
     func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
@@ -354,7 +354,7 @@ class NeuralStyleModel {
 
         autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
-            outputImage = modelHandle.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
+            outputImage = modelHandle.execute(commandBuffer: commandBuffer, sourceImage: sourceImage)
         }
 
         return outputImage!
