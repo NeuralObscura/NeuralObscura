@@ -1,6 +1,22 @@
 import UIKit
+import MetalPerformanceShaders
 
 extension UIImage {
+    static func MPSImageToUIImage(image: MPSImage, orientation: UIImageOrientation) -> UIImage {
+        let texture = image.texture
+        let bytesPerPixel = image.pixelSize
+        let bytesPerRow = bytesPerPixel * texture.width
+        var imageBytes = [UInt8](repeating: 0, count: texture.width * texture.height * bytesPerPixel)
+        let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
+        texture.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
+
+        let providerRef = CGDataProvider(data: NSData(bytes: &imageBytes, length: imageBytes.count * MemoryLayout<UInt8>.size))
+        let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
+        let imageRef = CGImage(width: texture.width, height: texture.height, bitsPerComponent: 8, bitsPerPixel: bytesPerPixel * 8, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: providerRef!, decode: nil, shouldInterpolate: false, intent: .defaultIntent)!
+
+        return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
+    }
+
     static func MTLTextureToUIImage(texture: MTLTexture, orientation: UIImageOrientation) -> UIImage {
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * texture.width

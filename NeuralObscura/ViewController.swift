@@ -17,6 +17,8 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
     private var model: NeuralStyleModel!
+    private var debugImagePaths: [String] = []
+    private var debugImagePathIndex: Int = 0
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -33,14 +35,18 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         textureLoader = MTKTextureLoader(device: device!)
 
         commandQueue = device!.makeCommandQueue()
-        
+
         // This is computationally expensive, should optimize
         // by initializing on a background thread.
         model = NeuralStyleModel(device: device, modelName: "composition")
 
-        let debugImagePath = Bundle.main.path(forResource: "tubingen", ofType: "jpg")!
+        debugImagePaths = [
+            Bundle.main.path(forResource: "debug", ofType: "png")!,
+            Bundle.main.path(forResource: "tubingen", ofType: "jpg")!]
 
-        imageView.image = UIImage.init(contentsOfFile: debugImagePath)!
+        imageView.isUserInteractionEnabled = true
+
+        loadNextDebugImage()
     }
 
     override func didReceiveMemoryWarning() {
@@ -85,20 +91,32 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         return MPSImage(texture: texture, featureChannels: 3)
     }
 
+    @IBAction func imageViewTapDetected(_ sender: AnyObject) {
+        loadNextDebugImage()
+    }
+
+    private func loadNextDebugImage() {
+        let debugImagePath = debugImagePaths[debugImagePathIndex]
+        imageView.image = UIImage.init(contentsOfFile: debugImagePath)!
+        debugImagePathIndex += 1
+        if (debugImagePathIndex >= debugImagePaths.count) {
+            debugImagePathIndex = 0
+        }
+    }
+
     @IBAction func doStyling(_ sender: AnyObject) {
         // note the configurable options
         let input = imageView.image!
+
         let inputMtlTexture = input.createMTLTextureForDevice(device: device)
         let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
         print("done")
-        //TODO: fix me
-        /*
+
         if(Int(input.size.width) == inputMtlTexture.width) {
-            imageView.image! = UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.up)
+            imageView.image! = UIImage.MPSImageToUIImage(image: output, orientation: UIImageOrientation.up)
         } else {
-            imageView.image! = UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.right)
+            imageView.image! = UIImage.MPSImageToUIImage(image: output, orientation: UIImageOrientation.right)
         }
- */
     }
 }
 

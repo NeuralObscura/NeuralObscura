@@ -19,7 +19,12 @@
                         <rect key="frame" x="0.0" y="0.0" width="375" height="667"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Wuk-uA-LIa"/>
+                            <imageView userInteractionEnabled="NO" contentMode="scaleAspectFit" horizontalHuggingPriority="251" verticalHuggingPriority="251" translatesAutoresizingMaskIntoConstraints="NO" id="Wuk-uA-LIa">
+                                <gestureRecognizers/>
+                                <connections>
+                                    <outletCollection property="gestureRecognizers" destination="bUy-KR-yex" appends="YES" id="fsR-V0-uKm"/>
+                                </connections>
+                            </imageView>
                             <toolbar opaque="NO" clearsContextBeforeDrawing="NO" contentMode="scaleToFill" translatesAutoresizingMaskIntoConstraints="NO" id="9Hy-Qa-w3b">
                                 <constraints>
                                     <constraint firstAttribute="height" constant="44" id="jp1-7t-ybo"/>
@@ -62,6 +67,11 @@
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="OJp-HQ-Xtt" userLabel="First Responder" sceneMemberID="firstResponder"/>
+                <tapGestureRecognizer id="bUy-KR-yex">
+                    <connections>
+                        <action selector="imageViewTapDetected:" destination="Ioc-AN-U4W" id="lgd-8D-t6D"/>
+                    </connections>
+                </tapGestureRecognizer>
             </objects>
             <point key="canvasLocation" x="338" y="481"/>
         </scene>
