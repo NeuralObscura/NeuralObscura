@@ -109,7 +109,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         let input = imageView.image!
 
         let inputMtlTexture = input.createMTLTextureForDevice(device: device)
-        let output = model.execute(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
+        let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
         print("done")
 
         if(Int(input.size.width) == inputMtlTexture.width) {
