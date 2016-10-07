@@ -107,22 +107,16 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     @IBAction func doStyling(_ sender: AnyObject) {
         // note the configurable options
         let input = imageView.image!
-        print("Four Corners at Image load")
-        input.fourCorners(device: self.device)
-        print("---------------------------")
 
         let inputMtlTexture = input.createMTLTextureForDevice(device: device)
         let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
-
         print("done")
-        //TODO: fix me
-        /*
+
         if(Int(input.size.width) == inputMtlTexture.width) {
-            imageView.image! = UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.up)
+            imageView.image! = UIImage.MPSImageToUIImage(image: output, orientation: UIImageOrientation.up)
         } else {
-            imageView.image! = UIImage.MTLTextureToUIImage(texture: outputMtlTexture, orientation: UIImageOrientation.right)
+            imageView.image! = UIImage.MPSImageToUIImage(image: output, orientation: UIImageOrientation.right)
         }
- */
     }
 }
 

@@ -28,6 +28,7 @@
 		DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56601D938C0E00E55916 /* UIImage.swift */; };
 		DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56641D9E0E0C00E55916 /* tubingen.jpg */; };
 		DA9A566A1DA6165D00E55916 /* debug.png in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56691DA6165D00E55916 /* debug.png */; };
+		DA9A566C1DA73F7000E55916 /* MPSImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A566B1DA73F7000E55916 /* MPSImage.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -75,6 +76,7 @@
 		DA9A56601D938C0E00E55916 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		DA9A56641D9E0E0C00E55916 /* tubingen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tubingen.jpg; sourceTree = "<group>"; };
 		DA9A56691DA6165D00E55916 /* debug.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debug.png; sourceTree = "<group>"; };
+		DA9A566B1DA73F7000E55916 /* MPSImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSImage.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -154,6 +156,7 @@
 				DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */,
 				DA0B0C601D8BAB4000ED7982 /* ViewController.swift */,
 				DA9A56601D938C0E00E55916 /* UIImage.swift */,
+				DA9A566B1DA73F7000E55916 /* MPSImage.swift */,
 				077BB3DF1DA191E60022578C /* Model */,
 				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
 				DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */,
@@ -341,6 +344,7 @@
 				077BB3D51D9B063F0022578C /* BatchNormalizationLayer.swift in Sources */,
 				DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */,
 				077BB3CE1D98E0E50022578C /* ResidualBlock.swift in Sources */,
+				DA9A566C1DA73F7000E55916 /* MPSImage.swift in Sources */,
 				DA6D1FB21D923BB500CD3F49 /* StyleModelData.swift in Sources */,
 				DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */,
 				077BB3E71DA39D080022578C /* CommandEncoder.swift in Sources */,

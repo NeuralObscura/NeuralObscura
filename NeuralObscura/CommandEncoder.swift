@@ -12,7 +12,7 @@ import MetalPerformanceShaders
 open class CommandEncoder: Chain {
     let device: MTLDevice
     let delegate: CommandEncoderDelegate
-    let useTemporary: Bool
+    var useTemporary: Bool
     
     var head: CommandEncoder?
     var top: CommandEncoder?

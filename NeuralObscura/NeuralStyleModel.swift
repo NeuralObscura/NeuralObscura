@@ -335,33 +335,14 @@ class NeuralStyleModel {
         // TODO: chain last tanh layer
         
         modelHandle = h
+        modelHandle.useTemporary = false
     }
-
-    func fourCorners(image: MPSImage) {
-        print(image.featureChannels)
-        let texture = image.texture
-        let bytesPerPixel = 4
-        let bytesPerRow = bytesPerPixel * texture.width
-        var imageBytes = [UInt8](repeating: 0, count: texture.width * texture.height * bytesPerPixel)
-        let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
-        texture.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
-
-        let providerRef = CGDataProvider(data: NSData(bytes: &imageBytes, length: imageBytes.count * MemoryLayout<UInt8>.size))
-        let rawData = providerRef!.data
-
-        let buf = CFDataGetBytePtr(rawData)
-        print(buf![0])
-        print(buf![(bytesPerRow)-4])
-        print(buf![((bytesPerRow*texture.height)-bytesPerRow)])
-        print(buf![(bytesPerRow*texture.height)-4])
-    }
-
 
     func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
         var outputImage: MPSImage? = nil
 
         print("Four corners as MPSImage; inital values")
-        fourCorners(image: sourceImage)
+        sourceImage.fourCorners()
         print("---------------------------")
 
         autoreleasepool {
