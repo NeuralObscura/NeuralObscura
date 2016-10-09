@@ -29,7 +29,7 @@ class ResidualBlock: Chain {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt = 3,
-        stride: Int = 1,
+        stride: UInt = 1,
         useTemporary: Bool = true) {
         
         /* Load the block parameters */
