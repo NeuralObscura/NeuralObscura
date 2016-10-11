@@ -18,7 +18,7 @@ class ConvolutionLayer: CommandEncoder {
         w: StyleModelData,
         b: StyleModelData,
         relu: Bool,
-        padding willPad: Bool = true,
+        padding: Int = 0,
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1,
@@ -33,7 +33,7 @@ class ConvolutionLayer: CommandEncoder {
                 w: w,
                 b: b,
                 relu: relu,
-                padding: willPad,
+                padding: padding,
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
@@ -43,12 +43,7 @@ class ConvolutionLayer: CommandEncoder {
 
 class ConvolutionLayerDelegate: CommandEncoderDelegate {
     let convolution: MPSCNNConvolution
-    
-    /**
-     * A property to keep info from init time whether we will pad
-     input image or not for use during encode call
-     */
-    fileprivate var padding = true
+    let padding: Int
     
     init(
         device: MTLDevice,
@@ -58,7 +53,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         w: StyleModelData,
         b: StyleModelData,
         relu: Bool,
-        padding willPad: Bool = true,
+        padding: Int = 0,
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1) {
@@ -92,36 +87,26 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         convolution.edgeMode = .zero
         
         // set padding for calculation of offset during encode call
-        padding = willPad
+        self.padding = padding
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
         // TODO: This won't work for the first layer
-        let inHeight = sourceImage?.height
-        let inWidth = sourceImage?.width
+        let inHeight = sourceImage!.height
+        let inWidth = sourceImage!.width
         let channelsIn = sourceImage?.featureChannels
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX
         let channelsOut = convolution.outputFeatureChannels
-//        let padding = // TODO: Figure out how the hell padding workds
-        // TODO: Calculate shape of output
-        return MPSImageDescriptor(channelFormat: textureFormat, width: 10, height: 10, featureChannels: channelsOut)
+
+        let outputSize = ((inWidth + (2 * self.padding) - kernelSize) / stride) + 1
+
+        return MPSImageDescriptor(channelFormat: textureFormat, width: outputSize, height: outputSize, featureChannels: channelsOut)
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         print("conv encode")
-        // select offset according to padding being used or not
-        if(padding) {
-            let pad_along_height = ((destinationImage.height - 1) * convolution.strideInPixelsY + convolution.kernelHeight - sourceImage.height)
-            let pad_along_width  = ((destinationImage.width - 1) * convolution.strideInPixelsX + convolution.kernelWidth - sourceImage.width)
-            let pad_top = Int(pad_along_height / 2)
-            let pad_left = Int(pad_along_width / 2)
-            
-            convolution.offset = MPSOffset(x: ((Int(convolution.kernelWidth)/2) - pad_left), y: (Int(convolution.kernelHeight/2) - pad_top), z: 0)
-        } else {
-            convolution.offset = MPSOffset(x: Int(convolution.kernelWidth)/2, y: Int(convolution.kernelHeight)/2, z: 0)
-        }
         // decrements sourceImage.readCount
         convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }

@@ -52,6 +52,7 @@ class ResidualBlock: Chain {
             w: c1_w,
             b: c1_b,
             relu: false,
+            padding: 1,
             stride: stride,
             useTemporary: useTemporary)
         
@@ -64,6 +65,7 @@ class ResidualBlock: Chain {
             w: c2_w,
             b: c2_b,
             relu: false,
+            padding: 1,
             stride: stride,
             useTemporary: useTemporary)
         b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b1_beta, gamma: b1_gamma)
