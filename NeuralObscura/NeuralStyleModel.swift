@@ -343,7 +343,6 @@ class NeuralStyleModel {
         // TODO: chain last tanh layer
         
         modelHandle = h
-        modelHandle.useTemporary = false // We need a CPU-accessible image as the result
     }
 
     func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {

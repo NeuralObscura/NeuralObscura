@@ -13,8 +13,7 @@ open class CommandEncoder: Chain {
     let device: MTLDevice
     let delegate: CommandEncoderDelegate
     let debug: Bool
-    
-    var useTemporary: Bool
+
     var head: CommandEncoder?
     var top: CommandEncoder?
     var bottom: CommandEncoder?
@@ -25,7 +24,6 @@ open class CommandEncoder: Chain {
          debug: Bool = true) {
         self.device = device
         self.delegate = delegate
-        self.useTemporary = useTemporary
         self.debug = debug
         self.head = self
     }
@@ -42,14 +40,14 @@ open class CommandEncoder: Chain {
         let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
         
         var destinationImage: MPSImage! = nil
-        switch self.useTemporary {
-        case true: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
-        case false: destinationImage = MPSImage(device: self.device, imageDescriptor: destDesc)
+        switch self.debug {
+        case true: destinationImage = MPSImage(device: self.device, imageDescriptor: destDesc)
+        case false: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
         }
         
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
         
-        if (!self.useTemporary && self.debug) {
+        if (self.debug) {
             destinationImage.fourCorners()
         }
 
