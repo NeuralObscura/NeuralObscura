@@ -94,15 +94,15 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         // TODO: This won't work for the first layer
         let inHeight = sourceImage!.height
         let inWidth = sourceImage!.width
-        let channelsIn = sourceImage?.featureChannels
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX
         let channelsOut = convolution.outputFeatureChannels
 
-        let outputSize = ((inWidth + (2 * self.padding) - kernelSize) / stride) + 1
+        let outHeight = ((inHeight + (2 * self.padding) - kernelSize) / stride) + 1
+        let outWidth = ((inWidth + (2 * self.padding) - kernelSize) / stride) + 1
 
-        return MPSImageDescriptor(channelFormat: textureFormat, width: outputSize, height: outputSize, featureChannels: channelsOut)
+        return MPSImageDescriptor(channelFormat: textureFormat, width: outWidth, height: outHeight, featureChannels: channelsOut)
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
