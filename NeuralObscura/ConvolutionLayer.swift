@@ -90,10 +90,10 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         self.padding = padding
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         // TODO: This won't work for the first layer
-        let inHeight = sourceImage!.height
-        let inWidth = sourceImage!.width
+        let inHeight = sourceImage.height
+        let inWidth = sourceImage.width
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX

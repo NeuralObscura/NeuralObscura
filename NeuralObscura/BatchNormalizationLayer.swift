@@ -38,12 +38,12 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
         self.gamma = gamma.pointer().pointee
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         return MPSImageDescriptor(
             channelFormat: textureFormat,
-            width: sourceImage!.width,
-            height: sourceImage!.height,
-            featureChannels: sourceImage!.featureChannels)
+            width: sourceImage.width,
+            height: sourceImage.height,
+            featureChannels: sourceImage.featureChannels)
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
