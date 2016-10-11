@@ -35,11 +35,7 @@ class ChainerDataReader(object):
         s = ""
         for key, data in self.parameters:
             print(key)
-<<<<<<< Updated upstream
-            s += ("  layerData[\"%s\"] = StyleModelData(modelName: modelName, rawFileName: \"%s\")\n" % (key, key))
-=======
             s += ("  layerData[\"%s\"] = ModelParams(modelName: \"%s\", rawFileName: \"%s\").pointer()\n" % (key, self.model_name, key))
->>>>>>> Stashed changes
             s += ("  //%s shape = %s\n" % (key, data.shape))
 
             # Save the individual files.
