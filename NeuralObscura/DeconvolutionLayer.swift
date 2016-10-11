@@ -15,8 +15,8 @@ class DeconvolutionLayer: CommandEncoder {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: UnsafePointer<Float>,
+        b: UnsafePointer<Float>?,
         neuronFilter: MPSCNNNeuron? = nil,
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
@@ -54,8 +54,8 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: UnsafePointer<Float>,
+        b: UnsafePointer<Float>?,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
@@ -80,8 +80,8 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         convolution = MPSCNNConvolution(
             device: device,
             convolutionDescriptor: convDesc,
-            kernelWeights: w.pointer(),
-            biasTerms: b.pointer(),
+            kernelWeights: w,
+            biasTerms: b,
             flags: MPSCNNConvolutionFlags.none)
         convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
 //        convolution.edgeMode = .zero
@@ -94,10 +94,10 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         // set padding for calculation of offset during encode call
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
-        let inHeight = sourceImage!.height
-        let inWidth = sourceImage!.width
-        let channelsIn = sourceImage!.featureChannels
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+        let inHeight = sourceImage.height
+        let inWidth = sourceImage.width
+        let channelsIn = sourceImage.featureChannels
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX

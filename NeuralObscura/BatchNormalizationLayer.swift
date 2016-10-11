@@ -12,9 +12,9 @@ import MetalPerformanceShaders
 class BatchNormalizationLayer: CommandEncoder {
     init(
         device: MTLDevice,
-        channelsIn: UInt,
-        beta: StyleModelData,
-        gamma: StyleModelData,
+        channelsIn: Int,
+        beta: UnsafePointer<Float>,
+        gamma: UnsafePointer<Float>,
         useTemporary: Bool = true) {
         super.init(
             device: device,
@@ -28,22 +28,22 @@ class BatchNormalizationLayer: CommandEncoder {
 }
 
 class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
-    let beta: Float
-    let gamma: Float
+    let beta: UnsafePointer<Float>
+    let gamma: UnsafePointer<Float>
     let channelsIn: Int
     
-    init(device: MTLDevice, channelsIn: UInt, beta: StyleModelData, gamma: StyleModelData) {
+    init(device: MTLDevice, channelsIn: Int, beta: UnsafePointer<Float>, gamma: UnsafePointer<Float>) {
         self.channelsIn = Int(channelsIn)
-        self.beta = beta.pointer().pointee // TODO: Reexamine this dereference
-        self.gamma = gamma.pointer().pointee
+        self.beta = beta
+        self.gamma = gamma
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         return MPSImageDescriptor(
             channelFormat: textureFormat,
-            width: sourceImage!.width,
-            height: sourceImage!.height,
-            featureChannels: sourceImage!.featureChannels)
+            width: sourceImage.width,
+            height: sourceImage.height,
+            featureChannels: sourceImage.featureChannels)
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {

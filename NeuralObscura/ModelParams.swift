@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class StyleModelData {
+class ModelParams {
     private var fd: CInt!
     private var hdr: UnsafeMutableRawPointer!
     private var ptr: UnsafeMutablePointer<Float>!

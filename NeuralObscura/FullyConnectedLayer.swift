@@ -15,8 +15,8 @@ class FullyConnectedLayer: CommandEncoder {
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: UnsafePointer<Float>,
+        b: UnsafePointer<Float>?,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
         destinationFeatureChannelOffset: UInt = 0,
         useTemporary: Bool = true) {
@@ -43,8 +43,8 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: UnsafePointer<Float>,
+        b: UnsafePointer<Float>?,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
         destinationFeatureChannelOffset: UInt = 0){
         
@@ -58,13 +58,13 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         // initialize the convolution layer by calling the parent's (MPSCNNFullyConnected's) initializer
         fullyConnected = MPSCNNFullyConnected.init(device: device,
                    convolutionDescriptor: convDesc,
-                   kernelWeights: w.pointer(),
-                   biasTerms: b.pointer(),
+                   kernelWeights: w,
+                   biasTerms: b,
                    flags: MPSCNNConvolutionFlags.none)
         fullyConnected.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         return MPSImageDescriptor(
             channelFormat: textureFormat,
             width: 1,

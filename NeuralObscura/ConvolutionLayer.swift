@@ -15,8 +15,8 @@ class ConvolutionLayer: CommandEncoder {
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: UnsafePointer<Float>,
+        b: UnsafePointer<Float>?,
         relu: Bool = true,
         padding: UInt = 0,
         stride: UInt = 1,
@@ -50,16 +50,16 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: UnsafePointer<Float>,
+        b: UnsafePointer<Float>?,
         relu: Bool = true,
         padding: UInt = 0,
         stride: UInt = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1) {
+        self.padding = Int(padding)
         
         var neuronFilter: MPSCNNNeuron?
-
         if relu {
             neuronFilter = MPSCNNNeuronReLU(device: device, a: 0)
         }
@@ -76,23 +76,20 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         assert((groupNum > 0), "Group size can't be less than 1")
         convDesc.groups = Int(groupNum)
         
-        // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
         convolution = MPSCNNConvolution(
             device: device,
             convolutionDescriptor: convDesc,
-            kernelWeights: w.pointer(),
-            biasTerms: b.pointer(),
+            kernelWeights: w,
+            biasTerms: b,
             flags: MPSCNNConvolutionFlags.none)
+        
         convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
         convolution.edgeMode = .zero
-        
-        // set padding for calculation of offset during encode call
-        self.padding = Int(padding)
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
-        let heightIn = sourceImage!.height
-        let widthIn = sourceImage!.width
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+        let heightIn: Int = sourceImage.height
+        let widthIn: Int = sourceImage.width
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX
@@ -109,7 +106,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
-        
         print("conv encode")
         convolution.offset = MPSOffset(
             x: convolution.kernelWidth / 2 - padding,

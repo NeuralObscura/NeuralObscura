@@ -24,7 +24,7 @@ class ResidualBlock: Chain {
     
     init(
         device: MTLDevice,
-        modelParams: [String: StyleModelData],
+        modelParams: [String: UnsafeMutablePointer<Float>],
         blockName: String,
         channelsIn: UInt,
         channelsOut: UInt,
@@ -68,8 +68,8 @@ class ResidualBlock: Chain {
             padding: 1,
             stride: stride,
             useTemporary: useTemporary)
-        b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b1_beta, gamma: b1_gamma)
-        b2 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b2_beta, gamma: b2_gamma)
+        b1 = BatchNormalizationLayer(device: device, channelsIn: Int(channelsOut), beta: b1_beta, gamma: b1_gamma)
+        b2 = BatchNormalizationLayer(device: device, channelsIn: Int(channelsOut), beta: b2_beta, gamma: b2_gamma)
         
     }
     
