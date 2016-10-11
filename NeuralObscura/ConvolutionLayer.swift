@@ -89,9 +89,8 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         // set padding for calculation of offset during encode call
         self.padding = padding
     }
-    
+
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
-        // TODO: This won't work for the first layer
         let inHeight = sourceImage.height
         let inWidth = sourceImage.width
         
