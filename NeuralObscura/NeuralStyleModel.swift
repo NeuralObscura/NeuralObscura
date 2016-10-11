@@ -168,6 +168,7 @@ class NeuralStyleModel {
             w: modelParams["c1_W"]!,
             b: modelParams["c1_b"]!,
             relu: true,
+            padding: 4,
             stride: 1)
 
         // b1=L.BatchNormalization(32),
@@ -186,6 +187,7 @@ class NeuralStyleModel {
             w: modelParams["c2_W"]!,
             b: modelParams["c2_b"]!,
             relu: true,
+            padding: 1,
             stride: 2)
 
         // b2=L.BatchNormalization(64),
@@ -204,6 +206,7 @@ class NeuralStyleModel {
             w: modelParams["c3_W"]!,
             b: modelParams["c3_b"]!,
             relu: true,
+            padding: 1,
             stride: 2)
 
         // b3=L.BatchNormalization(128),

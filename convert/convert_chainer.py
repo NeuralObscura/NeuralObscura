@@ -35,7 +35,7 @@ class ChainerDataReader(object):
         s = ""
         for key, data in self.parameters:
             print(key)
-            s += ("  layerData[\"%s\"] = StyleModelData(modelName: \"%s\", rawFileName: \"%s\")\n" % (key, self.model_name, key))
+            s += ("  layerData[\"%s\"] = StyleModelData(modelName: modelName, rawFileName: \"%s\")\n" % (key, key))
             s += ("  //%s shape = %s\n" % (key, data.shape))
 
             # Save the individual files.
