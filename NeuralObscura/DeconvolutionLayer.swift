@@ -94,10 +94,10 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         // set padding for calculation of offset during encode call
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
-        let inHeight = sourceImage!.height
-        let inWidth = sourceImage!.width
-        let channelsIn = sourceImage!.featureChannels
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+        let inHeight = sourceImage.height
+        let inWidth = sourceImage.width
+        let channelsIn = sourceImage.featureChannels
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX

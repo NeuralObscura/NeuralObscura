@@ -64,7 +64,7 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         fullyConnected.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage?) -> MPSImageDescriptor {
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         return MPSImageDescriptor(
             channelFormat: textureFormat,
             width: 1,
