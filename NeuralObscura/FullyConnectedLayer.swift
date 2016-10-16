@@ -15,8 +15,8 @@ class FullyConnectedLayer: CommandEncoder {
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: ParameterBuffer,
+        b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
         destinationFeatureChannelOffset: UInt = 0,
         useTemporary: Bool = true) {
@@ -43,8 +43,8 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: ParameterBuffer,
+        b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
         destinationFeatureChannelOffset: UInt = 0){
         

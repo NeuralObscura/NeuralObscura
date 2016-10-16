@@ -15,8 +15,8 @@ class DeconvolutionLayer: CommandEncoder {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: ParameterBuffer,
+        b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = nil,
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
@@ -54,8 +54,8 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: ParameterBuffer,
+        b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,

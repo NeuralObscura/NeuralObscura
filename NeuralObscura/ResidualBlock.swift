@@ -24,7 +24,7 @@ class ResidualBlock: Chain {
     
     init(
         device: MTLDevice,
-        modelParams: [String: StyleModelData],
+        modelParams: [String: ParameterBuffer],
         blockName: String,
         channelsIn: UInt,
         channelsOut: UInt,

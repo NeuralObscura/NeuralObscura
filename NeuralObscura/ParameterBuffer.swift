@@ -9,7 +9,37 @@
 import Foundation
 import MetalPerformanceShaders
 
-class StyleModelData {
+protocol ParameterBuffer {
+    func pointer() -> UnsafeMutablePointer<Float>
+}
+
+class MemoryParameterBuffer: ParameterBuffer {
+    private let ptr: UnsafeMutablePointer<Float>!
+    private let count: Int
+    
+    init(values: [Float]) {
+        self.count = values.count
+        ptr = UnsafeMutablePointer<Float>.allocate(capacity: values.count)
+        // Nil check?
+        for (idx, v) in values.enumerated() {
+            ptr[idx] = v;
+        }
+    }
+
+    deinit {
+        if let ptrRef = ptr {
+            ptrRef.deinitialize(count: count)
+            ptrRef.deallocate(capacity: count)
+        }
+    }
+    
+    func pointer() -> UnsafeMutablePointer<Float> {
+        return ptr
+    }
+}
+
+
+class FileParameterBuffer: ParameterBuffer {
     private var fd: CInt!
     private var hdr: UnsafeMutableRawPointer!
     private var ptr: UnsafeMutablePointer<Float>!
