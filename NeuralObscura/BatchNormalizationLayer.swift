@@ -15,7 +15,7 @@ class BatchNormalizationLayer: CommandEncoder {
         channelsIn: UInt,
         beta: ParameterBuffer,
         gamma: ParameterBuffer,
-        useTemporary: Bool = true) {
+        debug: Bool = true) {
         super.init(
             device: device,
             delegate: BatchNormalizationLayerDelegate(
@@ -23,7 +23,7 @@ class BatchNormalizationLayer: CommandEncoder {
                 channelsIn: channelsIn,
                 beta: beta,
                 gamma: gamma),
-            useTemporary: useTemporary)
+            debug: debug)
     }
 }
 

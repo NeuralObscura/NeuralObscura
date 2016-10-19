@@ -17,12 +17,12 @@ class ConvolutionLayer: CommandEncoder {
         channelsOut: UInt,
         w: ParameterBuffer,
         b: ParameterBuffer,
-        relu: Bool,
+        relu: Bool = true,
         padding: Int = 0,
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1,
-        useTemporary: Bool = true) {
+        debug: Bool = true) {
         super.init(
             device: device,
             delegate: ConvolutionLayerDelegate(
@@ -37,7 +37,7 @@ class ConvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-            useTemporary: useTemporary)
+                debug: debug)
     }
 }
 
@@ -52,7 +52,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         channelsOut: UInt,
         w: ParameterBuffer,
         b: ParameterBuffer,
-        relu: Bool,
+        relu: Bool = true,
         padding: Int = 0,
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,

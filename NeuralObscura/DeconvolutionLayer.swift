@@ -22,7 +22,7 @@ class DeconvolutionLayer: CommandEncoder {
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1,
-        useTemporary: Bool = true) {
+        debug: Bool = true) {
         super.init(
             device: device,
             delegate: DeconvolutionLayerDelegate(
@@ -37,7 +37,7 @@ class DeconvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-            useTemporary: useTemporary)
+            debug: debug)
     }
 }
 
