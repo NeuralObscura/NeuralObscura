@@ -17,27 +17,22 @@ class MemoryParameterBuffer: ParameterBuffer {
     private var ptr: UnsafeMutablePointer<Float>!
     private var count: Int!
     
-    init(_ values: [Float]) {
-        self.count = values.count
-        self.ptr = values.withUnsafeBufferPointer { (buffer: UnsafeBufferPointer<Float>) -> UnsafeMutablePointer<Float> in
-            let src = UnsafeMutableRawPointer(mutating: buffer.baseAddress!)
-            let alloc = UnsafeMutablePointer<Float>.allocate(capacity: buffer.count)
-            let dst = UnsafeMutableRawPointer(alloc)!
-            memcpy(dst, src, buffer.count * MemoryLayout<Float>.size)
-            return dst.bindMemory(to: Float.self, capacity: buffer.count)
-        }
+    init( _ values: [Float]) {
+        var mutValues = values
+        self.count = mutValues.count
+        self.ptr = UnsafeMutablePointer<Float>.init(&mutValues)
     }
     
     init(_ value: Float) {
         self.count = 1
         self.ptr = UnsafeMutablePointer<Float>.allocate(capacity: 1)
-        self.ptr[0] = value
+        self.ptr.pointee = value
     }
 
-    deinit {
-        ptr!.deinitialize(count: count)
-        ptr!.deallocate(capacity: count)
-    }
+//    deinit {
+//        ptr!.deinitialize(count: count)
+//        ptr!.deallocate(capacity: count)
+//    }
     
     func pointer() -> UnsafeMutablePointer<Float> {
         return ptr

@@ -14,12 +14,11 @@ import MetalPerformanceShaders
 class ConvolutionLayerTests: CommandEncoderBaseTest {
     
     func testConvolution() {
-        // Build test model params
+        /* Create our CommandEncoder */
         let w = MemoryParameterBuffer([0, 0, 0,
                                        0, 1, 0,
                                        0, 0, 0])
-        let b = MemoryParameterBuffer(1)  
-        
+        let b = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
             device: device,
             kernelSize: 3,
@@ -28,33 +27,68 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w,
             b: b,
             relu: false,
-            debug: false)
+            padding: 1,
+            debug: true)
         
-        // Create a test image
-//        let testImage = MPSImage(device: device,
-//                               width: 4,
-//                               values: [1, 1, 1, 1,
-//                                        1, 1, 1, 1,
-//                                        1, 1, 1, 1,
-//                                        1, 1, 1, 1])
-        let testImage = MPSImage(device: device,
-                               width: 3,
-                               values: [1, 1, 1,
-                                        1, 1, 1,
-                                        1, 1, 1])
-        print(testImage)
-        // Execute test subject
-        let testOutput = conv.execute(commandBuffer: commandBuffer, sourceImage: testImage)
+        let testImgBytes = [0, 0, 0, 0,
+                            0, 1, 0, 0,
+                            0, 0, 0, 0,
+                            0, 0, 0, 0] as [UInt8]
+        let expImgBytes =  [0, 0, 0, 0,
+                            0, 0, 0, 0,
+                            0, 0, 1, 0,
+                            0, 0, 0, 0] as [UInt8]
         
-        // print("test output width: \(testOutput.width)")
-        // print("test output height: \(testOutput.height)")
-        // print("test output buffer length: \(testOutput.texture.buffer!.length)")
-        // print("test output:")
-         print(testOutput)
-        // Create expected output image
-        // let expectedOutput: MPSImage
-        // 
-        // assertEqual(testOutput, expectedOutput)
+        /* Create an input test image */
+        let testTextureDesc = MTLTextureDescriptor()
+        testTextureDesc.textureType = .type2D
+        testTextureDesc.width = 4
+        testTextureDesc.height = 4
+        testTextureDesc.pixelFormat = .r8Unorm
+        // testTextureDesc.resourceOptions
+        // testTextureDesc.cpuCacheMode
+        // testTextureDesc.usage
+        // testTextureDesc.storageMode
+        let testTexture = device.makeTexture(descriptor: testTextureDesc)
+        testTexture.replace(
+            region: MTLRegionMake2D(0, 0, testTexture.width, testTexture.height),
+            mipmapLevel: 0,
+            withBytes: testImgBytes,
+            bytesPerRow: testTexture.width * MemoryLayout<UInt8>.stride)
+        let testImg = MPSImage(texture: testTexture, featureChannels: 1)
+        
+        /* Create an expected test image */
+        let expTextureDesc = MTLTextureDescriptor()
+        expTextureDesc.textureType = .type2D
+        expTextureDesc.width = 4
+        expTextureDesc.height = 4
+        expTextureDesc.pixelFormat = .r8Unorm
+        // expTextureDesc.resourceOptions
+        // expTextureDesc.cpuCacheMode
+        // expTextureDesc.usage
+        // expTextureDesc.storageMode
+        let expTexture = device.makeTexture(descriptor: expTextureDesc)
+        expTexture.replace(
+            region: MTLRegionMake2D(0, 0, expTexture.width, expTexture.height),
+            mipmapLevel: 0,
+            withBytes: expImgBytes,
+            bytesPerRow: expTexture.width * MemoryLayout<UInt8>.stride)
+        let expImg = MPSImage(texture: expTexture, featureChannels: 1)
+        
+        /* Run our test */
+        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        
+        print("Input image:")
+        print(testImg)
+        
+        print("Output image:")
+        print(outputImg)
+        
+        print("Expected image:")
+        print(expImg)
+        
+        /* Verify the result */
+        XCTAssertEqual(outputImg, expImg)
     }
     
 }

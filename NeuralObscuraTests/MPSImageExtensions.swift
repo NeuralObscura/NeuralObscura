@@ -12,46 +12,59 @@ import MetalPerformanceShaders
 
 extension MPSImage {
     
-    convenience init(device: MTLDevice, width: Int, values: [UInt8]) {
-        let texture = values.withUnsafeBufferPointer {
-            [unowned device] (buffer: UnsafeBufferPointer) -> MTLTexture in
-            let height = (values.count + width - 1) / width
-            let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(
-                pixelFormat: .r8Unorm,
-                width: width,
-                height: height,
-                mipmapped: false)
-            let texture = device.makeTexture(descriptor: textureDescriptor)
-            let region = MTLRegion(
-                origin: MTLOriginMake(0, 0, 0),
-                size: MTLSizeMake(width, height, 1))
-            texture.replace(
-                region: region,
-                mipmapLevel: 0,
-                withBytes: buffer.baseAddress!,
-                bytesPerRow: width * MemoryLayout<UInt8>.stride)
-            return texture
+    override open func isEqual(_ rawRhs: Any?) -> Bool {
+        let lhs = self
+        
+        guard let rhs = rawRhs as? MPSImage else {
+            return false
         }
-        self.init(texture: texture, featureChannels: 1)
+        
+        guard ( lhs.width == rhs.width &&
+                lhs.height == rhs.height &&
+                lhs.pixelSize == rhs.pixelSize &&
+                lhs.pixelFormat == rhs.pixelFormat) else { return false }
+        
+        let lhsRowSize: Int = lhs.pixelSize * lhs.width
+        let rhsRowSize: Int = rhs.pixelSize * rhs.width
+        
+        let lhsTexture = lhs.texture
+        let rhsTexture = rhs.texture
+        
+        let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsRowSize * lhs.height, alignedTo: lhs.pixelSize)
+        let rhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: rhsRowSize * rhs.height, alignedTo: rhs.pixelSize)
+        
+        lhsTexture.getBytes(lhsRawPtr,
+            bytesPerRow: lhsRowSize,
+            from: MTLRegionMake2D(0, 0, lhs.width, lhs.height),
+            mipmapLevel: 0)
+        rhsTexture.getBytes(rhsRawPtr,
+            bytesPerRow: rhsRowSize,
+            from: MTLRegionMake2D(0, 0, rhs.width, rhs.height),
+            mipmapLevel: 0)
+        
+        let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsRowSize * lhs.height)
+        let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsRowSize * rhs.height)
+        
+        let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsRowSize * lhs.height)
+        let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhsRowSize * rhs.height)
+        
+        return lhsBufferPtr.elementsEqual(rhsBufferPtr)
     }
     
     override open var description: String {
-        let count = self.width * self.height
-        let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: count)
-        self.texture.getBytes(
-            ptr,
-            bytesPerRow: self.width * MemoryLayout<UInt8>.size,
+        let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: self.width * self.height)
+        self.texture.getBytes(ptr,
+            bytesPerRow: self.width * self.pixelSize,
             from: MTLRegionMake2D(0, 0, self.width, self.height),
             mipmapLevel: 0)
-        let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: count)
-        var str = ""
-        for (idx, e) in buffer.enumerated() {
+        let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: self.width * self.height)
+        return buffer.enumerated().map { [unowned self] (idx, e) in
             if idx % self.width == 0 {
-                str += "\n"
+                return String(format: "\n%2X ", e)
+            } else {
+                return String(format: "%2X ", e)
             }
-            str += e.description + " "
-        }
-        str += "\n"
-        return str
+        }.joined() + "\n"
    }
+    
 }
