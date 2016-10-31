@@ -85,6 +85,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
             flags: MPSCNNConvolutionFlags.none)
         convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
         convolution.edgeMode = .zero
+        convolution.offset = MPSOffset(x: 1 - padding, y: 1 - padding, z: 0)
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {

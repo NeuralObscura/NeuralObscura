@@ -13,7 +13,7 @@ import MetalPerformanceShaders
 
 class MPSCNNConvolutionTests: CommandEncoderBaseTest {
     
-    func testConvolution() {
+    func testProofOfConcept() {
         /* Create an input test image */
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 3, 3, 0,
