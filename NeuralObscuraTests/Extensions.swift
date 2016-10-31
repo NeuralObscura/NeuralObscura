@@ -9,6 +9,23 @@
 import Foundation
 import MetalPerformanceShaders
 
+extension MTLDevice {
+    func MakeTestMPSImage(width: Int, height: Int, values: [UInt8]) -> MPSImage {
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.textureType = .type2D
+        textureDesc.width = width
+        textureDesc.height = width
+        textureDesc.pixelFormat = .r8Unorm
+        let texture = self.makeTexture(descriptor: textureDesc)
+        texture.replace(
+            region: MTLRegionMake2D(0, 0, texture.width, texture.height),
+            mipmapLevel: 0,
+            withBytes: values,
+            bytesPerRow: texture.width * MemoryLayout<UInt8>.size)
+        return MPSImage(texture: texture, featureChannels: 1)
+    }
+}
+
 
 extension MPSImage {
     

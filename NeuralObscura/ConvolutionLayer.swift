@@ -37,7 +37,7 @@ class ConvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-                debug: debug)
+            debug: debug)
     }
 }
 
@@ -60,7 +60,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         self.padding = padding
         
         var neuronFilter: MPSCNNNeuron?
-
         if relu {
             neuronFilter = MPSCNNNeuronReLU(device: device, a: 0)
         }
@@ -86,9 +85,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
             flags: MPSCNNConvolutionFlags.none)
         convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
         convolution.edgeMode = .zero
-        convolution.clipRect.origin = MTLOriginMake(0, 0, 0)
-        convolution.clipRect.size.depth = 1
-        convolution.offset = MPSOffset(x: 0, y: 0, z: 0)
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {

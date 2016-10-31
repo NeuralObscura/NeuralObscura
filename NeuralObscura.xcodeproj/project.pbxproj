@@ -14,15 +14,15 @@
 		077BB3D51D9B063F0022578C /* BatchNormalizationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */; };
 		077BB3D71D9E1B0C0022578C /* Protocols.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3D61D9E1B0C0022578C /* Protocols.swift */; };
 		077BB3E71DA39D080022578C /* CommandEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3E61DA39D080022578C /* CommandEncoder.swift */; };
+		077E558C1DC699B500111255 /* MPSCNNConvolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */; };
 		07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */; };
 		07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */; };
-		07FF01B81DB4229200DF8F11 /* MPSImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FF01B71DB4229200DF8F11 /* MPSImageExtensions.swift */; };
+		07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FF01B71DB4229200DF8F11 /* Extensions.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
 		DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C601D8BAB4000ED7982 /* ViewController.swift */; };
 		DA0B0C641D8BAB4000ED7982 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C621D8BAB4000ED7982 /* Main.storyboard */; };
 		DA0B0C661D8BAB4000ED7982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */; };
 		DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */; };
-		DA0B0C741D8BAB4000ED7982 /* NeuralObscuraTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C731D8BAB4000ED7982 /* NeuralObscuraTests.swift */; };
 		DA0B0C7F1D8BAB4000ED7982 /* NeuralObscuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */; };
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
 		DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */; };
@@ -59,9 +59,10 @@
 		077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationLayer.swift; sourceTree = "<group>"; };
 		077BB3D61D9E1B0C0022578C /* Protocols.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Protocols.swift; sourceTree = "<group>"; };
 		077BB3E61DA39D080022578C /* CommandEncoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoder.swift; sourceTree = "<group>"; };
+		077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSCNNConvolutionTests.swift; sourceTree = "<group>"; };
 		07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoderBaseTest.swift; sourceTree = "<group>"; };
 		07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayerTests.swift; sourceTree = "<group>"; };
-		07FF01B71DB4229200DF8F11 /* MPSImageExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSImageExtensions.swift; sourceTree = "<group>"; };
+		07FF01B71DB4229200DF8F11 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA0B0C601D8BAB4000ED7982 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -70,7 +71,6 @@
 		DA0B0C681D8BAB4000ED7982 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		DA0B0C6A1D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA0B0C6F1D8BAB4000ED7982 /* NeuralObscuraTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuralObscuraTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		DA0B0C731D8BAB4000ED7982 /* NeuralObscuraTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuralObscuraTests.swift; sourceTree = "<group>"; };
 		DA0B0C751D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA0B0C7A1D8BAB4000ED7982 /* NeuralObscuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuralObscuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuralObscuraUITests.swift; sourceTree = "<group>"; };
@@ -176,10 +176,10 @@
 		DA0B0C721D8BAB4000ED7982 /* NeuralObscuraTests */ = {
 			isa = PBXGroup;
 			children = (
-				07FF01B71DB4229200DF8F11 /* MPSImageExtensions.swift */,
+				07FF01B71DB4229200DF8F11 /* Extensions.swift */,
 				07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */,
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
-				DA0B0C731D8BAB4000ED7982 /* NeuralObscuraTests.swift */,
+				077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */,
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
 			);
 			path = NeuralObscuraTests;
@@ -364,8 +364,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA0B0C741D8BAB4000ED7982 /* NeuralObscuraTests.swift in Sources */,
-				07FF01B81DB4229200DF8F11 /* MPSImageExtensions.swift in Sources */,
+				077E558C1DC699B500111255 /* MPSCNNConvolutionTests.swift in Sources */,
+				07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */,
 				07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */,
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,
 			);
@@ -454,7 +454,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -497,7 +497,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
@@ -511,7 +511,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscura;
 				PRODUCT_NAME = "$(TARGET_NAME)";
@@ -525,7 +525,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.1;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscura;
 				PRODUCT_NAME = "$(TARGET_NAME)";

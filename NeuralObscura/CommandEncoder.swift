@@ -14,9 +14,9 @@ open class CommandEncoder: Chain {
     let delegate: CommandEncoderDelegate
     let debug: Bool
 
-    var head: CommandEncoder?
+    weak var head: CommandEncoder?
     var top: CommandEncoder?
-    var bottom: CommandEncoder?
+    weak var bottom: CommandEncoder?
     
     init(device: MTLDevice,
          delegate: CommandEncoderDelegate,
@@ -58,6 +58,7 @@ open class CommandEncoder: Chain {
     }
     
     func execute(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
+        print("execute \(head)")
         let destinationImage = head!.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
