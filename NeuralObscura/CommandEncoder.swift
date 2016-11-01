@@ -58,7 +58,6 @@ open class CommandEncoder: Chain {
     }
     
     func execute(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
-        print("execute \(head)")
         let destinationImage = head!.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()

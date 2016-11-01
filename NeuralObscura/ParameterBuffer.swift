@@ -35,7 +35,6 @@ class MemoryParameterBuffer: ParameterBuffer {
     }
     
     deinit {
-        ptr!.deinitialize(count: count)
         ptr!.deallocate(capacity: count)
     }
     
