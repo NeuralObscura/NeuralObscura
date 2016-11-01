@@ -30,7 +30,7 @@ class ResidualBlock: Chain {
         channelsOut: UInt,
         kernelSize: UInt = 3,
         stride: Int = 1,
-        outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
+        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         
         /* Load the block parameters */
         let c1_w = modelParams[blockName + "_c1_W"]!

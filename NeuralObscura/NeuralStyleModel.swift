@@ -10,7 +10,7 @@ import Foundation
 import MetalPerformanceShaders
 import MetalKit
 
-enum NeuralStyleModelLayerOutputType {
+enum CommandEncoderOutputType {
     case temporary  // Normal Intra-layer use
     case permenant  // Output is accessible via the CPU, final layer use
     case debug      // Output is accessible via the CPU, also triggers debug printing
@@ -19,7 +19,7 @@ enum NeuralStyleModelLayerOutputType {
 class NeuralStyleModel {
     let device: MTLDevice
     let useTemporary: Bool
-    let outputType: NeuralStyleModelLayerOutputType
+    let outputType: CommandEncoderOutputType
     var modelParams = [String: ParameterBuffer]()
     
     let c1, c2, c3: ConvolutionLayer
@@ -31,7 +31,7 @@ class NeuralStyleModel {
     init(device: MTLDevice,
          modelName: String,
          useTemporary: Bool = true,
-         outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
+         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         self.device = device
         self.useTemporary = useTemporary
         self.outputType = outputType

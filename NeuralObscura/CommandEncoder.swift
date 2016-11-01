@@ -12,7 +12,7 @@ import MetalPerformanceShaders
 open class CommandEncoder: Chain {
     let device: MTLDevice
     let delegate: CommandEncoderDelegate
-    let outputType: NeuralStyleModelLayerOutputType
+    let outputType: CommandEncoderOutputType
 
     weak var head: CommandEncoder?
     var top: CommandEncoder?
@@ -20,7 +20,7 @@ open class CommandEncoder: Chain {
     
     init(device: MTLDevice,
          delegate: CommandEncoderDelegate,
-         outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
+         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         self.device = device
         self.delegate = delegate
         self.outputType = outputType
@@ -39,9 +39,9 @@ open class CommandEncoder: Chain {
         
         var destinationImage: MPSImage! = nil
         switch self.outputType {
-        case NeuralStyleModelLayerOutputType.debug: destinationImage = MPSImage(device: self.device, imageDescriptor: destDesc)
-        case NeuralStyleModelLayerOutputType.permenant: destinationImage = MPSImage(device: self.device, imageDescriptor: destDesc)
-        case NeuralStyleModelLayerOutputType.temporary: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+        case CommandEncoderOutputType.debug: destinationImage = MPSImage(device: self.device, imageDescriptor: destDesc)
+        case CommandEncoderOutputType.permenant: destinationImage = MPSImage(device: self.device, imageDescriptor: destDesc)
+        case CommandEncoderOutputType.temporary: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
         }
         
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)

@@ -15,7 +15,7 @@ class BatchNormalizationLayer: CommandEncoder {
         channelsIn: UInt,
         beta: ParameterBuffer,
         gamma: ParameterBuffer,
-        outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
+        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
             device: device,
             delegate: BatchNormalizationLayerDelegate(

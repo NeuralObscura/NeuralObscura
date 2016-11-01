@@ -19,7 +19,7 @@ class FullyConnectedLayer: CommandEncoder {
         b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
         destinationFeatureChannelOffset: UInt = 0,
-        outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
+        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
             device: device,
             delegate: FullyConnectedLayerDelegate(

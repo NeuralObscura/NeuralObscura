@@ -33,7 +33,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 0,
-            outputType: NeuralStyleModelLayerOutputType.debug)
+            outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 2, height: 2, values: [1, 0,
                                                                            0, 1])
@@ -65,7 +65,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 1,
-            outputType: NeuralStyleModelLayerOutputType.debug)
+            outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 1,
@@ -100,7 +100,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 2,
-            outputType: NeuralStyleModelLayerOutputType.debug)
+            outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
                                                                            0, 0, 0, 0, 0, 0,
@@ -137,7 +137,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 0,
-            outputType: NeuralStyleModelLayerOutputType.debug)
+            outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 2, height: 2, values: [2, 3,
                                                                            2, 3])
@@ -169,7 +169,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 1,
-            outputType: NeuralStyleModelLayerOutputType.debug)
+            outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [1, 1, 2, 1,
                                                                            1, 2, 3, 2,
@@ -204,7 +204,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 2,
-            outputType: NeuralStyleModelLayerOutputType.debug)
+            outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
                                                                            0, 1, 1, 2, 1, 1,
