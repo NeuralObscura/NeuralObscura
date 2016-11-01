@@ -10,11 +10,16 @@ import Foundation
 import MetalPerformanceShaders
 import MetalKit
 
+enum NeuralStyleModelLayerOutputType {
+    case temporary  // Normal Intra-layer use
+    case permenant  // Output is accessible via the CPU, final layer use
+    case debug      // Output is accessible via the CPU, also triggers debug printing
+}
 
 class NeuralStyleModel {
     let device: MTLDevice
     let useTemporary: Bool
-    let debug: Bool
+    let outputType: NeuralStyleModelLayerOutputType
     var modelParams = [String: ParameterBuffer]()
     
     let c1, c2, c3: ConvolutionLayer
@@ -26,10 +31,10 @@ class NeuralStyleModel {
     init(device: MTLDevice,
          modelName: String,
          useTemporary: Bool = true,
-         debug: Bool = true) {
+         outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
         self.device = device
         self.useTemporary = useTemporary
-        self.debug = debug
+        self.outputType = outputType
 
         /* Load model parameters */
         modelParams["r4_c2_W"] = FileParameterBuffer(modelName: modelName, rawFileName: "r4_c2_W")
@@ -169,7 +174,8 @@ class NeuralStyleModel {
             b: modelParams["c1_b"]!,
             relu: true,
             padding: 4,
-            stride: 1)
+            stride: 1,
+            outputType: outputType)
 
         // b1=L.BatchNormalization(32),
         b1 = BatchNormalizationLayer(
@@ -188,7 +194,8 @@ class NeuralStyleModel {
             b: modelParams["c2_b"]!,
             relu: true,
             padding: 1,
-            stride: 2)
+            stride: 2,
+            outputType: outputType)
 
         // b2=L.BatchNormalization(64),
         b2 = BatchNormalizationLayer(
@@ -207,7 +214,8 @@ class NeuralStyleModel {
             b: modelParams["c3_b"]!,
             relu: true,
             padding: 1,
-            stride: 2)
+            stride: 2,
+            outputType: outputType)
 
         // b3=L.BatchNormalization(128),
         b3 = BatchNormalizationLayer(
@@ -222,7 +230,8 @@ class NeuralStyleModel {
             modelParams: modelParams,
             blockName: "r1",
             channelsIn: 128,
-            channelsOut: 128)
+            channelsOut: 128,
+            outputType: outputType)
 
         // r2=ResidualBlock(128, 128),
         r2 = ResidualBlock(
@@ -230,7 +239,8 @@ class NeuralStyleModel {
             modelParams: modelParams,
             blockName: "r2",
             channelsIn: 128,
-            channelsOut: 128)
+            channelsOut: 128,
+            outputType: outputType)
 
         // r3=ResidualBlock(128, 128),
         r3 = ResidualBlock(
@@ -238,7 +248,8 @@ class NeuralStyleModel {
             modelParams: modelParams,
             blockName: "r3",
             channelsIn: 128,
-            channelsOut: 128)
+            channelsOut: 128,
+            outputType: outputType)
 
         // r4=ResidualBlock(128, 128),
         r4 = ResidualBlock(
@@ -246,7 +257,8 @@ class NeuralStyleModel {
             modelParams: modelParams,
             blockName: "r4",
             channelsIn: 128,
-            channelsOut: 128)
+            channelsOut: 128,
+            outputType: outputType)
 
         // r5=ResidualBlock(128, 128),
         r5 = ResidualBlock(
@@ -254,7 +266,8 @@ class NeuralStyleModel {
             modelParams: modelParams,
             blockName: "r5",
             channelsIn: 128,
-            channelsOut: 128)
+            channelsOut: 128,
+            outputType: outputType)
 
         // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
         d1 = DeconvolutionLayer(
@@ -265,7 +278,8 @@ class NeuralStyleModel {
             w: modelParams["d1_W"]!,
             b: modelParams["d1_b"]!,
             padding: true,
-            stride: 2)
+            stride: 2,
+            outputType: outputType)
 
         // b4=L.BatchNormalization(64),
         b4 = BatchNormalizationLayer(
@@ -282,7 +296,8 @@ class NeuralStyleModel {
             kernelSize: 4,
             w: modelParams["d2_W"]!,
             b: modelParams["d2_b"]!,
-            stride: 2)
+            stride: 2,
+            outputType: outputType)
 
         // b5=L.BatchNormalization(32),
         b5 = BatchNormalizationLayer(
@@ -299,7 +314,8 @@ class NeuralStyleModel {
             kernelSize: 9,
             w: modelParams["d3_W"]!,
             b: modelParams["d3_b"]!,
-            stride: 1)
+            stride: 1,
+            outputType: outputType)
 
         // TODO: Init last tanh layer
 

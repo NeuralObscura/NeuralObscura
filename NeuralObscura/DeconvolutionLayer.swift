@@ -22,7 +22,7 @@ class DeconvolutionLayer: CommandEncoder {
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1,
-        debug: Bool = true) {
+        outputType: NeuralStyleModelLayerOutputType = NeuralStyleModelLayerOutputType.debug) {
         super.init(
             device: device,
             delegate: DeconvolutionLayerDelegate(
@@ -37,7 +37,7 @@ class DeconvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-            debug: debug)
+            outputType: outputType)
     }
 }
 
