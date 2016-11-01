@@ -30,7 +30,7 @@ class ResidualBlock: Chain {
         channelsOut: UInt,
         kernelSize: UInt = 3,
         stride: Int = 1,
-        debug: Bool = true) {
+        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         
         /* Load the block parameters */
         let c1_w = modelParams[blockName + "_c1_W"]!
@@ -54,7 +54,7 @@ class ResidualBlock: Chain {
             relu: false,
             padding: 1,
             stride: stride,
-            debug: debug)
+            outputType: outputType)
         
         // TODO: Disable relu!
         c2 = ConvolutionLayer(
@@ -67,7 +67,7 @@ class ResidualBlock: Chain {
             relu: false,
             padding: 1,
             stride: stride,
-            debug: debug)
+            outputType: outputType)
         b1 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b1_beta, gamma: b1_gamma)
         b2 = BatchNormalizationLayer(device: device, channelsIn: channelsOut, beta: b2_beta, gamma: b2_gamma)
         
