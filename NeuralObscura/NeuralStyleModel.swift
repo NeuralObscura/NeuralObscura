@@ -348,12 +348,6 @@ class NeuralStyleModel {
     func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
         var outputImage: MPSImage? = nil
 
-        if (debug) {
-            print("Four corners as MPSImage; inital values")
-            sourceImage.fourCorners()
-            print("---------------------------")
-        }
-
         autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
             outputImage = modelHandle.execute(commandBuffer: commandBuffer, sourceImage: sourceImage)

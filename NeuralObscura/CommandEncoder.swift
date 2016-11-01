@@ -44,10 +44,6 @@ open class CommandEncoder: Chain {
         }
         
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-        
-        if (self.debug) {
-            destinationImage.fourCorners()
-        }
 
         switch bottom {
         case .some(_):
