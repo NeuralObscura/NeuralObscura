@@ -14,13 +14,12 @@ open class CommandEncoder: Chain {
     let delegate: CommandEncoderDelegate
     let debug: Bool
 
-    var head: CommandEncoder?
+    weak var head: CommandEncoder?
     var top: CommandEncoder?
-    var bottom: CommandEncoder?
+    weak var bottom: CommandEncoder?
     
     init(device: MTLDevice,
          delegate: CommandEncoderDelegate,
-         useTemporary: Bool = true,
          debug: Bool = true) {
         self.device = device
         self.delegate = delegate
@@ -36,7 +35,6 @@ open class CommandEncoder: Chain {
     }
     
     func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
-        print("forward")
         let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
         
         var destinationImage: MPSImage! = nil
@@ -60,7 +58,6 @@ open class CommandEncoder: Chain {
     }
     
     func execute(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
-        print("execute")
         let destinationImage = head!.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()

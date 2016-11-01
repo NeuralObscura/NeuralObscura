@@ -13,9 +13,9 @@ class BatchNormalizationLayer: CommandEncoder {
     init(
         device: MTLDevice,
         channelsIn: UInt,
-        beta: StyleModelData,
-        gamma: StyleModelData,
-        useTemporary: Bool = true) {
+        beta: ParameterBuffer,
+        gamma: ParameterBuffer,
+        debug: Bool = true) {
         super.init(
             device: device,
             delegate: BatchNormalizationLayerDelegate(
@@ -23,7 +23,7 @@ class BatchNormalizationLayer: CommandEncoder {
                 channelsIn: channelsIn,
                 beta: beta,
                 gamma: gamma),
-            useTemporary: useTemporary)
+            debug: debug)
     }
 }
 
@@ -32,7 +32,7 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     let gamma: Float
     let channelsIn: Int
     
-    init(device: MTLDevice, channelsIn: UInt, beta: StyleModelData, gamma: StyleModelData) {
+    init(device: MTLDevice, channelsIn: UInt, beta: ParameterBuffer, gamma: ParameterBuffer) {
         self.channelsIn = Int(channelsIn)
         self.beta = beta.pointer().pointee // TODO: Reexamine this dereference
         self.gamma = gamma.pointer().pointee

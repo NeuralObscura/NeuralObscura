@@ -15,14 +15,14 @@ class DeconvolutionLayer: CommandEncoder {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: ParameterBuffer,
+        b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = nil,
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
         destinationFeatureChannelOffset: UInt = 0,
         groupNum: UInt = 1,
-        useTemporary: Bool = true) {
+        debug: Bool = true) {
         super.init(
             device: device,
             delegate: DeconvolutionLayerDelegate(
@@ -37,7 +37,7 @@ class DeconvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-            useTemporary: useTemporary)
+            debug: debug)
     }
 }
 
@@ -54,8 +54,8 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
-        w: StyleModelData,
-        b: StyleModelData,
+        w: ParameterBuffer,
+        b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
         padding: Bool = true, // TODO: Revisit this default
         stride: Int = 1,
