@@ -31,7 +31,7 @@ extension MTLDevice {
         textureDesc.width = width
         textureDesc.height = height
         textureDesc.arrayLength = values.count
-        textureDesc.pixelFormat = .rgba8Uint
+        textureDesc.pixelFormat = .rgba8Unorm
         let texture = self.makeTexture(descriptor: textureDesc)
         for (index, element) in values.enumerated() {
             texture.replace(
@@ -43,7 +43,7 @@ extension MTLDevice {
                 bytesPerImage: texture.width * texture.height * MemoryLayout<UInt8>.size * 4)
         }
         debugPrint(texture)
-        return MPSImage(texture: texture, featureChannels: values.count)
+        return MPSImage(texture: texture, featureChannels: values.count * 4)
     }
 }
 

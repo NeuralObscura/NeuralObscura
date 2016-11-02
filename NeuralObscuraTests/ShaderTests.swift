@@ -111,6 +111,7 @@ class ShaderTests: CommandEncoderBaseTest {
     }*/
 
     func testAddOne() {
+        /*
         let testImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,1,1,1,1,1,1,
                                                                                  0,0,0,0,0,0,0,0],
                                                                                 [1,1,1,1,1,1,1,1,
@@ -122,16 +123,23 @@ class ShaderTests: CommandEncoderBaseTest {
                                                                                 [1,1,1,1,1,1,1,1,
                                                                                  0,0,0,0,0,0,0,0]])
 
-        let outputImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,1,1,1,1,1,1,
+        let outputImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[0,0,0,0,0,0,0,0,
                                                                                    0,0,0,0,0,0,0,0],
-                                                                                  [1,1,1,1,1,1,1,1,
+                                                                                  [0,0,0,0,0,0,0,0,
                                                                                    0,0,0,0,0,0,0,0],
-                                                                                  [1,1,1,1,1,1,1,1,
+                                                                                  [0,0,0,0,0,0,0,0,
                                                                                    0,0,0,0,0,0,0,0],
-                                                                                  [1,1,1,1,1,1,1,1,
+                                                                                  [0,0,0,0,0,0,0,0,
                                                                                    0,0,0,0,0,0,0,0],
-                                                                                  [1,1,1,1,1,1,1,1,
+                                                                                  [0,0,0,0,0,0,0,0,
                                                                                    0,0,0,0,0,0,0,0]])
+ */
+        let testImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,1,1,1,1,1,1,
+                                                                                 0,0,0,0,0,0,0,0]])
+
+        let outputImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[0,0,0,0,0,0,0,0,
+                                                                                   0,0,0,0,0,0,0,0]])
+
         var addOne: MTLComputePipelineState
         do {
             let library = device.newDefaultLibrary()!
@@ -159,14 +167,6 @@ class ShaderTests: CommandEncoderBaseTest {
 
 
         let expImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,1,1,1,1,1,1,
-                                                                                0,0,0,0,0,0,0,0],
-                                                                               [1,1,1,1,1,1,1,1,
-                                                                                0,0,0,0,0,0,0,0],
-                                                                               [1,1,1,1,1,1,1,1,
-                                                                                0,0,0,0,0,0,0,0],
-                                                                               [1,1,1,1,1,1,1,1,
-                                                                                0,0,0,0,0,0,0,0],
-                                                                               [1,1,1,1,1,1,1,1,
                                                                                 0,0,0,0,0,0,0,0]])
 
         /* Verify the result */
