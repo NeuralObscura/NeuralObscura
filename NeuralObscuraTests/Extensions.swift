@@ -24,6 +24,27 @@ extension MTLDevice {
             bytesPerRow: texture.width * MemoryLayout<UInt8>.size)
         return MPSImage(texture: texture, featureChannels: 1)
     }
+
+    func MakeDeepTestMPSImage(width: Int, height: Int, values: [[UInt8]]) -> MPSImage {
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.textureType = .type2DArray
+        textureDesc.width = width
+        textureDesc.height = height
+        textureDesc.arrayLength = values.count
+        textureDesc.pixelFormat = .rgba8Uint
+        let texture = self.makeTexture(descriptor: textureDesc)
+        for (index, element) in values.enumerated() {
+            texture.replace(
+                region: MTLRegionMake2D(0, 0, texture.width, texture.height),
+                mipmapLevel: 0,
+                slice: index,
+                withBytes: element,
+                bytesPerRow: texture.width * MemoryLayout<UInt8>.size * 4,
+                bytesPerImage: texture.width * texture.height * MemoryLayout<UInt8>.size * 4)
+        }
+        debugPrint(texture)
+        return MPSImage(texture: texture, featureChannels: values.count)
+    }
 }
 
 
