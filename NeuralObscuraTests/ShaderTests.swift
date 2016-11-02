@@ -134,11 +134,11 @@ class ShaderTests: CommandEncoderBaseTest {
                                                                                   [0,0,0,0,0,0,0,0,
                                                                                    0,0,0,0,0,0,0,0]])
  */
-        let testImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,1,1,1,1,1,1,
-                                                                                 0,0,0,0,0,0,0,0]])
+        let testImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,
+                                                                                 0,0]])
 
-        let outputImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[0,0,0,0,0,0,0,0,
-                                                                                   0,0,0,0,0,0,0,0]])
+        let outputImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[0,0,
+                                                                                   0,0]])
 
         var addOne: MTLComputePipelineState
         do {
@@ -166,11 +166,11 @@ class ShaderTests: CommandEncoderBaseTest {
         print(outputImg)
 
 
-        let expImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,1,1,1,1,1,1,
-                                                                                0,0,0,0,0,0,0,0]])
+        let expImg = device.MakeDeepTestMPSImage(width: 2, height: 2, values: [[1,1,
+                                                                                0,0]])
 
         /* Verify the result */
-        //XCTAssertEqual(outputImg, expImg)
+        XCTAssertEqual(outputImg, expImg)
     }
 
 }
