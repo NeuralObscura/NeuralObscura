@@ -14,7 +14,7 @@ extension MTLDevice {
         let textureDesc = MTLTextureDescriptor()
         textureDesc.textureType = .type2D
         textureDesc.width = width
-        textureDesc.height = width
+        textureDesc.height = height
         textureDesc.pixelFormat = .r8Unorm
         let texture = self.makeTexture(descriptor: textureDesc)
         texture.replace(
