@@ -20,6 +20,7 @@
 		07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FF01B71DB4229200DF8F11 /* Extensions.swift */; };
 		DA0638141DC9CAF100BC496D /* SizeCalculationUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */; };
 		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
+		DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
 		DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C601D8BAB4000ED7982 /* ViewController.swift */; };
 		DA0B0C641D8BAB4000ED7982 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C621D8BAB4000ED7982 /* Main.storyboard */; };
@@ -66,6 +67,7 @@
 		07FF01B71DB4229200DF8F11 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SizeCalculationUtil.swift; sourceTree = "<group>"; };
 		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
+		DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationLayerTests.swift; sourceTree = "<group>"; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA0B0C601D8BAB4000ED7982 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -183,6 +185,7 @@
 				07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */,
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
 				077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */,
+				DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */,
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
 			);
 			path = NeuralObscuraTests;
@@ -369,6 +372,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				077E558C1DC699B500111255 /* MPSCNNConvolutionTests.swift in Sources */,
+				DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */,
 				07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */,
 				07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */,
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,

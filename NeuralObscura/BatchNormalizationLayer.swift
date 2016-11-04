@@ -52,7 +52,7 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         print("bn encode")
         let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder.setComputePipelineState(ShaderRegistry.get(name: "batch_normalization"))
+        encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "batch_normalization"))
         encoder.setTexture(sourceImage.texture, at: 0)
         encoder.setTexture(destinationImage.texture, at: 1)
         encoder.setBuffer(gamma, offset: 0, at: 2)

@@ -14,20 +14,20 @@ class ShaderRegistry {
     private var registry = [String: MTLComputePipelineState]()
     static let sharedInstance = ShaderRegistry()
 
-    private init() {
-        ShaderRegistry.loadShader(name: "batch_normalization")
-    }
+    private init() {}
 
-    static func loadShader(name: String) {
-        do {
-            let shaderFunc = sharedInstance.library.makeFunction(name: name)!
-            sharedInstance.registry[name] = try sharedInstance.device.makeComputePipelineState(function: shaderFunc)
-        } catch {
-            fatalError("Unable to load shader: \(name)")
+    static func getOrLoad(name: String) -> MTLComputePipelineState {
+        if let shader = sharedInstance.registry[name] {
+            return shader
+        } else {
+            do {
+                let shaderFunc = sharedInstance.library.makeFunction(name: name)!
+                sharedInstance.registry[name] = try sharedInstance.device.makeComputePipelineState(function: shaderFunc)
+            } catch {
+                fatalError("Unable to load shader: \(name)")
+            }
+
+            return sharedInstance.registry[name]!
         }
-    }
-
-    static func get(name: String) -> MTLComputePipelineState {
-        return sharedInstance.registry[name]!
     }
 }
