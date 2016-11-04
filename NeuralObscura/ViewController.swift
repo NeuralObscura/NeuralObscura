@@ -12,7 +12,6 @@ import MetalPerformanceShaders
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     @IBOutlet weak var imageView: UIImageView!
-    private var device: MTLDevice!
     private var ciContext : CIContext!
     private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
@@ -23,22 +22,15 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        device = MTLCreateSystemDefaultDevice()
+        ciContext = CIContext.init(mtlDevice: ShaderRegistry.getDevice())
 
-        guard MPSSupportsMTLDevice(device) else {
-            print("Error: Metal Performance Shaders not supported on this device")
-            return
-        }
+        textureLoader = MTKTextureLoader(device: ShaderRegistry.getDevice())
 
-        ciContext = CIContext.init(mtlDevice: device)
-
-        textureLoader = MTKTextureLoader(device: device!)
-
-        commandQueue = device!.makeCommandQueue()
+        commandQueue = ShaderRegistry.getDevice().makeCommandQueue()
 
         // This is computationally expensive, should optimize
         // by initializing on a background thread.
-        model = NeuralStyleModel(device: device, modelName: "composition")
+        model = NeuralStyleModel(modelName: "composition")
 
         debugImagePaths = [
             Bundle.main.path(forResource: "debug", ofType: "png")!,
@@ -108,7 +100,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         // note the configurable options
         let input = imageView.image!
 
-        let inputMtlTexture = input.createMTLTextureForDevice(device: device)
+        let inputMtlTexture = input.createMTLTextureForDevice(device: ShaderRegistry.getDevice())
         let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
         print("done")
 

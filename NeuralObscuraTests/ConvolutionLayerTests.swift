@@ -25,7 +25,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                           0, 0, 0])
         let b_pb = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
-            device: device,
             kernelSize: 3,
             channelsIn: 1,
             channelsOut: 1,
@@ -57,7 +56,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                           0, 0, 0])
         let b_pb = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
-            device: device,
             kernelSize: 3,
             channelsIn: 1,
             channelsOut: 1,
@@ -92,7 +90,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                           0, 0, 0])
         let b_pb = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
-            device: device,
             kernelSize: 3,
             channelsIn: 1,
             channelsOut: 1,
@@ -129,7 +126,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                           1, 1, 1])
         let b_pb = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
-            device: device,
             kernelSize: 3,
             channelsIn: 1,
             channelsOut: 1,
@@ -161,7 +157,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                           1, 1, 1])
         let b_pb = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
-            device: device,
             kernelSize: 3,
             channelsIn: 1,
             channelsOut: 1,
@@ -196,7 +191,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                           1, 1, 1])
         let b_pb = MemoryParameterBuffer(0)
         let conv = ConvolutionLayer(
-            device: device,
             kernelSize: 3,
             channelsIn: 1,
             channelsOut: 1,

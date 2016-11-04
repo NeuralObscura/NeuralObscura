@@ -11,15 +11,12 @@ import MetalPerformanceShaders
 
 class BatchNormalizationLayer: CommandEncoder {
     init(
-        device: MTLDevice,
         channelsIn: UInt,
         beta: ParameterBuffer,
         gamma: ParameterBuffer,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
-            device: device,
             delegate: BatchNormalizationLayerDelegate(
-                device: device,
                 channelsIn: channelsIn,
                 beta: beta,
                 gamma: gamma),
@@ -32,13 +29,12 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     let gamma: MTLBuffer
     let channelsIn: Int
 
-    init(device: MTLDevice,
-         channelsIn: UInt,
+    init(channelsIn: UInt,
          beta: ParameterBuffer,
          gamma: ParameterBuffer) {
         self.channelsIn = Int(channelsIn)
-        self.beta = device.makeBuffer(bytes: beta.pointer(), length: beta.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        self.gamma = device.makeBuffer(bytes: gamma.pointer(), length: gamma.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        self.beta = ShaderRegistry.getDevice().makeBuffer(bytes: beta.pointer(), length: beta.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        self.gamma = ShaderRegistry.getDevice().makeBuffer(bytes: gamma.pointer(), length: gamma.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {

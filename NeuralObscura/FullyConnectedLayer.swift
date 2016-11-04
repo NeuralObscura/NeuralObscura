@@ -11,7 +11,6 @@ import MetalPerformanceShaders
 
 class FullyConnectedLayer: CommandEncoder {
     init(
-        device: MTLDevice,
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
@@ -21,10 +20,7 @@ class FullyConnectedLayer: CommandEncoder {
         destinationFeatureChannelOffset: UInt = 0,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
-            device: device,
-            delegate: FullyConnectedLayerDelegate(
-                device: device,
-                kernelSize: kernelSize,
+            delegate: FullyConnectedLayerDelegate(                kernelSize: kernelSize,
                 channelsIn: channelsIn,
                 channelsOut: channelsOut,
                 w: w,
@@ -39,7 +35,6 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
     let fullyConnected: MPSCNNFullyConnected
     
     init(
-        device: MTLDevice,
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
@@ -56,7 +51,7 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
                                                    neuronFilter: neuronFilter)
         
         // initialize the convolution layer by calling the parent's (MPSCNNFullyConnected's) initializer
-        fullyConnected = MPSCNNFullyConnected.init(device: device,
+        fullyConnected = MPSCNNFullyConnected.init(device: ShaderRegistry.getDevice(),
                    convolutionDescriptor: convDesc,
                    kernelWeights: w.pointer(),
                    biasTerms: b.pointer(),

@@ -17,9 +17,6 @@ enum CommandEncoderOutputType {
 }
 
 class NeuralStyleModel {
-    let device: MTLDevice
-    let library: MTLLibrary
-    let batchNormalizationShader: MTLComputePipelineState
     let useTemporary: Bool
     let outputType: CommandEncoderOutputType
     var modelParams = [String: ParameterBuffer]()
@@ -30,18 +27,9 @@ class NeuralStyleModel {
     let d1, d2, d3: DeconvolutionLayer
     let modelHandle: CommandEncoder
 
-    init(device: MTLDevice,
-         modelName: String,
+    init(modelName: String,
          useTemporary: Bool = true,
          outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
-        self.device = device
-        self.library = device.newDefaultLibrary()!
-        do {
-            let batchNormalizationFunction = self.library.makeFunction(name: "batch_normalization")!
-            self.batchNormalizationShader = try device.makeComputePipelineState(function: batchNormalizationFunction)
-        } catch {
-            fatalError("Unable to load batchNormalizationShader")
-        }
         self.useTemporary = useTemporary
         self.outputType = outputType
 
@@ -175,7 +163,6 @@ class NeuralStyleModel {
         /* Init model encoders */
         // c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
         c1 = ConvolutionLayer(
-            device: device,
             kernelSize: 9,
             channelsIn: 3,
             channelsOut: 32,
@@ -188,14 +175,12 @@ class NeuralStyleModel {
 
         // b1=L.BatchNormalization(32),
         b1 = BatchNormalizationLayer(
-            device: device,
             channelsIn: 32,
             beta: modelParams["b1_beta"]!,
             gamma: modelParams["b1_gamma"]!)
 
         // c2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
         c2 = ConvolutionLayer(
-            device: device,
             kernelSize: 4,
             channelsIn: 32,
             channelsOut: 64,
@@ -208,14 +193,12 @@ class NeuralStyleModel {
 
         // b2=L.BatchNormalization(64),
         b2 = BatchNormalizationLayer(
-            device: device,
             channelsIn: 64,
             beta: modelParams["b2_beta"]!,
             gamma: modelParams["b2_gamma"]!)
 
         // c3=L.Convolution2D(64, 128, 4,stride=2, pad=1),
         c3 = ConvolutionLayer(
-            device: device,
             kernelSize: 4,
             channelsIn: 64,
             channelsOut: 128,
@@ -228,14 +211,12 @@ class NeuralStyleModel {
 
         // b3=L.BatchNormalization(128),
         b3 = BatchNormalizationLayer(
-            device: device,
             channelsIn: 128,
             beta: modelParams["b3_beta"]!,
             gamma: modelParams["b3_gamma"]!)
 
         // r1=ResidualBlock(128, 128),
         r1 = ResidualBlock(
-            device: device,
             modelParams: modelParams,
             blockName: "r1",
             channelsIn: 128,
@@ -244,7 +225,6 @@ class NeuralStyleModel {
 
         // r2=ResidualBlock(128, 128),
         r2 = ResidualBlock(
-            device: device,
             modelParams: modelParams,
             blockName: "r2",
             channelsIn: 128,
@@ -253,7 +233,6 @@ class NeuralStyleModel {
 
         // r3=ResidualBlock(128, 128),
         r3 = ResidualBlock(
-            device: device,
             modelParams: modelParams,
             blockName: "r3",
             channelsIn: 128,
@@ -262,7 +241,6 @@ class NeuralStyleModel {
 
         // r4=ResidualBlock(128, 128),
         r4 = ResidualBlock(
-            device: device,
             modelParams: modelParams,
             blockName: "r4",
             channelsIn: 128,
@@ -271,7 +249,6 @@ class NeuralStyleModel {
 
         // r5=ResidualBlock(128, 128),
         r5 = ResidualBlock(
-            device: device,
             modelParams: modelParams,
             blockName: "r5",
             channelsIn: 128,
@@ -280,7 +257,6 @@ class NeuralStyleModel {
 
         // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
         d1 = DeconvolutionLayer(
-            device: device,
             channelsIn: 128,
             channelsOut: 64,
             kernelSize: 4,
@@ -292,14 +268,12 @@ class NeuralStyleModel {
 
         // b4=L.BatchNormalization(64),
         b4 = BatchNormalizationLayer(
-            device: device,
             channelsIn: 64,
             beta: modelParams["b4_beta"]!,
             gamma: modelParams["b4_gamma"]!)
 
         // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
         d2 = DeconvolutionLayer(
-            device: device,
             channelsIn: 64,
             channelsOut: 32,
             kernelSize: 4,
@@ -310,14 +284,12 @@ class NeuralStyleModel {
 
         // b5=L.BatchNormalization(32),
         b5 = BatchNormalizationLayer(
-            device: device,
             channelsIn: 32,
             beta: modelParams["b5_beta"]!,
             gamma: modelParams["b5_gamma"]!)
 
         // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
         d3 = DeconvolutionLayer(
-            device: device,
             channelsIn: 32,
             channelsOut: 3,
             kernelSize: 9,

@@ -23,7 +23,6 @@ class ResidualBlock: Chain {
     fileprivate var padding = true
     
     init(
-        device: MTLDevice,
         modelParams: [String: ParameterBuffer],
         blockName: String,
         channelsIn: UInt,
@@ -45,7 +44,6 @@ class ResidualBlock: Chain {
         /* Init block encoders */
         // TODO: Disable relu!
         c1 = ConvolutionLayer(
-            device: device,
             kernelSize: kernelSize,
             channelsIn: channelsIn,
             channelsOut: channelsOut,
@@ -58,7 +56,6 @@ class ResidualBlock: Chain {
         
         // TODO: Disable relu!
         c2 = ConvolutionLayer(
-            device: device,
             kernelSize: kernelSize,
             channelsIn: channelsOut,
             channelsOut: channelsOut,
@@ -68,12 +65,10 @@ class ResidualBlock: Chain {
             padding: 1,
             stride: stride,
             outputType: outputType)
-        b1 = BatchNormalizationLayer(device: device,
-                                     channelsIn: channelsOut,
+        b1 = BatchNormalizationLayer(channelsIn: channelsOut,
                                      beta: b1_beta,
                                      gamma: b1_gamma)
-        b2 = BatchNormalizationLayer(device: device,
-                                     channelsIn: channelsOut,
+        b2 = BatchNormalizationLayer(channelsIn: channelsOut,
                                      beta: b2_beta,
                                      gamma: b2_gamma)
         
