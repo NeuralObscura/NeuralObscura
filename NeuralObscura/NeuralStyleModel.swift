@@ -18,6 +18,8 @@ enum CommandEncoderOutputType {
 
 class NeuralStyleModel {
     let device: MTLDevice
+    let library: MTLLibrary
+    let batchNormalizationShader: MTLComputePipelineState
     let useTemporary: Bool
     let outputType: CommandEncoderOutputType
     var modelParams = [String: ParameterBuffer]()
@@ -33,6 +35,13 @@ class NeuralStyleModel {
          useTemporary: Bool = true,
          outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         self.device = device
+        self.library = device.newDefaultLibrary()!
+        do {
+            let batchNormalizationFunction = self.library.makeFunction(name: "batch_normalization")!
+            self.batchNormalizationShader = try device.makeComputePipelineState(function: batchNormalizationFunction)
+        } catch {
+            fatalError("Unable to load batchNormalizationShader")
+        }
         self.useTemporary = useTemporary
         self.outputType = outputType
 
