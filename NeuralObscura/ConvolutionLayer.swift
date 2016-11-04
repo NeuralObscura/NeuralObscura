@@ -11,16 +11,16 @@ import MetalPerformanceShaders
 
 class ConvolutionLayer: CommandEncoder {
     init(
-        kernelSize: UInt,
-        channelsIn: UInt,
-        channelsOut: UInt,
+        kernelSize: Int,
+        channelsIn: Int,
+        channelsOut: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
         relu: Bool = true,
         padding: Int = 0,
         stride: Int = 1,
-        destinationFeatureChannelOffset: UInt = 0,
-        groupNum: UInt = 1,
+        destinationFeatureChannelOffset: Int = 0,
+        groupNum: Int = 1,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
             delegate: ConvolutionLayerDelegate(
@@ -43,16 +43,16 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
     let padding: Int
     
     init(
-        kernelSize: UInt,
-        channelsIn: UInt,
-        channelsOut: UInt,
+        kernelSize: Int,
+        channelsIn: Int,
+        channelsOut: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
         relu: Bool = true,
         padding: Int = 0,
         stride: Int = 1,
-        destinationFeatureChannelOffset: UInt = 0,
-        groupNum: UInt = 1) {
+        destinationFeatureChannelOffset: Int = 0,
+        groupNum: Int = 1) {
         self.padding = padding
         
         var neuronFilter: MPSCNNNeuron?
@@ -85,7 +85,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
-        // TODO: This won't work for the first layer
         let inHeight = sourceImage.height
         let inWidth = sourceImage.width
         
