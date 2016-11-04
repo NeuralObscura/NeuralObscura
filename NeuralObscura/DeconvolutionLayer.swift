@@ -11,7 +11,6 @@ import MetalPerformanceShaders
 
 class DeconvolutionLayer: CommandEncoder {
     init(
-        device: MTLDevice,
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
@@ -24,9 +23,7 @@ class DeconvolutionLayer: CommandEncoder {
         groupNum: UInt = 1,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
-            device: device,
             delegate: DeconvolutionLayerDelegate(
-                device: device,
                 channelsIn: channelsIn,
                 channelsOut: channelsOut,
                 kernelSize: kernelSize,
@@ -50,7 +47,6 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
     fileprivate var padding = true
     
     init(
-        device: MTLDevice,
         channelsIn: UInt,
         channelsOut: UInt,
         kernelSize: UInt,
@@ -78,7 +74,7 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         
         // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
         convolution = MPSCNNConvolution(
-            device: device,
+            device: ShaderRegistry.getDevice(),
             convolutionDescriptor: convDesc,
             kernelWeights: w.pointer(),
             biasTerms: b.pointer(),

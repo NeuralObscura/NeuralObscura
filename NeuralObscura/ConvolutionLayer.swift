@@ -11,7 +11,6 @@ import MetalPerformanceShaders
 
 class ConvolutionLayer: CommandEncoder {
     init(
-        device: MTLDevice,
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
@@ -24,9 +23,7 @@ class ConvolutionLayer: CommandEncoder {
         groupNum: UInt = 1,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
-            device: device,
             delegate: ConvolutionLayerDelegate(
-                device: device,
                 kernelSize: kernelSize,
                 channelsIn: channelsIn,
                 channelsOut: channelsOut,
@@ -46,7 +43,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
     let padding: Int
     
     init(
-        device: MTLDevice,
         kernelSize: UInt,
         channelsIn: UInt,
         channelsOut: UInt,
@@ -61,7 +57,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         
         var neuronFilter: MPSCNNNeuron?
         if relu {
-            neuronFilter = MPSCNNNeuronReLU(device: device, a: 0)
+            neuronFilter = MPSCNNNeuronReLU(device: ShaderRegistry.getDevice(), a: 0)
         }
         
         // create appropriate convolution descriptor with appropriate stride
@@ -78,7 +74,7 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         
         // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
         convolution = MPSCNNConvolution(
-            device: device,
+            device: ShaderRegistry.getDevice(),
             convolutionDescriptor: convDesc,
             kernelWeights: w.pointer(),
             biasTerms: b.pointer(),

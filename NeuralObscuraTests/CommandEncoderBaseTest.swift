@@ -20,7 +20,7 @@ class CommandEncoderBaseTest: XCTestCase {
     
     override func setUp() {
         super.setUp()
-        device = MTLCreateSystemDefaultDevice()!
+        device = ShaderRegistry.getDevice()
         assert(MPSSupportsMTLDevice(device) == true)
         textureLoader = MTKTextureLoader(device: device)
         commandQueue = device.makeCommandQueue()

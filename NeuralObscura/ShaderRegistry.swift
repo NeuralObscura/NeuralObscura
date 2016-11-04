@@ -9,8 +9,8 @@
 import MetalPerformanceShaders
 
 class ShaderRegistry {
-    private let device: MTLDevice = MTLCreateSystemDefaultDevice()!
-    private let library: MTLLibrary = MTLCreateSystemDefaultDevice()!.newDefaultLibrary()!
+    private var device: MTLDevice?
+    private var library: MTLLibrary?
     private var registry = [String: MTLComputePipelineState]()
     static let sharedInstance = ShaderRegistry()
 
@@ -21,13 +21,34 @@ class ShaderRegistry {
             return shader
         } else {
             do {
-                let shaderFunc = sharedInstance.library.makeFunction(name: name)!
-                sharedInstance.registry[name] = try sharedInstance.device.makeComputePipelineState(function: shaderFunc)
+                let shaderFunc = getLibrary().makeFunction(name: name)!
+                sharedInstance.registry[name] = try getDevice().makeComputePipelineState(function: shaderFunc)
             } catch {
                 fatalError("Unable to load shader: \(name)")
             }
 
             return sharedInstance.registry[name]!
+        }
+    }
+
+    static func getDevice() -> MTLDevice {
+        if let d = sharedInstance.device {
+            return d
+        } else {
+            sharedInstance.device = MTLCreateSystemDefaultDevice()
+            guard MPSSupportsMTLDevice(sharedInstance.device) else {
+                fatalError("Error: Metal Performance Shaders not supported on this device")
+            }
+            return sharedInstance.device!
+        }
+    }
+
+    static func getLibrary() -> MTLLibrary {
+        if let l = sharedInstance.library {
+            return l
+        } else {
+            sharedInstance.library = getDevice().newDefaultLibrary()
+            return sharedInstance.library!
         }
     }
 }
