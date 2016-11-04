@@ -20,12 +20,12 @@ import MetalPerformanceShaders
  */
 class DeconvolutionLayer: CommandEncoder {
     init(
+        kernelSize: Int,
         channelsIn: Int,
         channelsOut: Int,
-        kernelSize: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
-        neuronFilter: MPSCNNNeuron? = nil,
+        relu: Bool = true,
         padding: Int = 0, // TODO: Revisit this default
         stride: Int = 1,
         destinationFeatureChannelOffset: Int = 0,
@@ -33,12 +33,12 @@ class DeconvolutionLayer: CommandEncoder {
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
             delegate: DeconvolutionLayerDelegate(
+                kernelSize: kernelSize,
                 channelsIn: channelsIn,
                 channelsOut: channelsOut,
-                kernelSize: kernelSize,
                 w: w,
                 b: b,
-                neuronFilter: neuronFilter,
+                relu: relu,
                 padding: padding,
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
@@ -54,12 +54,12 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
     private let interpixelStride: MTLBuffer?
     
     init(
+        kernelSize: Int,
         channelsIn: Int,
         channelsOut: Int,
-        kernelSize: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
-        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronReLU(),
+        relu: Bool = true,
         padding: Int  = 0,
         stride: Int = 1,
         destinationFeatureChannelOffset: Int = 0,
@@ -69,12 +69,17 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         self.stride = stride
         
         if stride > 1 {
-            var s = UInt8(stride)
+            var s = UInt(stride)
             self.interpixelStride = ShaderRegistry.getDevice().makeBuffer(
                 bytes: &s,
-                length: MemoryLayout<UInt8>.size,
+                length: MemoryLayout<UInt>.size,
                 options: MTLResourceOptions.cpuCacheModeWriteCombined)
         } else { interpixelStride = nil }
+        
+        var neuronFilter: MPSCNNNeuron?
+        if relu {
+            neuronFilter = MPSCNNNeuronReLU(device: ShaderRegistry.getDevice(), a: 0)
+        }
         
         // create appropriate convolution descriptor with appropriate stride
         let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: kernelSize,
@@ -130,13 +135,21 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
     }
     
     func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+        var intermediateImage = sourceImage
         
         /* We don't need interpixel stride if the stride is 1 */
-        if let _ = interpixelStride {
+        if self.stride > 1 {
+            let convInputDesc = MPSImageDescriptor(
+                channelFormat: textureFormat,
+                width: (sourceImage.width * stride) - 1,
+                height: (sourceImage.height * stride) - 1,
+                featureChannels: sourceImage.featureChannels)
+            intermediateImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: convInputDesc)
+            
             let encoder = commandBuffer.makeComputeCommandEncoder()
             encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "deconvolution_interpixel_stride"))
             encoder.setTexture(sourceImage.texture, at: 0)
-            encoder.setTexture(destinationImage.texture, at: 1)
+            encoder.setTexture(intermediateImage.texture, at: 1)
             encoder.setBuffer(interpixelStride!, offset: 0, at: 2)
             // TODO: Optimize
             let threadsPerGroups = MTLSizeMake(1, 1, 1)
@@ -148,8 +161,9 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
             encoder.endEncoding()
         }
         
+        
         // encode standard convolution
-        convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        convolution.encode(commandBuffer: commandBuffer, sourceImage: intermediateImage, destinationImage: destinationImage)
     }
 }
 

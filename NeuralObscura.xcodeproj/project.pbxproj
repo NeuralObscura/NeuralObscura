@@ -17,6 +17,7 @@
 		077E558C1DC699B500111255 /* MPSCNNConvolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */; };
 		07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */; };
 		07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */; };
+		07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */; };
 		07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FF01B71DB4229200DF8F11 /* Extensions.swift */; };
 		DA0638141DC9CAF100BC496D /* SizeCalculationUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */; };
 		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
@@ -64,6 +65,7 @@
 		077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSCNNConvolutionTests.swift; sourceTree = "<group>"; };
 		07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoderBaseTest.swift; sourceTree = "<group>"; };
 		07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayerTests.swift; sourceTree = "<group>"; };
+		07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionLayerTests.swift; sourceTree = "<group>"; };
 		07FF01B71DB4229200DF8F11 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SizeCalculationUtil.swift; sourceTree = "<group>"; };
 		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
@@ -117,6 +119,7 @@
 		077BB3D31D9B05440022578C /* CommandEncoders */ = {
 			isa = PBXGroup;
 			children = (
+				DA9A565E1D9253C000E55916 /* Shaders.metal */,
 				077BB3D61D9E1B0C0022578C /* Protocols.swift */,
 				077BB3E61DA39D080022578C /* CommandEncoder.swift */,
 				077BB3C91D98E0010022578C /* ConvolutionLayer.swift */,
@@ -131,7 +134,8 @@
 		077BB3DF1DA191E60022578C /* Model */ = {
 			isa = PBXGroup;
 			children = (
-				DA9A565E1D9253C000E55916 /* Shaders.metal */,
+				DA9A56601D938C0E00E55916 /* UIImage.swift */,
+				DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */,
 				DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */,
 				DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */,
 				DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */,
@@ -166,8 +170,6 @@
 				DA9A56681D9E1D1400E55916 /* Resources */,
 				DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */,
 				DA0B0C601D8BAB4000ED7982 /* ViewController.swift */,
-				DA9A56601D938C0E00E55916 /* UIImage.swift */,
-				DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */,
 				077BB3DF1DA191E60022578C /* Model */,
 				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
 				DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */,
@@ -184,6 +186,7 @@
 				07FF01B71DB4229200DF8F11 /* Extensions.swift */,
 				07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */,
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
+				07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */,
 				077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */,
 				DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */,
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
@@ -376,6 +379,7 @@
 				07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */,
 				07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */,
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,
+				07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

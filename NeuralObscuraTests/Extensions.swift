@@ -13,7 +13,7 @@ import MetalPerformanceShaders
 extension MTLDevice {
     func MakeTestMPSImage(width: Int, height: Int, values: [UInt8]) -> MPSImage {
         let textureDesc = MTLTextureDescriptor()
-        textureDesc.textureType = .type2D
+        textureDesc.textureType = .type2DArray
         textureDesc.width = width
         textureDesc.height = height
         textureDesc.pixelFormat = .r8Unorm

@@ -29,3 +29,16 @@ kernel void batch_normalization(texture2d_array<float, access::read> inTexture [
 
     outTexture.write(outColor, gid.xy, gid.z);
 }
+
+/* Deconvolution Interpixel Stride
+ *
+ * Formula: output[i * stride][j * stride] = input[i][j]
+ */
+kernel void deconvolution_interpixel_stride(texture2d_array<float, access::read> inTexture [[texture(0)]],
+                                texture2d_array<float, access::write> outTexture [[texture(1)]],
+                                const device uint* stride [[ buffer(2) ]],
+                                uint3 gid [[thread_position_in_grid]]) {
+    float4 outColor = inTexture.read(gid.xy, gid.z);
+    uint2 outLoc = uint2(gid.x * *stride, gid.y * *stride);
+    outTexture.write(outColor, outLoc, gid.z);
+}

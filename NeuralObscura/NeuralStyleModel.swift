@@ -257,9 +257,9 @@ class NeuralStyleModel {
 
         // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
         d1 = DeconvolutionLayer(
+            kernelSize: 4,
             channelsIn: 128,
             channelsOut: 64,
-            kernelSize: 4,
             w: modelParams["d1_W"]!,
             b: modelParams["d1_b"]!,
             padding: 1,
@@ -274,9 +274,9 @@ class NeuralStyleModel {
 
         // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
         d2 = DeconvolutionLayer(
+            kernelSize: 4,
             channelsIn: 64,
             channelsOut: 32,
-            kernelSize: 4,
             w: modelParams["d2_W"]!,
             b: modelParams["d2_b"]!,
             padding: 1,
@@ -291,9 +291,9 @@ class NeuralStyleModel {
 
         // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
         d3 = DeconvolutionLayer(
+            kernelSize: 9,
             channelsIn: 32,
             channelsOut: 3,
-            kernelSize: 9,
             w: modelParams["d3_W"]!,
             b: modelParams["d3_b"]!,
             padding: 4,
