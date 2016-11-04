@@ -19,6 +19,7 @@
 		07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */; };
 		07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FF01B71DB4229200DF8F11 /* Extensions.swift */; };
 		DA0638141DC9CAF100BC496D /* SizeCalculationUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */; };
+		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
 		DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C601D8BAB4000ED7982 /* ViewController.swift */; };
 		DA0B0C641D8BAB4000ED7982 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C621D8BAB4000ED7982 /* Main.storyboard */; };
@@ -64,6 +65,7 @@
 		07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayerTests.swift; sourceTree = "<group>"; };
 		07FF01B71DB4229200DF8F11 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SizeCalculationUtil.swift; sourceTree = "<group>"; };
+		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		DA0B0C601D8BAB4000ED7982 /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
@@ -129,6 +131,7 @@
 			children = (
 				DA9A565E1D9253C000E55916 /* Shaders.metal */,
 				DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */,
+				DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */,
 				DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */,
 				077BB3D31D9B05440022578C /* CommandEncoders */,
 			);
@@ -348,6 +351,7 @@
 				DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */,
 				077BB3D71D9E1B0C0022578C /* Protocols.swift in Sources */,
 				DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */,
+				DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */,
 				077BB3D21D9B05260022578C /* DeconvolutionLayer.swift in Sources */,
 				077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */,
 				DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */,

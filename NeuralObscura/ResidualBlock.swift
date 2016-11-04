@@ -24,7 +24,6 @@ class ResidualBlock: Chain {
     
     init(
         device: MTLDevice,
-        batchNormalizationShader: MTLComputePipelineState,
         modelParams: [String: ParameterBuffer],
         blockName: String,
         channelsIn: UInt,
@@ -70,12 +69,10 @@ class ResidualBlock: Chain {
             stride: stride,
             outputType: outputType)
         b1 = BatchNormalizationLayer(device: device,
-                                     shader: batchNormalizationShader,
                                      channelsIn: channelsOut,
                                      beta: b1_beta,
                                      gamma: b1_gamma)
         b2 = BatchNormalizationLayer(device: device,
-                                     shader: batchNormalizationShader,
                                      channelsIn: channelsOut,
                                      beta: b2_beta,
                                      gamma: b2_gamma)
