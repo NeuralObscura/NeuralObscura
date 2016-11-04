@@ -162,13 +162,13 @@
 				DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */,
 				DA0B0C601D8BAB4000ED7982 /* ViewController.swift */,
 				DA9A56601D938C0E00E55916 /* UIImage.swift */,
+				DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */,
 				077BB3DF1DA191E60022578C /* Model */,
 				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
 				DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */,
 				DA0B0C6A1D8BAB4000ED7982 /* Info.plist */,
 				DA6D1FAF1D92352C00CD3F49 /* composition_model_data */,
 				DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */,
-				DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */,
 			);
 			path = NeuralObscura;
 			sourceTree = "<group>";

@@ -46,7 +46,7 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
                                                                            0, 9, 13, 4, 0,
                                                                            0, 6,  7, 1, 0,
                                                                            0, 0, 0, 0, 0])
-        
+
         /*  Create an output image */
         let outputImg = MPSImage(
             device: device,

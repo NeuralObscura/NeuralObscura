@@ -82,24 +82,65 @@ extension MPSImage {
     }
 
     override open var description: String {
-        let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: self.width * self.height)
+        switch self.pixelFormat {
+        case .r8Unorm:
+            return UnormToString()
+        case .rgba8Unorm:
+            return UnormToString()
+        case .rgba32Float:
+            return Float32ToString()
+        default:
+            fatalError("Unknown MTLPixelFormat: \(texture.pixelFormat)")
+        }
+    }
+
+    func UnormToString() -> String {
+        let bytesPerRow = SizeCalculationUtil.calculateBytesPerRow(width: self.width, pixelFormat: self.pixelFormat)
+        let bytesPerImage = SizeCalculationUtil.calculateBytesPerImage(height: self.height, bytesPerRow: bytesPerRow)
+        let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: bytesPerImage)
         var outputString: String = ""
 
         for i in 0...(featureChannels-1) {
             self.texture.getBytes(ptr,
-                                  bytesPerRow: self.width * self.pixelSize,
-                                  bytesPerImage: self.height * self.width * self.pixelSize,
+                                  bytesPerRow: bytesPerRow,
+                                  bytesPerImage: bytesPerImage,
                                   from: MTLRegionMake2D(0, 0, self.width, self.height),
                                   mipmapLevel: 0,
                                   slice: i)
-            let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: self.width * self.height)
+            let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: bytesPerImage)
             outputString += buffer.enumerated().map { [unowned self] (idx, e) in
                 if idx % self.width == 0 {
                     return String(format: "\n%2X ", e)
                 } else {
                     return String(format: "%2X ", e)
                 }
-                }.joined() + "\n"
+            }.joined() + "\n"
+        }
+
+        return outputString
+    }
+
+    func Float32ToString() -> String {
+        let bytesPerRow = SizeCalculationUtil.calculateBytesPerRow(width: self.width, pixelFormat: self.pixelFormat)
+        let bytesPerImage = SizeCalculationUtil.calculateBytesPerImage(height: self.height, bytesPerRow: bytesPerRow)
+        let ptr = UnsafeMutablePointer<Float32>.allocate(capacity: bytesPerImage)
+        var outputString: String = ""
+
+        for i in 0...(featureChannels-1) {
+            self.texture.getBytes(ptr,
+                                  bytesPerRow: bytesPerRow,
+                                  bytesPerImage: bytesPerImage,
+                                  from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                  mipmapLevel: 0,
+                                  slice: i)
+            let buffer = UnsafeBufferPointer<Float32>(start: ptr, count: bytesPerImage)
+            outputString += buffer.enumerated().map { [unowned self] (idx, e) in
+                if idx % self.width == 0 {
+                    return String(format: "\n%.2f ", e)
+                } else {
+                    return String(format: "%.2f ", e)
+                }
+            }.joined() + "\n"
         }
 
         return outputString
