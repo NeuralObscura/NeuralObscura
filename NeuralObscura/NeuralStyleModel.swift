@@ -262,7 +262,7 @@ class NeuralStyleModel {
             kernelSize: 4,
             w: modelParams["d1_W"]!,
             b: modelParams["d1_b"]!,
-            padding: true,
+            padding: 1,
             stride: 2,
             outputType: outputType)
 
@@ -279,6 +279,7 @@ class NeuralStyleModel {
             kernelSize: 4,
             w: modelParams["d2_W"]!,
             b: modelParams["d2_b"]!,
+            padding: 1,
             stride: 2,
             outputType: outputType)
 
@@ -295,6 +296,7 @@ class NeuralStyleModel {
             kernelSize: 9,
             w: modelParams["d3_W"]!,
             b: modelParams["d3_b"]!,
+            padding: 4,
             stride: 1,
             outputType: outputType)
 

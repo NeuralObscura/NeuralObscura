@@ -11,16 +11,17 @@ import MetalPerformanceShaders
 
 class FullyConnectedLayer: CommandEncoder {
     init(
-        kernelSize: UInt,
-        channelsIn: UInt,
-        channelsOut: UInt,
+        kernelSize: Int,
+        channelsIn: Int,
+        channelsOut: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
-        destinationFeatureChannelOffset: UInt = 0,
+        destinationFeatureChannelOffset: Int = 0,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         super.init(
-            delegate: FullyConnectedLayerDelegate(                kernelSize: kernelSize,
+            delegate: FullyConnectedLayerDelegate(
+                kernelSize: kernelSize,
                 channelsIn: channelsIn,
                 channelsOut: channelsOut,
                 w: w,
@@ -35,19 +36,19 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
     let fullyConnected: MPSCNNFullyConnected
     
     init(
-        kernelSize: UInt,
-        channelsIn: UInt,
-        channelsOut: UInt,
+        kernelSize: Int,
+        channelsIn: Int,
+        channelsOut: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
-        destinationFeatureChannelOffset: UInt = 0){
+        destinationFeatureChannelOffset: Int = 0){
         
         // create appropriate convolution descriptor (in fully connected, stride is always 1)
-        let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: Int(kernelSize),
-                                                   kernelHeight: Int(kernelSize),
-                                                   inputFeatureChannels: Int(channelsIn),
-                                                   outputFeatureChannels: Int(channelsOut),
+        let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: kernelSize,
+                                                   kernelHeight: kernelSize,
+                                                   inputFeatureChannels: channelsIn,
+                                                   outputFeatureChannels: channelsOut,
                                                    neuronFilter: neuronFilter)
         
         // initialize the convolution layer by calling the parent's (MPSCNNFullyConnected's) initializer
@@ -56,7 +57,7 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
                    kernelWeights: w.pointer(),
                    biasTerms: b.pointer(),
                    flags: MPSCNNConvolutionFlags.none)
-        fullyConnected.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
+        fullyConnected.destinationFeatureChannelOffset = destinationFeatureChannelOffset
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {

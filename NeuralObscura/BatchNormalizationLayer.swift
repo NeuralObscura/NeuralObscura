@@ -11,7 +11,7 @@ import MetalPerformanceShaders
 
 class BatchNormalizationLayer: CommandEncoder {
     init(
-        channelsIn: UInt,
+        channelsIn: Int,
         beta: ParameterBuffer,
         gamma: ParameterBuffer,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
@@ -29,7 +29,8 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     let gamma: MTLBuffer
     let channelsIn: Int
 
-    init(channelsIn: UInt,
+    init(
+         channelsIn: Int,
          beta: ParameterBuffer,
          gamma: ParameterBuffer) {
         self.channelsIn = Int(channelsIn)

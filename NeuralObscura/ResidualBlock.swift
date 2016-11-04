@@ -25,9 +25,9 @@ class ResidualBlock: Chain {
     init(
         modelParams: [String: ParameterBuffer],
         blockName: String,
-        channelsIn: UInt,
-        channelsOut: UInt,
-        kernelSize: UInt = 3,
+        channelsIn: Int,
+        channelsOut: Int,
+        kernelSize: Int = 3,
         stride: Int = 1,
         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         
