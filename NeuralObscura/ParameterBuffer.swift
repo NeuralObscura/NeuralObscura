@@ -11,14 +11,17 @@ import MetalPerformanceShaders
 
 protocol ParameterBuffer {
     func pointer() -> UnsafeMutablePointer<Float>
+    func lengthInBytes() -> Int
 }
 
 class MemoryParameterBuffer: ParameterBuffer {
     private var ptr: UnsafeMutablePointer<Float>!
     private var count: Int!
+    private let length: Int
     
     init( _ values: [Float]) {
         self.count = values.count
+        self.length = self.count * MemoryLayout<Float>.size
         self.ptr = values.withUnsafeBufferPointer({ (buf) -> UnsafeMutablePointer<Float> in
             let ptr = UnsafeMutablePointer<Float>.allocate(capacity: buf.count)
             for (i, e) in buf.enumerated() {
@@ -30,6 +33,7 @@ class MemoryParameterBuffer: ParameterBuffer {
     
     init(_ value: Float) {
         self.count = 1
+        self.length = self.count * MemoryLayout<Float>.size
         self.ptr = UnsafeMutablePointer<Float>.allocate(capacity: 1)
         self.ptr.pointee = value
     }
@@ -41,6 +45,10 @@ class MemoryParameterBuffer: ParameterBuffer {
     func pointer() -> UnsafeMutablePointer<Float> {
         return ptr
     }
+
+    func lengthInBytes() -> Int {
+        return length
+    }
 }
 
 
@@ -49,12 +57,14 @@ class FileParameterBuffer: ParameterBuffer {
     private var hdr: UnsafeMutableRawPointer!
     private var ptr: UnsafeMutablePointer<Float>!
     private var fileSize: UInt64 = 0
+    var length: Int
     let modelName: String
     let rawFileName: String
     
     init(modelName: String, rawFileName: String) {
         self.modelName = modelName
         self.rawFileName = rawFileName
+        self.length = 0
         
         loadRawFile(rawFileName: self.rawFileName)
     }
@@ -75,6 +85,8 @@ class FileParameterBuffer: ParameterBuffer {
         } catch {
             print("Error: \(error)")
         }
+
+        self.length = Int(fileSize)
         
         // open file descriptors in read-only mode to parameter files
         let fd = open( path!, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
@@ -108,5 +120,9 @@ class FileParameterBuffer: ParameterBuffer {
     func pointer() -> UnsafeMutablePointer<Float> {
         return ptr
     }
-    
+
+    func lengthInBytes() -> Int {
+        return length
+    }
+
 }

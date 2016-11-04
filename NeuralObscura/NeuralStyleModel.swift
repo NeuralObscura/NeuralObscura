@@ -18,6 +18,8 @@ enum CommandEncoderOutputType {
 
 class NeuralStyleModel {
     let device: MTLDevice
+    let library: MTLLibrary
+    let batchNormalizationShader: MTLComputePipelineState
     let useTemporary: Bool
     let outputType: CommandEncoderOutputType
     var modelParams = [String: ParameterBuffer]()
@@ -33,6 +35,13 @@ class NeuralStyleModel {
          useTemporary: Bool = true,
          outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
         self.device = device
+        self.library = device.newDefaultLibrary()!
+        do {
+            let batchNormalizationFunction = self.library.makeFunction(name: "batch_normalization")!
+            self.batchNormalizationShader = try device.makeComputePipelineState(function: batchNormalizationFunction)
+        } catch {
+            fatalError("Unable to load batchNormalizationShader")
+        }
         self.useTemporary = useTemporary
         self.outputType = outputType
 
@@ -180,6 +189,7 @@ class NeuralStyleModel {
         // b1=L.BatchNormalization(32),
         b1 = BatchNormalizationLayer(
             device: device,
+            shader: batchNormalizationShader,
             channelsIn: 32,
             beta: modelParams["b1_beta"]!,
             gamma: modelParams["b1_gamma"]!)
@@ -200,6 +210,7 @@ class NeuralStyleModel {
         // b2=L.BatchNormalization(64),
         b2 = BatchNormalizationLayer(
             device: device,
+            shader: batchNormalizationShader,
             channelsIn: 64,
             beta: modelParams["b2_beta"]!,
             gamma: modelParams["b2_gamma"]!)
@@ -220,6 +231,7 @@ class NeuralStyleModel {
         // b3=L.BatchNormalization(128),
         b3 = BatchNormalizationLayer(
             device: device,
+            shader: batchNormalizationShader,
             channelsIn: 128,
             beta: modelParams["b3_beta"]!,
             gamma: modelParams["b3_gamma"]!)
@@ -227,6 +239,7 @@ class NeuralStyleModel {
         // r1=ResidualBlock(128, 128),
         r1 = ResidualBlock(
             device: device,
+            batchNormalizationShader: batchNormalizationShader,
             modelParams: modelParams,
             blockName: "r1",
             channelsIn: 128,
@@ -236,6 +249,7 @@ class NeuralStyleModel {
         // r2=ResidualBlock(128, 128),
         r2 = ResidualBlock(
             device: device,
+            batchNormalizationShader: batchNormalizationShader,
             modelParams: modelParams,
             blockName: "r2",
             channelsIn: 128,
@@ -245,6 +259,7 @@ class NeuralStyleModel {
         // r3=ResidualBlock(128, 128),
         r3 = ResidualBlock(
             device: device,
+            batchNormalizationShader: batchNormalizationShader,
             modelParams: modelParams,
             blockName: "r3",
             channelsIn: 128,
@@ -254,6 +269,7 @@ class NeuralStyleModel {
         // r4=ResidualBlock(128, 128),
         r4 = ResidualBlock(
             device: device,
+            batchNormalizationShader: batchNormalizationShader,
             modelParams: modelParams,
             blockName: "r4",
             channelsIn: 128,
@@ -263,6 +279,7 @@ class NeuralStyleModel {
         // r5=ResidualBlock(128, 128),
         r5 = ResidualBlock(
             device: device,
+            batchNormalizationShader: batchNormalizationShader,
             modelParams: modelParams,
             blockName: "r5",
             channelsIn: 128,
@@ -284,6 +301,7 @@ class NeuralStyleModel {
         // b4=L.BatchNormalization(64),
         b4 = BatchNormalizationLayer(
             device: device,
+            shader: batchNormalizationShader,
             channelsIn: 64,
             beta: modelParams["b4_beta"]!,
             gamma: modelParams["b4_gamma"]!)
@@ -302,6 +320,7 @@ class NeuralStyleModel {
         // b5=L.BatchNormalization(32),
         b5 = BatchNormalizationLayer(
             device: device,
+            shader: batchNormalizationShader,
             channelsIn: 32,
             beta: modelParams["b5_beta"]!,
             gamma: modelParams["b5_gamma"]!)
