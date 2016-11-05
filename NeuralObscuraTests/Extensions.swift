@@ -9,14 +9,47 @@
 import Foundation
 import MetalPerformanceShaders
 @testable import NeuralObscura
+import Accelerate
 
 extension MTLDevice {
     func MakeTestMPSImage(width: Int, height: Int, values: [UInt8]) -> MPSImage {
+        var convertedValues = [Float32]()
+        for value in values {
+            convertedValues.append(Float32(value))
+        }
+
+        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r32Float, values: convertedValues)
+    }
+
+    func MakeTestMPSImageUnorm8(width: Int, height: Int, values: [UInt8]) -> MPSImage {
+        var convertedValues = [Float32]()
+        for value in values {
+            convertedValues.append(Float32(value))
+        }
+
+        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r8Unorm, values: convertedValues)
+
+    }
+
+    func MakeTestMPSImage(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [[UInt8]]) -> MPSImage {
+        // ravel the values
+        var ravelValues = [Float32]()
+        for pixel in values {
+            for channel in pixel {
+                ravelValues.append(Float32(channel))
+            }
+        }
+
+        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: featureChannels, pixelFormat: pixelFormat, values: ravelValues)
+    }
+
+    // values are expected to be raveled
+    func MakeTestMPSImageWithMultipleFeatureChannels(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [Float32]) -> MPSImage {
         let textureDesc = MTLTextureDescriptor()
         textureDesc.textureType = .type2DArray
         textureDesc.width = width
         textureDesc.height = height
-        textureDesc.pixelFormat = .r8Unorm
+        textureDesc.pixelFormat = pixelFormat
         let texture = self.makeTexture(descriptor: textureDesc)
         let bytesPerRow = SizeCalculationUtil.calculateBytesPerRow(width: textureDesc.width, pixelFormat: textureDesc.pixelFormat)
 
@@ -25,7 +58,7 @@ extension MTLDevice {
             mipmapLevel: 0,
             withBytes: values,
             bytesPerRow: bytesPerRow)
-        return MPSImage(texture: texture, featureChannels: 1)
+        return MPSImage(texture: texture, featureChannels: featureChannels)
     }
 }
 
@@ -44,34 +77,41 @@ extension MPSImage {
             lhs.pixelSize == rhs.pixelSize &&
             lhs.pixelFormat == rhs.pixelFormat) else { return false }
 
-        let lhsRowSize: Int = lhs.pixelSize * lhs.width
-        let rhsRowSize: Int = rhs.pixelSize * rhs.width
+        let lhsRowSize: Int = SizeCalculationUtil.calculateBytesPerRow(width: lhs.width, pixelFormat: lhs.pixelFormat)
+        let lhsImageSize = SizeCalculationUtil.calculateBytesPerImage(height: lhs.height, bytesPerRow: lhsRowSize)
+        let rhsRowSize: Int = SizeCalculationUtil.calculateBytesPerRow(width: rhs.width, pixelFormat: rhs.pixelFormat)
+        let rhsImageSize = SizeCalculationUtil.calculateBytesPerImage(height: rhs.height, bytesPerRow: rhsRowSize)
 
         let lhsTexture = lhs.texture
         let rhsTexture = rhs.texture
 
-        let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsRowSize * lhs.height, alignedTo: lhs.pixelSize)
-        let rhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: rhsRowSize * rhs.height, alignedTo: rhs.pixelSize)
+        let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsImageSize, alignedTo: lhs.pixelSize)
+        let rhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: rhsImageSize, alignedTo: rhs.pixelSize)
 
-        for i in 0...(featureChannels-1) {
+        let slices = SizeCalculationUtil.pixelFormatWithFeatureChannelsToSlices(
+            pixelFormat: self.pixelFormat,
+            featureChannels: featureChannels)
+
+
+        for i in 0...(slices-1) {
             lhsTexture.getBytes(lhsRawPtr,
                                 bytesPerRow: lhsRowSize,
-                                bytesPerImage: lhs.height * lhsRowSize,
+                                bytesPerImage: lhsImageSize,
                                 from: MTLRegionMake2D(0, 0, self.width, self.height),
                                 mipmapLevel: 0,
                                 slice: i)
             rhsTexture.getBytes(rhsRawPtr,
                                 bytesPerRow: rhsRowSize,
-                                bytesPerImage: rhs.height * rhsRowSize,
+                                bytesPerImage: rhsImageSize,
                                 from: MTLRegionMake2D(0, 0, self.width, self.height),
                                 mipmapLevel: 0,
                                 slice: i)
 
-            let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsRowSize * lhs.height)
-            let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsRowSize * rhs.height)
+            let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhs.width * lhs.height)
+            let rhsPtr = rhsRawPtr.bindMemory(to: Float32.self, capacity: rhs.width * rhs.height)
 
-            let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsRowSize * lhs.height)
-            let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhsRowSize * rhs.height)
+            let lhsBufferPtr = UnsafeBufferPointer<Float32>(start: lhsPtr, count: lhs.width * lhs.height)
+            let rhsBufferPtr = UnsafeBufferPointer<Float32>(start: rhsPtr, count: rhs.width * rhs.height)
 
             if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                 return false
@@ -89,6 +129,8 @@ extension MPSImage {
             return UnormToString()
         case .rgba32Float:
             return Float32ToString()
+        case .r32Float:
+            return Float32ToString()
         default:
             fatalError("Unknown MTLPixelFormat: \(texture.pixelFormat)")
         }
@@ -97,23 +139,36 @@ extension MPSImage {
     func UnormToString() -> String {
         let bytesPerRow = SizeCalculationUtil.calculateBytesPerRow(width: self.width, pixelFormat: self.pixelFormat)
         let bytesPerImage = SizeCalculationUtil.calculateBytesPerImage(height: self.height, bytesPerRow: bytesPerRow)
-        let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: bytesPerImage)
+        let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: SizeCalculationUtil.calculateTypedSize(width: self.width,
+                                                                                                        height: self.height,
+                                                                                                        pixelFormat: self.pixelFormat))
         var outputString: String = ""
 
-        for i in 0...(featureChannels-1) {
+        let slices = SizeCalculationUtil.pixelFormatWithFeatureChannelsToSlices(
+            pixelFormat: self.pixelFormat,
+            featureChannels: featureChannels)
+
+        for i in 0...(slices-1) {
             self.texture.getBytes(ptr,
                                   bytesPerRow: bytesPerRow,
                                   bytesPerImage: bytesPerImage,
                                   from: MTLRegionMake2D(0, 0, self.width, self.height),
                                   mipmapLevel: 0,
                                   slice: i)
-            let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: bytesPerImage)
+            let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: SizeCalculationUtil.calculateTypedSize(width: self.width,
+                                                                                                              height: self.height,
+                                                                                                              pixelFormat: self.pixelFormat))
             outputString += buffer.enumerated().map { [unowned self] (idx, e) in
-                if idx % self.width == 0 {
-                    return String(format: "\n%2X ", e)
+                var r = ""
+                if idx % (self.width * SizeCalculationUtil.pixelFormatToPixelCount(pixelFormat: self.pixelFormat)) == 0 {
+                    r += String(format: "\n%2X ", e)
                 } else {
-                    return String(format: "%2X ", e)
+                    if SizeCalculationUtil.pixelFormatToPixelCount(pixelFormat: self.pixelFormat) > 1 && idx % SizeCalculationUtil.pixelFormatToPixelCount(pixelFormat: self.pixelFormat) == 0 {
+                        r += "| "
+                    }
+                    r += String(format: "%2X ", e)
                 }
+                return r
             }.joined() + "\n"
         }
 
@@ -123,23 +178,37 @@ extension MPSImage {
     func Float32ToString() -> String {
         let bytesPerRow = SizeCalculationUtil.calculateBytesPerRow(width: self.width, pixelFormat: self.pixelFormat)
         let bytesPerImage = SizeCalculationUtil.calculateBytesPerImage(height: self.height, bytesPerRow: bytesPerRow)
-        let ptr = UnsafeMutablePointer<Float32>.allocate(capacity: bytesPerImage)
+
+        let ptr = UnsafeMutablePointer<Float32>.allocate(capacity: SizeCalculationUtil.calculateTypedSize(width: self.width,
+                                                                                                          height: self.height,
+                                                                                                          pixelFormat: self.pixelFormat))
         var outputString: String = ""
 
-        for i in 0...(featureChannels-1) {
+        let slices = SizeCalculationUtil.pixelFormatWithFeatureChannelsToSlices(
+            pixelFormat: self.pixelFormat,
+            featureChannels: featureChannels)
+
+        for i in 0...(slices-1) {
             self.texture.getBytes(ptr,
                                   bytesPerRow: bytesPerRow,
                                   bytesPerImage: bytesPerImage,
                                   from: MTLRegionMake2D(0, 0, self.width, self.height),
                                   mipmapLevel: 0,
                                   slice: i)
-            let buffer = UnsafeBufferPointer<Float32>(start: ptr, count: bytesPerImage)
+            let buffer = UnsafeBufferPointer<Float32>(start: ptr, count: SizeCalculationUtil.calculateTypedSize(width: self.width,
+                                                                                                                height: self.height,
+                                                                                                                pixelFormat: self.pixelFormat))
             outputString += buffer.enumerated().map { [unowned self] (idx, e) in
-                if idx % self.width == 0 {
-                    return String(format: "\n%.2f ", e)
+                var r = ""
+                if idx % (self.width * SizeCalculationUtil.pixelFormatToPixelCount(pixelFormat: self.pixelFormat)) == 0 {
+                    r += String(format: " \n%.2f ", e)
                 } else {
-                    return String(format: "%.2f ", e)
+                    if SizeCalculationUtil.pixelFormatToPixelCount(pixelFormat: self.pixelFormat) > 1 && idx % SizeCalculationUtil.pixelFormatToPixelCount(pixelFormat: self.pixelFormat) == 0 {
+                        r += "| "
+                    }
+                    r += String(format: "%.2f ", e)
                 }
+                return r
             }.joined() + "\n"
         }
 

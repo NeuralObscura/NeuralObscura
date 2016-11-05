@@ -35,7 +35,6 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
             kernelWeights: w,
             biasTerms: b,
             flags: MPSCNNConvolutionFlags.none)
-        print(conv.offset)
         conv.edgeMode = .zero
         conv.offset = MPSOffset(x: 0, y: 0, z: 0)
         conv.clipRect.size = MTLSizeMake(testImg.width + 1, testImg.height + 1, 1)
@@ -51,7 +50,7 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
         let outputImg = MPSImage(
             device: device,
             imageDescriptor: MPSImageDescriptor(
-                channelFormat: MPSImageFeatureChannelFormat.unorm8,
+                channelFormat: textureFormat,
                 width: 5,
                 height: 5,
                 featureChannels: 1))

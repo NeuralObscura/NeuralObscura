@@ -150,7 +150,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
                                                                             0, 0, 0, 0])
-        
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
                                           1, 1, 1,
@@ -174,7 +173,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
-        
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
     }

@@ -280,18 +280,18 @@
 				TargetAttributes = {
 					DA0B0C5A1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = FJQDM4N4ZQ;
+						DevelopmentTeam = DFVY326C5E;
 						ProvisioningStyle = Automatic;
 					};
 					DA0B0C6E1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = FJQDM4N4ZQ;
+						DevelopmentTeam = DFVY326C5E;
 						ProvisioningStyle = Automatic;
 						TestTargetID = DA0B0C5A1D8BAB4000ED7982;
 					};
 					DA0B0C791D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = FJQDM4N4ZQ;
+						DevelopmentTeam = DFVY326C5E;
 						ProvisioningStyle = Automatic;
 						TestTargetID = DA0B0C5A1D8BAB4000ED7982;
 					};
@@ -521,7 +521,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -535,7 +535,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -550,7 +550,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraTests;
@@ -565,7 +565,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraTests;
@@ -579,7 +579,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraUITests;
@@ -593,7 +593,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraUITests;

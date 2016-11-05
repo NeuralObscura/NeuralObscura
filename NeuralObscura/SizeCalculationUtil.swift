@@ -24,6 +24,10 @@ class SizeCalculationUtil {
         return arrayLength * pixelFormatToPixelCount(pixelFormat: pixelFormat)
     }
 
+    static func calculateTypedSize(width: Int, height: Int, pixelFormat: MTLPixelFormat) -> Int {
+        return width * height * pixelFormatToPixelCount(pixelFormat: pixelFormat)
+    }
+
     static func pixelFormatToPixelCount(pixelFormat: MTLPixelFormat) -> Int {
         switch pixelFormat {
         case .rgba8Unorm:
@@ -32,6 +36,12 @@ class SizeCalculationUtil {
             return 1
         case .rgba32Float:
             return 4
+        case .rgba16Float:
+            return 4
+        case .r32Float:
+            return 1
+        case .r16Float:
+            return 1
         default:
             fatalError("Unknown MTLPixelFormat: \(pixelFormat)")
         }
@@ -45,8 +55,22 @@ class SizeCalculationUtil {
             return MemoryLayout<UInt8>.size
         case .rgba32Float:
             return MemoryLayout<Float32>.size
+        case .r32Float:
+            return MemoryLayout<Float32>.size
+        case .r16Float:
+            return MemoryLayout<UInt8>.size * 2
+        case .rgba16Float:
+            return MemoryLayout<UInt8>.size * 2
         default:
             fatalError("Unknown MTLPixelFormat: \(pixelFormat)")
         }
+    }
+
+    static func pixelFormatWithFeatureChannelsToSlices(pixelFormat: MTLPixelFormat, featureChannels: Int) -> Int {
+        var slices = ((featureChannels + pixelFormatToPixelCount(pixelFormat: pixelFormat)-1) / pixelFormatToPixelCount(pixelFormat: pixelFormat))
+        if slices <= 0 {
+            slices = 1
+        }
+        return slices
     }
 }

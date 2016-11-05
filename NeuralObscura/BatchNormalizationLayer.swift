@@ -55,8 +55,9 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
         encoder.setBuffer(gamma, offset: 0, at: 2)
         encoder.setBuffer(beta, offset: 0, at: 3)
         let threadsPerGroup = MTLSizeMake(1, 1, 1)
-        let threadGroups = MTLSizeMake(destinationImage.texture.width / threadsPerGroup.width,
-                                       destinationImage.texture.height / threadsPerGroup.height, 1)
+        let threadGroups = MTLSizeMake(destinationImage.texture.width,
+                                       destinationImage.texture.height,
+                                       destinationImage.texture.arrayLength)
         encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
         encoder.endEncoding()
 
