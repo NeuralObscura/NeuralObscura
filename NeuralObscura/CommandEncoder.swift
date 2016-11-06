@@ -16,6 +16,7 @@ open class CommandEncoder: Chain {
     weak var head: CommandEncoder?
     var top: CommandEncoder?
     weak var bottom: CommandEncoder?
+    var destinationImage: MPSImage? = nil
     
     init(delegate: CommandEncoderDelegate,
          debug: Bool = false) {
@@ -49,9 +50,9 @@ open class CommandEncoder: Chain {
 
         switch bottom {
         case .some(_):
-            return bottom!.forward(commandBuffer: commandBuffer, sourceImage: destinationImage)
+            return bottom!.forward(commandBuffer: commandBuffer, sourceImage: self.destinationImage!)
         case .none:
-            return destinationImage
+            return destinationImage!
         }
     }
     

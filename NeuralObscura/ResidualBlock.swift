@@ -42,7 +42,6 @@ class ResidualBlock: Chain {
         let b2_gamma = modelParams[blockName + "_b2_gamma"]!
         
         /* Init block encoders */
-        // TODO: Disable relu!
         c1 = ConvolutionLayer(
             kernelSize: kernelSize,
             channelsIn: channelsIn,
@@ -53,8 +52,7 @@ class ResidualBlock: Chain {
             padding: 1,
             stride: stride,
             debug: debug)
-        
-        // TODO: Disable relu!
+
         c2 = ConvolutionLayer(
             kernelSize: kernelSize,
             channelsIn: channelsOut,
@@ -65,6 +63,7 @@ class ResidualBlock: Chain {
             padding: 1,
             stride: stride,
             debug: debug)
+
         b1 = BatchNormalizationLayer(channelsIn: channelsOut,
                                      beta: b1_beta,
                                      gamma: b1_gamma)
@@ -82,9 +81,59 @@ class ResidualBlock: Chain {
         
         h = b2.chain(c2.chain(h))
         
-        // TODO: Set up summation layer
-        
+        h = ResidualBlockSummationLayer(original: top).chain(h)
+
+        debugPrint(top)
+
         return h
     }
     
+}
+
+class ResidualBlockSummationLayer: CommandEncoder {
+    init(
+        original: CommandEncoder,
+        debug: Bool = false) {
+        super.init(
+            delegate: ResidualBlockSummationLayerDelegate(original: original),
+            debug: debug)
+    }
+}
+
+class ResidualBlockSummationLayerDelegate: CommandEncoderDelegate {
+    let original: CommandEncoder
+
+    init(original: CommandEncoder) {
+        self.original = original
+    }
+
+    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+        return MPSImageDescriptor(
+            channelFormat: textureFormat,
+            width: sourceImage.width,
+            height: sourceImage.height,
+            featureChannels: sourceImage.featureChannels)
+    }
+
+    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+        print("residual block summation encode")
+        let encoder = commandBuffer.makeComputeCommandEncoder()
+        encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "add"))
+        encoder.setTexture(sourceImage.texture, at: 0)
+        encoder.setTexture(original.destinationImage!.texture, at: 1)
+        encoder.setTexture(destinationImage.texture, at: 2)
+        let threadsPerGroup = MTLSizeMake(1, 1, 1)
+        let threadGroups = MTLSizeMake(destinationImage.texture.width,
+                                       destinationImage.texture.height,
+                                       destinationImage.texture.arrayLength)
+        encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
+        encoder.endEncoding()
+
+        if sourceImage is MPSTemporaryImage {
+            (sourceImage as! MPSTemporaryImage).readCount -= 1
+        }
+        if original.destinationImage! is MPSTemporaryImage {
+            (original.destinationImage! as! MPSTemporaryImage).readCount -= 1
+        }
+    }
 }
