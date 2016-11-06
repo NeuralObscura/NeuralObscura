@@ -34,7 +34,7 @@ open class CommandEncoder: Chain {
     
     func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
         let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
-        
+
         var destinationImage: MPSImage! = nil
         switch bottom {
         case .some(_):
