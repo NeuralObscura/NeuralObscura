@@ -51,19 +51,6 @@ kernel void deconvolution_interpixel_stride(texture2d_array<float, access::read>
     outTexture.write(outColor, outLoc, gid.z);
 }
 
-/* Tanh cleanup and adjustment. To be used at the end of style processing
- *
- * Formula: output = (tanh(input)+1)*127.5
- */
-kernel void tanh_adjustment(texture2d<float, access::read> inTexture [[texture(0)]],
-                            texture2d<float, access::write> outTexture [[texture(1)]],
-                            uint3 gid [[thread_position_in_grid]]) {
-    float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = (tanh(input) + 1) * 127.5;
-    output.a = 255.0; // max opacity
-    outTexture.write(output, gid.xy, gid.z);
-}
-
 /* Add two matrices together
  *
  * Formula: output = input1 + input2
@@ -75,5 +62,18 @@ kernel void add(texture2d_array<float, access::read> inTexture1 [[texture(0)]],
     float4 input1 = inTexture1.read(gid.xy, gid.z);
     float4 input2 = inTexture2.read(gid.xy, gid.z);
     float4 output = input1 + input2;
+    outTexture.write(output, gid.xy, gid.z);
+}
+
+/* Tanh cleanup and adjustment. To be used at the end of style processing
+ *
+ * Formula: output = (tanh(input)+1)*127.5
+ */
+kernel void tanh_adjustment(texture2d<float, access::read> inTexture [[texture(0)]],
+                            texture2d<float, access::write> outTexture [[texture(1)]],
+                            uint3 gid [[thread_position_in_grid]]) {
+    float4 input = inTexture.read(gid.xy, gid.z);
+    float4 output = (tanh(input) + 1) * 127.5;
+    output.a = 255.0; // max opacity
     outTexture.write(output, gid.xy, gid.z);
 }

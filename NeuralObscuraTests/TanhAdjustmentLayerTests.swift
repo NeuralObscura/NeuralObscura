@@ -16,6 +16,7 @@ class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
         // textureType is 2DArray since the number of feature channels at this
         // stage in processing is 3, RGB, as this is meant as a cleanup step of
         // the final image.
+
         let testImg = device.MakeTestMPSImage(width: 2,
                                               height: 2,
                                               featureChannels: 3,
