@@ -19,7 +19,6 @@
 		07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */; };
 		07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */; };
 		07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07FF01B71DB4229200DF8F11 /* Extensions.swift */; };
-		DA0638141DC9CAF100BC496D /* SizeCalculationUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */; };
 		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
 		DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
@@ -31,6 +30,7 @@
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
 		DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */; };
 		DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */; };
+		DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormat.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C591DD0F88E00C6D125 /* MTLPixelFormat.swift */; };
 		DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DA9A565E1D9253C000E55916 /* Shaders.metal */; };
 		DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56601D938C0E00E55916 /* UIImage.swift */; };
 		DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56641D9E0E0C00E55916 /* tubingen.jpg */; };
@@ -67,7 +67,6 @@
 		07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayerTests.swift; sourceTree = "<group>"; };
 		07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionLayerTests.swift; sourceTree = "<group>"; };
 		07FF01B71DB4229200DF8F11 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
-		DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SizeCalculationUtil.swift; sourceTree = "<group>"; };
 		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
 		DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationLayerTests.swift; sourceTree = "<group>"; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -85,6 +84,7 @@
 		DA6D1FAF1D92352C00CD3F49 /* composition_model_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = composition_model_data; sourceTree = "<group>"; };
 		DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterBuffer.swift; sourceTree = "<group>"; };
 		DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModel.swift; sourceTree = "<group>"; };
+		DA8A6C591DD0F88E00C6D125 /* MTLPixelFormat.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLPixelFormat.swift; sourceTree = "<group>"; };
 		DA9A565E1D9253C000E55916 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		DA9A56601D938C0E00E55916 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		DA9A56641D9E0E0C00E55916 /* tubingen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tubingen.jpg; sourceTree = "<group>"; };
@@ -135,7 +135,7 @@
 			isa = PBXGroup;
 			children = (
 				DA9A56601D938C0E00E55916 /* UIImage.swift */,
-				DA0638131DC9CAF100BC496D /* SizeCalculationUtil.swift */,
+				DA8A6C591DD0F88E00C6D125 /* MTLPixelFormat.swift */,
 				DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */,
 				DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */,
 				DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */,
@@ -352,13 +352,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA0638141DC9CAF100BC496D /* SizeCalculationUtil.swift in Sources */,
 				077BB3CC1D98E0890022578C /* FullyConnectedLayer.swift in Sources */,
 				DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */,
 				077BB3D71D9E1B0C0022578C /* Protocols.swift in Sources */,
 				DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */,
 				DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */,
 				077BB3D21D9B05260022578C /* DeconvolutionLayer.swift in Sources */,
+				DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormat.swift in Sources */,
 				077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */,
 				DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */,
 				077BB3D51D9B063F0022578C /* BatchNormalizationLayer.swift in Sources */,
