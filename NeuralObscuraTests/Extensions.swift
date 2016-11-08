@@ -12,7 +12,7 @@ import MetalPerformanceShaders
 import Accelerate
 
 extension MTLDevice {
-    func MakeTestMPSImage(width: Int, height: Int, values: [UInt8]) -> MPSImage {
+    func MakeTestMPSImage(width: Int, height: Int, values: [Float32]) -> MPSImage {
         var convertedValues = [Float32]()
         for value in values {
             convertedValues.append(Float32(value))
@@ -21,22 +21,12 @@ extension MTLDevice {
         return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r32Float, values: convertedValues)
     }
 
-    func MakeTestMPSImageUnorm8(width: Int, height: Int, values: [UInt8]) -> MPSImage {
-        var convertedValues = [Float32]()
-        for value in values {
-            convertedValues.append(Float32(value))
-        }
-
-        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r8Unorm, values: convertedValues)
-
-    }
-
-    func MakeTestMPSImage(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [[UInt8]]) -> MPSImage {
+    func MakeTestMPSImage(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [[Float32]]) -> MPSImage {
         // ravel the values
         var ravelValues = [Float32]()
         for pixel in values {
             for channel in pixel {
-                ravelValues.append(Float32(channel))
+                ravelValues.append(channel)
             }
         }
 

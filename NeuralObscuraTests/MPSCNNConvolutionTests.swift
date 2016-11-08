@@ -18,7 +18,7 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 3, 3, 0,
                                                                             0, 6, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         /* Create our CommandEncoder */
         let w: [Float] = [1, 1,
                           1, 1]
@@ -44,7 +44,7 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
                                                                            0, 3, 6, 3, 0,
                                                                            0, 9, 13, 4, 0,
                                                                            0, 6,  7, 1, 0,
-                                                                           0, 0, 0, 0, 0])
+                                                                           0, 0, 0, 0, 0] as [Float32])
 
         /*  Create an output image */
         let outputImg = MPSImage(
