@@ -80,10 +80,10 @@ class FileParameterBuffer: ParameterBuffer {
             if let fsize = attr[FileAttributeKey.size] as? NSNumber {
                 fileSize = fsize.uint64Value
             } else {
-                print("Failed to get a size attribute from path: \(path)")
+                fatalError("Failed to get a size attribute from path: \(path)")
             }
         } catch {
-            print("Error: \(error)")
+            fatalError("Error: \(error)")
         }
 
         self.length = Int(fileSize)
@@ -101,7 +101,7 @@ class FileParameterBuffer: ParameterBuffer {
         ptr = hdr!.bindMemory(to: Float.self, capacity: floatCount)
         
         if ptr == UnsafeMutablePointer<Float>(bitPattern: -1) {
-            print("Error: mmap failed, errno = \(errno)")
+            fatalError("Error: mmap failed, errno = \(errno)")
         }
     }
     

@@ -16,7 +16,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     
     func testIdentityNoPadding() {
         let testImg = device.MakeTestMPSImage(width: 2, height: 2, values: [1, 0,
-                                                                            0, 1])
+                                                                            0, 1] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -36,7 +36,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 0,
                                                                            0, 0, 1, 0,
-                                                                           0, 0, 0, 0])
+                                                                           0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -49,7 +49,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 0,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -69,7 +69,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 0,
                                                                            0, 0, 1, 0,
-                                                                           0, 0, 0, 0])
+                                                                           0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -84,7 +84,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
                                                                             0, 0, 1, 0, 1, 0,
                                                                             0, 0, 0, 1, 0, 0,
                                                                             0, 0, 0, 0, 0, 0,
-                                                                            0, 0, 0, 0, 0, 0])
+                                                                            0, 0, 0, 0, 0, 0] as [Float32])
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
                                           0, 1, 0,
@@ -103,7 +103,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 1,
                                                                            0, 0, 1, 0,
-                                                                           0, 0, 0, 0])
+                                                                           0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -116,7 +116,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 0,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
@@ -140,7 +140,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
                                                                            0, 1, 1, 2, 1, 1, 0,
                                                                            0, 0, 0, 1, 1, 1, 0,
                                                                            0, 0, 0, 1, 1, 1, 0,
-                                                                           0, 0, 0, 0, 0, 0, 0])
+                                                                           0, 0, 0, 0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)

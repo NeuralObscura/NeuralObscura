@@ -17,7 +17,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -35,7 +35,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 2, height: 2, values: [1, 0,
-                                                                           0, 1])
+                                                                           0, 1] as [Float32])
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -48,7 +48,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -68,7 +68,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 1,
                                                                            0, 0, 1, 0,
-                                                                           0, 0, 0, 0])
+                                                                           0, 0, 0, 0] as [Float32])
         
         
         /* Run our test */
@@ -82,7 +82,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -104,7 +104,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                                                            0, 0, 1, 0, 1, 0,
                                                                            0, 0, 0, 1, 0, 0,
                                                                            0, 0, 0, 0, 0, 0,
-                                                                           0, 0, 0, 0, 0, 0])
+                                                                           0, 0, 0, 0, 0, 0] as [Float32])
         
         
         /* Run our test */
@@ -118,7 +118,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
@@ -136,7 +136,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             outputType: CommandEncoderOutputType.debug)
         
         let expImg = device.MakeTestMPSImage(width: 2, height: 2, values: [2, 3,
-                                                                           2, 3])
+                                                                           2, 3] as [Float32])
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -149,8 +149,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
-        
+                                                                            0, 0, 0, 0] as [Float32])
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
                                           1, 1, 1,
@@ -169,12 +168,11 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [1, 1, 2, 1,
                                                                            1, 2, 3, 2,
                                                                            1, 2, 3, 2,
-                                                                           0, 1, 1, 1])
+                                                                           0, 1, 1, 1] as [Float32])
         
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
-        
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
     }
@@ -183,7 +181,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 1,
                                                                             0, 0, 1, 0,
-                                                                            0, 0, 0, 0])
+                                                                            0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
@@ -205,7 +203,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                                                            0, 1, 2, 3, 2, 1,
                                                                            0, 1, 2, 3, 2, 1,
                                                                            0, 0, 1, 1, 1, 0,
-                                                                           0, 0, 0, 0, 0, 0])
+                                                                           0, 0, 0, 0, 0, 0] as [Float32])
         
         
         /* Run our test */
