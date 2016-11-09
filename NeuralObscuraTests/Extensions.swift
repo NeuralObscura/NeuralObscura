@@ -44,7 +44,7 @@ extension MTLDevice {
         let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
 
         if pixelFormat == .rgba16Float || pixelFormat == .r16Float {
-            let sourceBytes = float32toFloat16(values)
+            let sourceBytes = Conversions.float32toFloat16(values)
             texture.replace(
                 region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
                 mipmapLevel: 0,
@@ -59,18 +59,6 @@ extension MTLDevice {
         }
 
         return MPSImage(texture: texture, featureChannels: featureChannels)
-    }
-
-    func float32toFloat16(_ values: [Float32]) -> [UInt16] {
-        var input = values
-        var inputBuffer = vImage_Buffer(data: &input, height: 1, width: UInt(values.count), rowBytes: values.count * 4)
-        var output = [UInt16](repeating: 0, count: values.count)
-        var outputBuffer = vImage_Buffer(data: &output, height: 1, width: UInt(values.count), rowBytes: values.count * 2)
-
-        if vImageConvert_PlanarFtoPlanar16F(&inputBuffer, &outputBuffer, 0) != kvImageNoError {
-            fatalError("Couldn't convert from float32 to float16")
-        }
-        return output
     }
 }
 
@@ -121,12 +109,6 @@ extension MPSImage {
 
             let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhs.width * lhs.height)
             let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhs.width * rhs.height)
-
-            let lhsValues = float16toFloat32(Array(lhsBufferPtr))
-            let rhsValues = float16toFloat32(Array(rhsBufferPtr))
-
-            print(lhsValues)
-            print(rhsValues)
 
             if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                 return false
@@ -247,7 +229,7 @@ extension MPSImage {
                                                                                                     height: self.height))
 
 
-            let convertedBuffer = float16toFloat32(Array(buffer))
+            let convertedBuffer = Conversions.float16toFloat32(Array(buffer))
 
             outputString += convertedBuffer.enumerated().map { [unowned self] (idx, e) in
                 var r = ""
@@ -264,17 +246,5 @@ extension MPSImage {
         }
 
         return outputString
-    }
-
-    func float16toFloat32(_ values: [UInt16]) -> [Float32] {
-        var input = values
-        var inputBuffer = vImage_Buffer(data: &input, height: 1, width: UInt(values.count), rowBytes: values.count * 2)
-        var output = [Float32](repeating: 0, count: values.count)
-        var outputBuffer = vImage_Buffer(data: &output, height: 1, width: UInt(values.count), rowBytes: values.count * 4)
-
-        if vImageConvert_Planar16FtoPlanarF(&inputBuffer, &outputBuffer, 0) != kvImageNoError {
-            fatalError("Couldn't convert from float16 to float32")
-        }
-        return output
     }
 }
