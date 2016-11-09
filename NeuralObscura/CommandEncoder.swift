@@ -35,12 +35,17 @@ open class CommandEncoder: Chain {
         let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
         
         var destinationImage: MPSImage! = nil
-        switch self.outputType {
-        case CommandEncoderOutputType.debug: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-        case CommandEncoderOutputType.permenant: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-        case CommandEncoderOutputType.temporary: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+        switch bottom {
+        case .some(_):
+            switch self.outputType {
+            case CommandEncoderOutputType.debug: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            case CommandEncoderOutputType.permenant: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            case CommandEncoderOutputType.temporary: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            }
+        case .none:
+            destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
         }
-        
+
         delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
 
         switch bottom {
