@@ -39,6 +39,7 @@
 		DA8A6C6C1DD4158800C6D125 /* Conversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C6B1DD4158800C6D125 /* Conversions.swift */; };
 		DA8A6C6E1DD41E7100C6D125 /* ImageFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C6D1DD41E7100C6D125 /* ImageFormatTests.swift */; };
 		DA8A6C701DD428C400C6D125 /* FileParameterBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C6F1DD428C400C6D125 /* FileParameterBufferTests.swift */; };
+		DA8A6C681DD2CCA400C6D125 /* Conversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C671DD2CCA400C6D125 /* Conversions.swift */; };
 		DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DA9A565E1D9253C000E55916 /* Shaders.metal */; };
 		DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56601D938C0E00E55916 /* UIImage.swift */; };
 		DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56641D9E0E0C00E55916 /* tubingen.jpg */; };
@@ -101,6 +102,7 @@
 		DA8A6C6B1DD4158800C6D125 /* Conversions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversions.swift; sourceTree = "<group>"; };
 		DA8A6C6D1DD41E7100C6D125 /* ImageFormatTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ImageFormatTests.swift; sourceTree = "<group>"; };
 		DA8A6C6F1DD428C400C6D125 /* FileParameterBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FileParameterBufferTests.swift; sourceTree = "<group>"; };
+		DA8A6C671DD2CCA400C6D125 /* Conversions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversions.swift; sourceTree = "<group>"; };
 		DA9A565E1D9253C000E55916 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		DA9A56601D938C0E00E55916 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		DA9A56641D9E0E0C00E55916 /* tubingen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tubingen.jpg; sourceTree = "<group>"; };
@@ -189,6 +191,7 @@
 				DA9A56681D9E1D1400E55916 /* Resources */,
 				DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */,
 				DA0B0C601D8BAB4000ED7982 /* ViewController.swift */,
+				DA8A6C671DD2CCA400C6D125 /* Conversions.swift */,
 				077BB3DF1DA191E60022578C /* Model */,
 				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
 				DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */,
@@ -382,6 +385,7 @@
 				077BB3D71D9E1B0C0022578C /* Protocols.swift in Sources */,
 				DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */,
 				DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */,
+				DA8A6C681DD2CCA400C6D125 /* Conversions.swift in Sources */,
 				077BB3D21D9B05260022578C /* DeconvolutionLayer.swift in Sources */,
 				DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormat.swift in Sources */,
 				077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */,
