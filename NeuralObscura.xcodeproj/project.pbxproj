@@ -220,6 +220,7 @@
 				DA8A6C5F1DD2BF8300C6D125 /* ReLULayerTests.swift */,
 				DA8A6C531DCEC0EE00C6D125 /* AdditionShaderTests.swift */,
 				DA8A6C571DCFB76D00C6D125 /* TanhAdjustmentLayerTests.swift */,
+				DA8A6C5F1DD2BF8300C6D125 /* ReLULayerTests.swift */,
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
 				DA8A6C6D1DD41E7100C6D125 /* ImageFormatTests.swift */,
 				DA8A6C6F1DD428C400C6D125 /* FileParameterBufferTests.swift */,
