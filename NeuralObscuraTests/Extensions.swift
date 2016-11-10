@@ -18,7 +18,7 @@ extension MTLDevice {
             convertedValues.append(Float32(value))
         }
 
-        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r32Float, values: convertedValues)
+        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r16Float, values: convertedValues)
     }
 
     func MakeTestMPSImage(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [[Float32]]) -> MPSImage {
@@ -43,11 +43,21 @@ extension MTLDevice {
         let texture = self.makeTexture(descriptor: textureDesc)
         let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
 
-        texture.replace(
-            region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-            mipmapLevel: 0,
-            withBytes: values,
-            bytesPerRow: bytesPerRow)
+        if pixelFormat == .rgba16Float || pixelFormat == .r16Float {
+            let sourceBytes = Conversions.float32toFloat16(values)
+            texture.replace(
+                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                mipmapLevel: 0,
+                withBytes: sourceBytes,
+                bytesPerRow: bytesPerRow)
+        } else {
+            texture.replace(
+                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                mipmapLevel: 0,
+                withBytes: values,
+                bytesPerRow: bytesPerRow)
+        }
+
         return MPSImage(texture: texture, featureChannels: featureChannels)
     }
 }
@@ -94,11 +104,11 @@ extension MPSImage {
                                 mipmapLevel: 0,
                                 slice: i)
 
-            let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhs.width * lhs.height)
-            let rhsPtr = rhsRawPtr.bindMemory(to: Float32.self, capacity: rhs.width * rhs.height)
+            let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhs.width * lhs.height)
+            let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhs.width * rhs.height)
 
-            let lhsBufferPtr = UnsafeBufferPointer<Float32>(start: lhsPtr, count: lhs.width * lhs.height)
-            let rhsBufferPtr = UnsafeBufferPointer<Float32>(start: rhsPtr, count: rhs.width * rhs.height)
+            let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhs.width * lhs.height)
+            let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhs.width * rhs.height)
 
             if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                 return false
@@ -118,6 +128,10 @@ extension MPSImage {
             return Float32ToString()
         case .r32Float:
             return Float32ToString()
+        case .r16Float:
+            return Float16ToString()
+        case .rgba16Float:
+            return Float16ToString()
         default:
             fatalError("Unknown MTLPixelFormat: \(texture.pixelFormat)")
         }
@@ -189,6 +203,46 @@ extension MPSImage {
                 }
                 return r
             }.joined() + "\n"
+        }
+
+        return outputString
+    }
+
+    func Float16ToString() -> String {
+        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
+        let bytesPerImage = self.height * bytesPerRow
+
+        let ptr = UnsafeMutablePointer<UInt16>.allocate(capacity: self.pixelFormat.typedSize(width: self.width,
+                                                                                              height: self.height))
+        var outputString: String = ""
+
+        let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
+
+        for i in 0...(slices-1) {
+            self.texture.getBytes(ptr,
+                                  bytesPerRow: bytesPerRow,
+                                  bytesPerImage: bytesPerImage,
+                                  from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                  mipmapLevel: 0,
+                                  slice: i)
+            let buffer = UnsafeBufferPointer<UInt16>(start: ptr, count: self.pixelFormat.typedSize(width: self.width,
+                                                                                                    height: self.height))
+
+
+            let convertedBuffer = Conversions.float16toFloat32(Array(buffer))
+
+            outputString += convertedBuffer.enumerated().map { [unowned self] (idx, e) in
+                var r = ""
+                if idx % (self.width * self.pixelFormat.pixelCount) == 0 {
+                    r += String(format: " \n%.2f ", e)
+                } else {
+                    if self.pixelFormat.pixelCount > 1 && idx % self.pixelFormat.pixelCount == 0 {
+                        r += "| "
+                    }
+                    r += String(format: "%.2f ", e)
+                }
+                return r
+                }.joined() + "\n"
         }
 
         return outputString
