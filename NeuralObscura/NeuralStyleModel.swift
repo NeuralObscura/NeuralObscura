@@ -25,6 +25,7 @@ class NeuralStyleModel {
     let b1, b2, b3, b4, b5: BatchNormalizationLayer
     let r1, r2, r3, r4, r5: ResidualBlock
     let d1, d2, d3: DeconvolutionLayer
+    let tanhAdj: TanhAdjustmentLayer
     let modelHandle: CommandEncoder
 
     init(modelName: String,
@@ -300,7 +301,7 @@ class NeuralStyleModel {
             stride: 1,
             outputType: outputType)
 
-        // TODO: Init last tanh layer
+        tanhAdj = TanhAdjustmentLayer()
 
         /* Chain model encoders together */
         var h: CommandEncoder
@@ -339,7 +340,7 @@ class NeuralStyleModel {
         h = d3.chain(h)
 
         // return (F.tanh(y)+1)*127.5
-        // TODO: chain last tanh layer
+        h = tanhAdj.chain(h)
         
         modelHandle = h
     }

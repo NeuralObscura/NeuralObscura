@@ -12,16 +12,29 @@ import MetalPerformanceShaders
 import Accelerate
 
 extension MTLDevice {
-    func MakeTestMPSImage(width: Int, height: Int, values: [Float32]) -> MPSImage {
+    func MakeTestMPSImage(width: Int,
+                          height: Int,
+                          textureType: MTLTextureType = .type2DArray,
+                          values: [Float32]) -> MPSImage {
         var convertedValues = [Float32]()
         for value in values {
             convertedValues.append(Float32(value))
         }
 
-        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: 1, pixelFormat: .r16Float, values: convertedValues)
+        return MakeTestMPSImageWithMultipleFeatureChannels(width: width,
+                                                           height: height,
+                                                           featureChannels: 1,
+                                                           pixelFormat: .r16Float,
+                                                           textureType: textureType,
+                                                           values: convertedValues)
     }
 
-    func MakeTestMPSImage(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [[Float32]]) -> MPSImage {
+    func MakeTestMPSImage(width: Int,
+                          height: Int,
+                          featureChannels: Int,
+                          pixelFormat: MTLPixelFormat,
+                          textureType: MTLTextureType = .type2DArray,
+                          values: [[Float32]]) -> MPSImage {
         // ravel the values
         var ravelValues = [Float32]()
         for pixel in values {
@@ -30,13 +43,23 @@ extension MTLDevice {
             }
         }
 
-        return MakeTestMPSImageWithMultipleFeatureChannels(width: width, height: height, featureChannels: featureChannels, pixelFormat: pixelFormat, values: ravelValues)
+        return MakeTestMPSImageWithMultipleFeatureChannels(width: width,
+                                                           height: height,
+                                                           featureChannels: featureChannels,
+                                                           pixelFormat: pixelFormat,
+                                                           textureType: textureType,
+                                                           values: ravelValues)
     }
 
     // values are expected to be raveled
-    func MakeTestMPSImageWithMultipleFeatureChannels(width: Int, height: Int, featureChannels: Int, pixelFormat: MTLPixelFormat, values: [Float32]) -> MPSImage {
+    func MakeTestMPSImageWithMultipleFeatureChannels(width: Int,
+                                                     height: Int,
+                                                     featureChannels: Int,
+                                                     pixelFormat: MTLPixelFormat,
+                                                     textureType: MTLTextureType = .type2DArray,
+                                                     values: [Float32]) -> MPSImage {
         let textureDesc = MTLTextureDescriptor()
-        textureDesc.textureType = .type2DArray
+        textureDesc.textureType = textureType
         textureDesc.width = width
         textureDesc.height = height
         textureDesc.pixelFormat = pixelFormat
@@ -64,7 +87,7 @@ extension MTLDevice {
 
 
 extension MPSImage {
-    
+
     override open func isEqual(_ rawRhs: Any?) -> Bool {
         let lhs = self
 
@@ -166,7 +189,7 @@ extension MPSImage {
                     r += String(format: "%2X ", e)
                 }
                 return r
-            }.joined() + "\n"
+                }.joined() + "\n"
         }
 
         return outputString
@@ -202,9 +225,9 @@ extension MPSImage {
                     r += String(format: "%.2f ", e)
                 }
                 return r
-            }.joined() + "\n"
+                }.joined() + "\n"
         }
-
+        
         return outputString
     }
 
