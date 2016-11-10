@@ -11,16 +11,16 @@ import MetalPerformanceShaders
 
 open class CommandEncoder: Chain {
     let delegate: CommandEncoderDelegate
-    let outputType: CommandEncoderOutputType
+    let debug: Bool
 
     weak var head: CommandEncoder?
     var top: CommandEncoder?
     weak var bottom: CommandEncoder?
     
     init(delegate: CommandEncoderDelegate,
-         outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+         debug: Bool = false) {
         self.delegate = delegate
-        self.outputType = outputType
+        self.debug = debug
         self.head = self
     }
     
@@ -37,10 +37,9 @@ open class CommandEncoder: Chain {
         var destinationImage: MPSImage! = nil
         switch bottom {
         case .some(_):
-            switch self.outputType {
-            case CommandEncoderOutputType.debug: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-            case CommandEncoderOutputType.permenant: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-            case CommandEncoderOutputType.temporary: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            switch debug {
+            case true: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            case false: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
             }
         case .none:
             destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)

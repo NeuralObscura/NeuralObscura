@@ -21,7 +21,7 @@ class ConvolutionLayer: CommandEncoder {
         stride: Int = 1,
         destinationFeatureChannelOffset: Int = 0,
         groupNum: Int = 1,
-        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+        debug: Bool = false) {
         super.init(
             delegate: ConvolutionLayerDelegate(
                 kernelSize: kernelSize,
@@ -34,7 +34,7 @@ class ConvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-            outputType: outputType)
+            debug: debug)
     }
 }
 

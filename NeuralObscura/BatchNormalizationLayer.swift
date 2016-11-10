@@ -14,13 +14,13 @@ class BatchNormalizationLayer: CommandEncoder {
         channelsIn: Int,
         beta: ParameterBuffer,
         gamma: ParameterBuffer,
-        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+        debug: Bool = false) {
         super.init(
             delegate: BatchNormalizationLayerDelegate(
                 channelsIn: channelsIn,
                 beta: beta,
                 gamma: gamma),
-            outputType: outputType)
+            debug: debug)
     }
 }
 

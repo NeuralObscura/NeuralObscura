@@ -30,7 +30,7 @@ class DeconvolutionLayer: CommandEncoder {
         stride: Int = 1,
         destinationFeatureChannelOffset: Int = 0,
         groupNum: Int = 1,
-        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+        debug: Bool = false) {
         super.init(
             delegate: DeconvolutionLayerDelegate(
                 kernelSize: kernelSize,
@@ -43,7 +43,7 @@ class DeconvolutionLayer: CommandEncoder {
                 stride: stride,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset,
                 groupNum: groupNum),
-            outputType: outputType)
+            debug: debug)
     }
 }
 
