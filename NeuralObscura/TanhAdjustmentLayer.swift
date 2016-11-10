@@ -10,11 +10,10 @@ import Foundation
 import MetalPerformanceShaders
 
 class TanhAdjustmentLayer: CommandEncoder {
-    init(
-        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+    init(debug: Bool = false) {
         super.init(
             delegate: TanhAdjustmentLayerDelegate(),
-            outputType: outputType)
+            debug: debug)
     }
 }
 

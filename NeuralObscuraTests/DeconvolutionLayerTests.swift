@@ -31,7 +31,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 0,
-            outputType: CommandEncoderOutputType.debug)
+            debug: true)
         
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 0,
@@ -64,7 +64,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 1,
-            outputType: CommandEncoderOutputType.debug)
+            debug: true)
         
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 0,
@@ -98,7 +98,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 2,
-            outputType: CommandEncoderOutputType.debug)
+            debug: true)
         
         let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 1,
@@ -132,7 +132,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             relu: false,
             padding: 1,
             stride: 2,
-            outputType: CommandEncoderOutputType.debug)
+            debug: true)
         
         let expImg = device.MakeTestMPSImage(width: 7, height: 7, values: [0, 0, 0, 0, 0, 0, 0,
                                                                            0, 1, 1, 1, 0, 0, 0,

@@ -10,10 +10,10 @@ import Foundation
 import MetalPerformanceShaders
 
 class ReLULayer: CommandEncoder {
-    init(outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+    init(debug: Bool = false) {
         super.init(
             delegate: ReLULayerDelegate(),
-            outputType: outputType)
+            debug: debug)
     }
 }
 

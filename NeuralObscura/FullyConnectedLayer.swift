@@ -18,7 +18,7 @@ class FullyConnectedLayer: CommandEncoder {
         b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
         destinationFeatureChannelOffset: Int = 0,
-        outputType: CommandEncoderOutputType = CommandEncoderOutputType.debug) {
+        debug: Bool = false) {
         super.init(
             delegate: FullyConnectedLayerDelegate(
                 kernelSize: kernelSize,
@@ -28,7 +28,7 @@ class FullyConnectedLayer: CommandEncoder {
                 b: b,
                 neuronFilter: neuronFilter,
                 destinationFeatureChannelOffset: destinationFeatureChannelOffset),
-            outputType: outputType)
+            debug: debug)
     }
 }
 
