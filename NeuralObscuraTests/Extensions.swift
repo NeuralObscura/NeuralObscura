@@ -14,25 +14,8 @@ import Accelerate
 extension MTLDevice {
     func MakeTestMPSImage(width: Int,
                           height: Int,
-                          textureType: MTLTextureType = .type2DArray,
-                          values: [Float32]) -> MPSImage {
-        var convertedValues = [Float32]()
-        for value in values {
-            convertedValues.append(Float32(value))
-        }
-
-        return MakeTestMPSImageWithMultipleFeatureChannels(width: width,
-                                                           height: height,
-                                                           featureChannels: 1,
-                                                           pixelFormat: .r16Float,
-                                                           textureType: textureType,
-                                                           values: convertedValues)
-    }
-
-    func MakeTestMPSImage(width: Int,
-                          height: Int,
-                          featureChannels: Int,
-                          pixelFormat: MTLPixelFormat,
+                          featureChannels: Int = 1,
+                          pixelFormat: MTLPixelFormat = .r16Float,
                           textureType: MTLTextureType = .type2DArray,
                           values: [[Float32]]) -> MPSImage {
         // ravel the values
@@ -43,21 +26,21 @@ extension MTLDevice {
             }
         }
 
-        return MakeTestMPSImageWithMultipleFeatureChannels(width: width,
-                                                           height: height,
-                                                           featureChannels: featureChannels,
-                                                           pixelFormat: pixelFormat,
-                                                           textureType: textureType,
-                                                           values: ravelValues)
+        return MakeTestMPSImage(width: width,
+                                height: height,
+                                featureChannels: featureChannels,
+                                pixelFormat: pixelFormat,
+                                textureType: textureType,
+                                values: ravelValues)
     }
 
     // values are expected to be raveled
-    func MakeTestMPSImageWithMultipleFeatureChannels(width: Int,
-                                                     height: Int,
-                                                     featureChannels: Int,
-                                                     pixelFormat: MTLPixelFormat,
-                                                     textureType: MTLTextureType = .type2DArray,
-                                                     values: [Float32]) -> MPSImage {
+    func MakeTestMPSImage(width: Int,
+                          height: Int,
+                          featureChannels: Int = 1,
+                          pixelFormat: MTLPixelFormat = .r16Float,
+                          textureType: MTLTextureType = .type2DArray,
+                          values: [Float32]) -> MPSImage {
         let textureDesc = MTLTextureDescriptor()
         textureDesc.textureType = textureType
         textureDesc.width = width
@@ -66,14 +49,15 @@ extension MTLDevice {
         let texture = self.makeTexture(descriptor: textureDesc)
         let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
 
-        if pixelFormat == .rgba16Float || pixelFormat == .r16Float {
+        switch pixelFormat {
+        case .rgba16Float, .r16Float:
             let sourceBytes = Conversions.float32toFloat16(values)
             texture.replace(
                 region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
                 mipmapLevel: 0,
                 withBytes: sourceBytes,
                 bytesPerRow: bytesPerRow)
-        } else if pixelFormat == .r8Unorm || pixelFormat == .rgba8Unorm {
+        case .rgba8Unorm, .r8Unorm:
             var convertedValues = [UInt8]()
             for v in values {
                 convertedValues.append(UInt8(v))
@@ -83,7 +67,7 @@ extension MTLDevice {
                 mipmapLevel: 0,
                 withBytes: convertedValues,
                 bytesPerRow: bytesPerRow)
-        } else {
+        default:
             texture.replace(
                 region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
                 mipmapLevel: 0,
@@ -137,7 +121,8 @@ extension MPSImage {
                                 mipmapLevel: 0,
                                 slice: i)
 
-            if lhs.pixelFormat == .r16Float || lhs.pixelFormat == .rgba16Float {
+            switch lhs.pixelFormat {
+            case .r16Float, .rgba16Float:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhs.width * lhs.height)
                 let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhs.width * rhs.height)
 
@@ -147,7 +132,7 @@ extension MPSImage {
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
-            } else {
+            case .r8Unorm, .rgba8Unorm:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhs.width * lhs.height)
                 let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhs.width * rhs.height)
 
@@ -157,6 +142,9 @@ extension MPSImage {
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
+            default:
+                print("Unrecognized pixel format \(lhs.pixelFormat)")
+                return false
             }
         }
 

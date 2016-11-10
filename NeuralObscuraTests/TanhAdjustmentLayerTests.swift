@@ -16,13 +16,13 @@ class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
         // textureType is 2DArray since the number of feature channels at this
         // stage in processing is 3, RGB, as this is meant as a cleanup step of
         // the final image.
-        let testImg = device.MakeTestMPSImageWithMultipleFeatureChannels(width: 2,
-                                                                         height: 2,
-                                                                         featureChannels: 3,
-                                                                         pixelFormat: MTLPixelFormat.rgba16Float,
-                                                                         textureType: .type2D,
-                                                                         values: [-25,-25,-25, -25,-25,-25,
-                                                                                  -25,-25,-25, -25,-25,-25] as [Float32])
+        let testImg = device.MakeTestMPSImage(width: 2,
+                                              height: 2,
+                                              featureChannels: 3,
+                                              pixelFormat: MTLPixelFormat.rgba16Float,
+                                              textureType: .type2D,
+                                              values: [-25,-25,-25, -25,-25,-25,
+                                                       -25,-25,-25, -25,-25,-25] as [Float32])
 
         /* Create our CommandEncoder*/
         let tanhAdj = TanhAdjustmentLayer()
