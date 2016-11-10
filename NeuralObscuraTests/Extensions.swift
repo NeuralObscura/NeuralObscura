@@ -73,6 +73,16 @@ extension MTLDevice {
                 mipmapLevel: 0,
                 withBytes: sourceBytes,
                 bytesPerRow: bytesPerRow)
+        } else if pixelFormat == .r8Unorm || pixelFormat == .rgba8Unorm {
+            var convertedValues = [UInt8]()
+            for v in values {
+                convertedValues.append(UInt8(v))
+            }
+            texture.replace(
+                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                mipmapLevel: 0,
+                withBytes: convertedValues,
+                bytesPerRow: bytesPerRow)
         } else {
             texture.replace(
                 region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
@@ -127,14 +137,26 @@ extension MPSImage {
                                 mipmapLevel: 0,
                                 slice: i)
 
-            let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhs.width * lhs.height)
-            let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhs.width * rhs.height)
+            if lhs.pixelFormat == .r16Float || lhs.pixelFormat == .rgba16Float {
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhs.width * lhs.height)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhs.width * rhs.height)
 
-            let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhs.width * lhs.height)
-            let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhs.width * rhs.height)
+                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhs.width * lhs.height)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhs.width * rhs.height)
 
-            if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
-                return false
+                if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
+                    return false
+                }
+            } else {
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhs.width * lhs.height)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhs.width * rhs.height)
+
+                let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhs.width * lhs.height)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhs.width * rhs.height)
+
+                if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
+                    return false
+                }
             }
         }
 
