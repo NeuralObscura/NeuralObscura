@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class FullyConnectedLayer: CommandEncoder {
+class FullyConnectedLayer: UnaryCommandEncoder {
     init(
         kernelSize: Int,
         channelsIn: Int,
@@ -34,6 +34,7 @@ class FullyConnectedLayer: CommandEncoder {
 
 class FullyConnectedLayerDelegate: CommandEncoderDelegate {
     let fullyConnected: MPSCNNFullyConnected
+    private var sourceImage: MPSImage!
     
     init(
         kernelSize: Int,
@@ -68,7 +69,12 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
             featureChannels: fullyConnected.outputFeatureChannels)
     }
     
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
+        self.sourceImage = sourceImage
+        return true
+    }
+    
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }
     

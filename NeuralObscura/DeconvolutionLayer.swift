@@ -18,7 +18,7 @@ import MetalPerformanceShaders
  of `i + 2p - k` where `i` is the input size in that dimension, `p` is the padding in that dimension,
  and `k` is the kernel size in that dimension.
  */
-class DeconvolutionLayer: CommandEncoder {
+class DeconvolutionLayer: UnaryCommandEncoder {
     init(
         kernelSize: Int,
         channelsIn: Int,
@@ -52,6 +52,7 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
     private let padding: Int
     private let stride: Int
     private let interpixelStride: MTLBuffer?
+    private var sourceImage: MPSImage!
     
     init(
         kernelSize: Int,
@@ -134,8 +135,14 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         return descriptor
     }
     
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
-        var intermediateImage = sourceImage
+    
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
+        self.sourceImage = sourceImage
+        return true
+    }
+    
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
+        var intermediateImage: MPSImage! = sourceImage
         
         /* We don't need interpixel stride if the stride is 1 */
         if self.stride > 1 {

@@ -128,7 +128,7 @@ extension MPSImage {
 
                 let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhs.width * lhs.height)
                 let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhs.width * rhs.height)
-
+                
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
