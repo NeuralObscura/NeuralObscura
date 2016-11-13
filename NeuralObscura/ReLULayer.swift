@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class ReLULayer: CommandEncoder {
+class ReLULayer: UnaryCommandEncoder {
     init(debug: Bool = false) {
         super.init(
             delegate: ReLULayerDelegate(),
@@ -18,6 +18,7 @@ class ReLULayer: CommandEncoder {
 }
 
 class ReLULayerDelegate: CommandEncoderDelegate {
+    private var sourceImage: MPSImage!
 
     init() {}
 
@@ -28,8 +29,13 @@ class ReLULayerDelegate: CommandEncoderDelegate {
             height: sourceImage.height,
             featureChannels: sourceImage.featureChannels)
     }
+    
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
+        self.sourceImage = sourceImage
+        return true
+    }
 
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         print("relu encode")
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rectifier_linear"))

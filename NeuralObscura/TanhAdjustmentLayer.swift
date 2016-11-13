@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class TanhAdjustmentLayer: CommandEncoder {
+class TanhAdjustmentLayer: UnaryCommandEncoder {
     init(debug: Bool = false) {
         super.init(
             delegate: TanhAdjustmentLayerDelegate(),
@@ -18,6 +18,7 @@ class TanhAdjustmentLayer: CommandEncoder {
 }
 
 class TanhAdjustmentLayerDelegate: CommandEncoderDelegate {
+    private var sourceImage: MPSImage!
 
     init() {}
 
@@ -28,8 +29,14 @@ class TanhAdjustmentLayerDelegate: CommandEncoderDelegate {
             height: sourceImage.height,
             featureChannels: sourceImage.featureChannels)
     }
+    
+    
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
+        self.sourceImage = sourceImage
+        return true
+    }
 
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         print("bn encode")
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "tanh_adjustment"))

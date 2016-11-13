@@ -9,57 +9,93 @@
 import Foundation
 import MetalPerformanceShaders
 
-open class CommandEncoder: Chain {
+
+open class CommandEncoder {
     let delegate: CommandEncoderDelegate
     let debug: Bool
-
     weak var head: CommandEncoder?
-    var top: CommandEncoder?
-    weak var bottom: CommandEncoder?
-    var destinationImage: MPSImage? = nil
+    var bottomCallbacks: [(MTLCommandBuffer, MPSImage) -> MPSImage?]
     
     init(delegate: CommandEncoderDelegate,
          debug: Bool = false) {
         self.delegate = delegate
         self.debug = debug
+        self.bottomCallbacks = []
         self.head = self
     }
     
-    func chain(_ top: CommandEncoder) -> CommandEncoder {
-        self.top = top
-        self.head = top.head
-        top.bottom = self
-        return self
+    func getDestinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
+        if debug || bottomCallbacks.isEmpty {
+            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+        } else {
+            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            img.readCount = bottomCallbacks.count
+            return img
+        }
     }
     
-    func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
-        let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
-
-        var destinationImage: MPSImage! = nil
-        switch bottom {
-        case .some(_):
-            switch debug {
-            case true: destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-            case false: destinationImage = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+    func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, sourcePosition: Int = 0) -> MPSImage? {
+        let ready = delegate.supplyInput(sourceImage: sourceImage, sourcePosition: sourcePosition)
+        var returnImage: MPSImage?
+        if ready {
+            let destinationImage = getDestinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
+            delegate.encode(commandBuffer: commandBuffer, destinationImage: destinationImage)
+            if bottomCallbacks.isEmpty {
+                returnImage = destinationImage
+            } else {
+                for callback in bottomCallbacks {
+                    if let result = callback(commandBuffer, destinationImage) {
+                        returnImage = result
+                    }
+                }
             }
-        case .none:
-            destinationImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
         }
-
-        delegate.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-
-        switch bottom {
-        case .some(_):
-            return bottom!.forward(commandBuffer: commandBuffer, sourceImage: self.destinationImage!)
-        case .none:
-            return destinationImage!
-        }
+        return returnImage
     }
     
     func execute(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage {
         let destinationImage = head!.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
-        return destinationImage
+        return destinationImage!
+    }
+    
+    func registerBottom(_ callback: @escaping (MTLCommandBuffer, MPSImage) -> MPSImage?) {
+        bottomCallbacks.append(callback)
+    }
+}
+
+open class UnaryCommandEncoder: CommandEncoder, UnaryChain {
+    var top: CommandEncoder?
+    
+    func chain(_ top: CommandEncoder) -> CommandEncoder {
+        self.top = top
+        self.head = top.head
+        top.registerBottom() {
+            [unowned self] (commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage? in
+            self.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
+        }
+        return self
+    }
+}
+
+open class BinaryCommandEncoder: CommandEncoder, BinaryChain {
+    var topA: CommandEncoder?
+    var topB: CommandEncoder?
+    
+    func chain(_ topA: CommandEncoder, _ topB: CommandEncoder) -> CommandEncoder {
+        self.topA = topA
+        self.topB = topB
+        self.head = topA.head
+        topA.registerBottom() {
+            [unowned self] (commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage? in
+            self.forward(commandBuffer: commandBuffer, sourceImage: sourceImage, sourcePosition: 0)
+        }
+        topB.registerBottom() {
+            [unowned self] (commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage? in
+            self.forward(commandBuffer: commandBuffer, sourceImage: sourceImage, sourcePosition: 1)
+        }
+        return self
     }
 }

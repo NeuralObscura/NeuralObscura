@@ -54,7 +54,7 @@ class AdditionShaderTests: CommandEncoderBaseTest {
                                              featureChannels: 4,
                                              pixelFormat: MTLPixelFormat.rgba32Float,
                                              values: [[2,4,6,8], [8,6,4,2],
-                                                      [6,8,4,2], [7,2,7,11]])
+                                                      [6,8,4,2], [4,2,6,8]])
 
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)

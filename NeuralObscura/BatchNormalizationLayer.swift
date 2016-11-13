@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class BatchNormalizationLayer: CommandEncoder {
+class BatchNormalizationLayer: UnaryCommandEncoder {
     init(
         channelsIn: Int,
         beta: ParameterBuffer,
@@ -28,6 +28,8 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     let beta: MTLBuffer
     let gamma: MTLBuffer
     let channelsIn: Int
+    
+    private var sourceImage: MPSImage!
 
     init(
          channelsIn: Int,
@@ -46,7 +48,12 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
             featureChannels: sourceImage.featureChannels)
     }
     
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
+        self.sourceImage = sourceImage
+        return true
+    }
+    
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         print("bn encode")
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "batch_normalization"))

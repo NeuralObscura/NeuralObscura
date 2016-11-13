@@ -11,18 +11,24 @@ import MetalPerformanceShaders
 
 let textureFormat = MPSImageFeatureChannelFormat.float16
 
-enum CommandEncoderError: Error {
-    case chainMisconfiguration
-}
-
-protocol Chain {
+protocol UnaryChain {
     mutating func chain(_ top: CommandEncoder) -> CommandEncoder
 }
 
-protocol CommandEncoderDelegate {
+protocol BinaryChain {
+    mutating func chain(_ topA: CommandEncoder, _ topB: CommandEncoder) -> CommandEncoder
+}
 
+protocol CommandEncoderDelegate {
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor
     
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage)
+    /* returns true if all inputs have been supplied and delegate is ready for encode() call */
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool
     
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage)
+    
+}
+
+enum CommandEncoderError: Error {
+    case chainMisconfiguration
 }

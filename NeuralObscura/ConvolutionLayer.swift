@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class ConvolutionLayer: CommandEncoder {
+class ConvolutionLayer: UnaryCommandEncoder {
     init(
         kernelSize: Int,
         channelsIn: Int,
@@ -41,6 +41,7 @@ class ConvolutionLayer: CommandEncoder {
 class ConvolutionLayerDelegate: CommandEncoderDelegate {
     let convolution: MPSCNNConvolution
     let padding: Int
+    private var sourceImage: MPSImage!
     
     init(
         kernelSize: Int,
@@ -102,9 +103,15 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
 
         return descriptor
     }
+
+    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
+        self.sourceImage = sourceImage
+        return true
+    }
+
     
-    func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         // decrements sourceImage.readCount
-        convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        convolution.encode(commandBuffer: commandBuffer, sourceImage: self.sourceImage, destinationImage: destinationImage)
     }
 }
