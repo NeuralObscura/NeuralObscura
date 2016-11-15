@@ -34,9 +34,12 @@ class ReLULayerDelegate: CommandEncoderDelegate {
         self.sourceImage = sourceImage
         return true
     }
+    
+    func resetInputs() {
+        self.sourceImage = nil
+    }
 
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
-        print("relu encode")
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rectifier_linear"))
         encoder.setTexture(sourceImage.texture, at: 0)

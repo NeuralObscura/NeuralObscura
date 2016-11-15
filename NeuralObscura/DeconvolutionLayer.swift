@@ -141,6 +141,10 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         return true
     }
     
+    func resetInputs() {
+        self.sourceImage = nil
+    }
+    
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         var intermediateImage: MPSImage! = sourceImage
         
@@ -166,6 +170,10 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
                 destinationImage.texture.arrayLength)
             encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroups)
             encoder.endEncoding()
+            
+            if let image = sourceImage as? MPSTemporaryImage {
+                image.readCount -= 1
+            }
         }
         
         

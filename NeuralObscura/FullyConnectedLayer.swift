@@ -74,6 +74,11 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         return true
     }
     
+    
+    func resetInputs() {
+        self.sourceImage = nil
+    }
+    
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
     }

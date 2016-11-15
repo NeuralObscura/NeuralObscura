@@ -30,7 +30,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
         // This is computationally expensive, should optimize
         // by initializing on a background thread.
-        model = NeuralStyleModel(modelName: "composition")
+        model = NeuralStyleModel(modelName: "composition", debug: true)
 
         debugImagePaths = [
             Bundle.main.path(forResource: "debug", ofType: "png")!,
