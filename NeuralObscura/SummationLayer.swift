@@ -46,12 +46,6 @@ class SummationLayerDelegate: CommandEncoderDelegate {
         return inputsSupplied == 2
     }
     
-    func resetInputs() {
-        self.sourceImageA = nil
-        self.sourceImageB = nil
-        inputsSupplied = 0
-    }
-    
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "add"))
@@ -71,5 +65,6 @@ class SummationLayerDelegate: CommandEncoderDelegate {
         if let image = sourceImageB as? MPSTemporaryImage {
             image.readCount -= 1
         }
+        inputsSupplied = 0
     }
 }

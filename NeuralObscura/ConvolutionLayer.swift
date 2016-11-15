@@ -109,12 +109,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         return true
     }
     
-    
-    func resetInputs() {
-        self.sourceImage = nil
-    }
-
-    
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         // decrements sourceImage.readCount
         convolution.encode(commandBuffer: commandBuffer, sourceImage: self.sourceImage, destinationImage: destinationImage)

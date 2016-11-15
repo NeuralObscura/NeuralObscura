@@ -141,10 +141,6 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         return true
     }
     
-    func resetInputs() {
-        self.sourceImage = nil
-    }
-    
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         var intermediateImage: MPSImage! = sourceImage
         
@@ -175,7 +171,6 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
                 image.readCount -= 1
             }
         }
-        
         
         // encode standard convolution
         convolution.encode(commandBuffer: commandBuffer, sourceImage: intermediateImage, destinationImage: destinationImage)

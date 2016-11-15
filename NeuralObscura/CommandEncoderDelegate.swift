@@ -15,7 +15,5 @@ protocol CommandEncoderDelegate {
     /* returns true if all inputs have been supplied and delegate is ready for encode() call */
     func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool
     
-    func resetInputs()
-    
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage)
 }

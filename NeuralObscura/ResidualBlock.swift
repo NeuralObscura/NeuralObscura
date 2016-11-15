@@ -18,6 +18,7 @@ class ResidualBlock: UnaryChain {
     let c1, c2: ConvolutionLayer
     let b1, b2: BatchNormalizationLayer
     let s1: SummationLayer
+    let r1: ReLULayer
     
     
     /* A property to keep info from init time whether we will pad input image or not for use during encode call */
@@ -73,11 +74,13 @@ class ResidualBlock: UnaryChain {
                                      gamma: b2_gamma)
         s1 = SummationLayer()
         
+        r1 = ReLULayer()
+        
     }
     
     func chain(_ top: CommandEncoder) -> CommandEncoder {
-        // TODO: Add relu around b1
-        var h = b1.chain(top)
+
+        var h = r1.chain(b1.chain(c1.chain(top)))
         
         h = b2.chain(c2.chain(h))
         

@@ -41,7 +41,6 @@ open class CommandEncoder {
         if ready {
             let destinationImage = getDestinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
             delegate.encode(commandBuffer: commandBuffer, destinationImage: destinationImage)
-            delegate.resetInputs()
             if bottomCallbacks.isEmpty {
                 returnImage = destinationImage
             } else {

@@ -34,10 +34,6 @@ class ReLULayerDelegate: CommandEncoderDelegate {
         self.sourceImage = sourceImage
         return true
     }
-    
-    func resetInputs() {
-        self.sourceImage = nil
-    }
 
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         let encoder = commandBuffer.makeComputeCommandEncoder()
