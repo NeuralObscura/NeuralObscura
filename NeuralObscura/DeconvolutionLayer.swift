@@ -166,8 +166,11 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
                 destinationImage.texture.arrayLength)
             encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroups)
             encoder.endEncoding()
+            
+            if let image = sourceImage as? MPSTemporaryImage {
+                image.readCount -= 1
+            }
         }
-        
         
         // encode standard convolution
         convolution.encode(commandBuffer: commandBuffer, sourceImage: intermediateImage, destinationImage: destinationImage)

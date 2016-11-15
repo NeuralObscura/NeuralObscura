@@ -108,7 +108,6 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         self.sourceImage = sourceImage
         return true
     }
-
     
     func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
         // decrements sourceImage.readCount
