@@ -74,6 +74,5 @@ kernel void tanh_adjustment(texture2d<float, access::read> inTexture [[texture(0
                             uint3 gid [[thread_position_in_grid]]) {
     float4 input = inTexture.read(gid.xy, gid.z);
     float4 output = (tanh(input) + 1) * 127.5;
-    output.a = 255.0; // max opacity
     outTexture.write(output, gid.xy, gid.z);
 }
