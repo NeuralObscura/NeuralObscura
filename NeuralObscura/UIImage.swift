@@ -1,5 +1,6 @@
 import UIKit
 import MetalPerformanceShaders
+import Accelerate
 
 extension UIImage {
     static func MPSImageToUIImage(image: MPSImage, orientation: UIImageOrientation) -> UIImage {
@@ -44,16 +45,38 @@ extension UIImage {
         let width = image!.width
         let height = image!.height
         let bounds = CGRect(x: 0, y: 0, width: width, height: height)
-        let rowBytes = width * 4
+        let pixelFormat = MTLPixelFormat.rgba16Float
+        let rowBytes = MTLPixelFormat.rgba8Unorm.bytesPerRow(width)
+        let pixelArea = width * height * pixelFormat.pixelCount
 
-        let context = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: rowBytes, space: colorSpace, bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
+        let context = CGContext(data: nil,
+                                width: width,
+                                height: height,
+                                bitsPerComponent: 8,
+                                bytesPerRow: rowBytes,
+                                space: colorSpace,
+                                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue)
         context!.clear(bounds)
         context!.draw(image!, in: bounds)
 
-        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: MTLPixelFormat.rgba8Unorm, width: width, height: height, mipmapped: false)
+        let textureDescriptor = MTLTextureDescriptor.texture2DDescriptor(pixelFormat: pixelFormat,
+                                                                         width: width,
+                                                                         height: height,
+                                                                         mipmapped: false)
         let texture = device.makeTexture(descriptor: textureDescriptor)
 
-        texture.replace(region: MTLRegionMake2D(0, 0, width, height), mipmapLevel: 0, withBytes: context!.data!, bytesPerRow: rowBytes)
+        let imageBuffer = UnsafeBufferPointer<UInt8>(start: context!.data!.bindMemory(to: UInt8.self, capacity: pixelArea),
+                                                     count: pixelArea)
+        let imageFloats = imageBuffer.enumerated().map { [unowned self] (idx, e) in
+            Float32(e)
+        }
+
+        let imageFloat16 = Conversions.float32toFloat16(imageFloats)
+
+        texture.replace(region: MTLRegionMake2D(0, 0, width, height),
+                        mipmapLevel: 0,
+                        withBytes: imageFloat16,
+                        bytesPerRow: MTLPixelFormat.rgba16Float.bytesPerRow(width))
         
         return texture
     }
