@@ -21,7 +21,7 @@ class ImageFormatTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4,
                                              height: 4,
                                              featureChannels: 3,
-                                             pixelFormat: MTLPixelFormat.rgba8Unorm,
+                                             pixelFormat: MTLPixelFormat.rgba16Float,
                                              values: mergedChannelsAlpha)
 
         let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!

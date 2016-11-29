@@ -288,6 +288,7 @@ class NeuralStyleModel {
             channelsOut: 3,
             w: modelParams["d3_W"]!,
             b: modelParams["d3_b"]!,
+            relu: false,
             padding: 4,
             stride: 1,
             debug: debug)
