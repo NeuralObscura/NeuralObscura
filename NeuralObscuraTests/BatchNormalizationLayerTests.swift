@@ -19,9 +19,13 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         /* Create our CommandEncoder */
         let gamma_pb = MemoryParameterBuffer([2])
         let beta_pb = MemoryParameterBuffer([1])
+        let mean_pb = MemoryParameterBuffer([0])
+        let stddev_pb = MemoryParameterBuffer([1])
         let bn = BatchNormalizationLayer(channelsIn: 1,
                                          beta: beta_pb,
-                                         gamma: gamma_pb)
+                                         gamma: gamma_pb,
+                                         mean: mean_pb,
+                                         stddev: stddev_pb)
 
         /* Run our test */
         let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -45,10 +49,14 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         /* Create our CommandEncoder*/
         let gamma_pb = MemoryParameterBuffer([3,2,2,3])
         let beta_pb = MemoryParameterBuffer([1,0,1,-1])
+        let mean_pb = MemoryParameterBuffer([0,0,0,0])
+        let stddev_pb = MemoryParameterBuffer([1,1,1,1])
 
         let bn = BatchNormalizationLayer(channelsIn: 1,
                                          beta: beta_pb,
-                                         gamma: gamma_pb)
+                                         gamma: gamma_pb,
+                                         mean: mean_pb,
+                                         stddev: stddev_pb)
 
         /* Run our test */
         let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
