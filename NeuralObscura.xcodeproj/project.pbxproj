@@ -35,6 +35,8 @@
 		DA0B0C661D8BAB4000ED7982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */; };
 		DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */; };
 		DA0B0C7F1D8BAB4000ED7982 /* NeuralObscuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */; };
+		DA6942651DEAAADE00285327 /* RGBAToBRGALayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */; };
+		DA6942671DEAAB2900285327 /* RGBAToBRGALayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */; };
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
 		DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */; };
 		DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */; };
@@ -105,6 +107,8 @@
 		DA0B0C7A1D8BAB4000ED7982 /* NeuralObscuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuralObscuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuralObscuraUITests.swift; sourceTree = "<group>"; };
 		DA0B0C801D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBAToBRGALayerTests.swift; sourceTree = "<group>"; };
+		DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBAToBRGALayer.swift; sourceTree = "<group>"; };
 		DA6D1FAF1D92352C00CD3F49 /* composition_model_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = composition_model_data; sourceTree = "<group>"; };
 		DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterBuffer.swift; sourceTree = "<group>"; };
 		DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModel.swift; sourceTree = "<group>"; };
@@ -159,6 +163,7 @@
 				077BB3D11D9B05260022578C /* DeconvolutionLayer.swift */,
 				077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */,
 				078642CD1DDAE596006A3AFB /* SummationLayer.swift */,
+				DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */,
 			);
 			name = CommandEncoders;
 			sourceTree = "<group>";
@@ -245,6 +250,7 @@
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
 				DA8A6C811DDD546700C6D125 /* UIImageToMTLTextureTests.swift */,
 				DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */,
+				DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */,
 			);
 			path = NeuralObscuraTests;
 			sourceTree = "<group>";
@@ -409,6 +415,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				DA6942671DEAAB2900285327 /* RGBAToBRGALayer.swift in Sources */,
 				078642C11DDAD892006A3AFB /* Chain.swift in Sources */,
 				078642C21DDAD892006A3AFB /* CommandEncoderDelegate.swift in Sources */,
 				077BB3CC1D98E0890022578C /* FullyConnectedLayer.swift in Sources */,
@@ -452,6 +459,7 @@
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,
 				DA8A6C821DDD546700C6D125 /* UIImageToMTLTextureTests.swift in Sources */,
 				07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */,
+				DA6942651DEAAADE00285327 /* RGBAToBRGALayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

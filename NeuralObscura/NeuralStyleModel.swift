@@ -19,6 +19,7 @@ class NeuralStyleModel {
     let r1, r2, r3, r4, r5: ResidualBlock
     let d1, d2, d3: DeconvolutionLayer
     let tanhAdj: TanhAdjustmentLayer
+    let rgba_to_brga: RGBAToBRGALayer
     let modelHandle: CommandEncoder
 
     init(modelName: String,
@@ -153,6 +154,8 @@ class NeuralStyleModel {
 
 
         /* Init model encoders */
+        rgba_to_brga = RGBAToBRGALayer()
+
         // c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
         c1 = ConvolutionLayer(
             kernelSize: 9,
@@ -297,9 +300,10 @@ class NeuralStyleModel {
 
         /* Chain model encoders together */
         var h: CommandEncoder
+        h = rgba_to_brga
 
         // h = self.b1(F.elu(self.c1(top)), test=test)
-        h = b1.chain(c1)
+        h = b1.chain(c1.chain(h))
 
         // h = self.b2(F.elu(self.c2(h)), test=test)
         h = b2.chain(c2.chain(h))
