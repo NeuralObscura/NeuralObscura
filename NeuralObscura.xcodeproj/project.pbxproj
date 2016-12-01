@@ -46,6 +46,7 @@
 		DA8A6C8B1DDD5F5800C6D125 /* ReLULayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C861DDD5F5800C6D125 /* ReLULayerTests.swift */; };
 		DA8A6C8C1DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */; };
 		DA8A6C8E1DDD5F6A00C6D125 /* debug2.png in Resources */ = {isa = PBXBuildFile; fileRef = DA8A6C8D1DDD5F6A00C6D125 /* debug2.png */; };
+		DA8A6C901DDD614300C6D125 /* GroundTruthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */; };
 		DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DA9A565E1D9253C000E55916 /* Shaders.metal */; };
 		DA9A56611D938C0E00E55916 /* UIImage.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA9A56601D938C0E00E55916 /* UIImage.swift */; };
 		DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56641D9E0E0C00E55916 /* tubingen.jpg */; };
@@ -115,6 +116,7 @@
 		DA8A6C861DDD5F5800C6D125 /* ReLULayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReLULayerTests.swift; sourceTree = "<group>"; };
 		DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TanhAdjustmentLayerTests.swift; sourceTree = "<group>"; };
 		DA8A6C8D1DDD5F6A00C6D125 /* debug2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debug2.png; sourceTree = "<group>"; };
+		DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GroundTruthTests.swift; sourceTree = "<group>"; };
 		DA9A565E1D9253C000E55916 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		DA9A56601D938C0E00E55916 /* UIImage.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImage.swift; sourceTree = "<group>"; };
 		DA9A56641D9E0E0C00E55916 /* tubingen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tubingen.jpg; sourceTree = "<group>"; };
@@ -242,6 +244,7 @@
 				DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */,
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
 				DA8A6C811DDD546700C6D125 /* UIImageToMTLTextureTests.swift */,
+				DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */,
 			);
 			path = NeuralObscuraTests;
 			sourceTree = "<group>";
@@ -440,6 +443,7 @@
 				DA8A6C891DDD5F5800C6D125 /* FileParameterBufferTests.swift in Sources */,
 				DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */,
 				DA8A6C881DDD5F5800C6D125 /* AdditionShaderTests.swift in Sources */,
+				DA8A6C901DDD614300C6D125 /* GroundTruthTests.swift in Sources */,
 				07FF01B81DB4229200DF8F11 /* Extensions.swift in Sources */,
 				07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */,
 				DA8A6C8A1DDD5F5800C6D125 /* ImageFormatTests.swift in Sources */,

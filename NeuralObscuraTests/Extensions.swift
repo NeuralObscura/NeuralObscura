@@ -96,8 +96,10 @@ extension MPSImage {
 
         let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
         let lhsImageSize = lhs.height * lhsRowSize
+        let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.pixelCount
         let rhsRowSize: Int = rhs.pixelFormat.bytesPerRow(rhs.width)
         let rhsImageSize = rhs.height * rhsRowSize
+        let rhsPixelArea = rhs.width * rhs.height * rhs.pixelFormat.pixelCount
 
         let lhsTexture = lhs.texture
         let rhsTexture = rhs.texture
@@ -123,21 +125,21 @@ extension MPSImage {
 
             switch lhs.pixelFormat {
             case .r16Float, .rgba16Float:
-                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhs.width * lhs.height)
-                let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhs.width * rhs.height)
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhsPixelArea)
 
-                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhs.width * lhs.height)
-                let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhs.width * rhs.height)
+                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhsPixelArea)
                 
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
             case .r8Unorm, .rgba8Unorm:
-                let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhs.width * lhs.height)
-                let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhs.width * rhs.height)
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
 
-                let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhs.width * lhs.height)
-                let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhs.width * rhs.height)
+                let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhsPixelArea)
 
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
@@ -150,6 +152,62 @@ extension MPSImage {
 
         return true
     }
+
+    func isLossyEqual(_ rhs: [Float32], percision: Int) -> Bool {
+        let lhs = self
+
+        guard ( lhs.width * lhs.height * lhs.featureChannels == rhs.count ) else { return false }
+
+        let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
+        let lhsImageSize = lhs.height * lhsRowSize
+        let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.pixelCount
+
+        let lhsTexture = lhs.texture
+
+        let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsImageSize, alignedTo: lhs.pixelSize)
+
+        let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
+        var lhsStr = [String]()
+
+        for i in 0...(slices-1) {
+            lhsTexture.getBytes(lhsRawPtr,
+                                bytesPerRow: lhsRowSize,
+                                bytesPerImage: lhsImageSize,
+                                from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                mipmapLevel: 0,
+                                slice: i)
+            switch lhs.pixelFormat {
+            case .r16Float, .rgba16Float:
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
+
+                let lhsFloat16Values = lhsBufferPtr.enumerated().map { [unowned self] (idx, e) in
+                    e
+                }
+
+                let lhsFloatValues = Conversions.float16toFloat32(lhsFloat16Values)
+
+                lhsStr += lhsFloatValues.enumerated().map { [unowned self] (idx, e) in
+                    String(format: "%.\(percision)f ", e)
+                }
+            default:
+                print("Unrecognized pixel format \(lhs.pixelFormat)")
+                return false
+            }
+        }
+
+        let rhsStr = rhs.map { (e) in
+            String(format: "%.\(percision)f ", e)
+        }
+
+        if lhsStr != rhsStr {
+            return false
+        }
+
+        return true
+    }
+
 
     override open var description: String {
         switch self.pixelFormat {
