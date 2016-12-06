@@ -25,16 +25,32 @@ kernel void rectifier_linear(texture2d_array<float, access::read> inTexture [[te
 
 /* Batch Normalization
  *
- * Formula: output = (gamma * input) + beta
+ * Formula: output = (gamma * ((input - mean) / stddev)) + beta
  */
 kernel void batch_normalization(texture2d_array<float, access::read> inTexture [[texture(0)]],
                                 texture2d_array<float, access::write> outTexture [[texture(1)]],
                                 const device float* gamma [[ buffer(2) ]],
                                 const device float* beta [[ buffer(3) ]],
+                                const device float* mean [[ buffer(4) ]],
+                                const device float* stddev [[ buffer(5) ]],
                                 uint3 gid [[thread_position_in_grid]]) {
     float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = float4(input.r * gamma[gid.z], input.g * gamma[gid.z+1], input.b * gamma[gid.z+2], input.a * gamma[gid.z+3]);
-    output = float4(output.r + beta[gid.z], output.g + beta[gid.z+1], output.b + beta[gid.z+2], output.a + beta[gid.z+3]);
+    float4 output = float4(input.r - mean[gid.z],
+                           input.g - mean[gid.z+1],
+                           input.b - mean[gid.z+2],
+                           input.a - mean[gid.z+3]);
+    output = float4(output.r / stddev[gid.z],
+                    output.g / stddev[gid.z+1],
+                    output.b / stddev[gid.z+2],
+                    output.a / stddev[gid.z+3]);
+    output = float4(output.r * gamma[gid.z],
+                    output.g * gamma[gid.z+1],
+                    output.b * gamma[gid.z+2],
+                    output.a * gamma[gid.z+3]);
+    output = float4(output.r + beta[gid.z],
+                    output.g + beta[gid.z+1],
+                    output.b + beta[gid.z+2],
+                    output.a + beta[gid.z+3]);
     outTexture.write(output, gid.xy, gid.z);
 }
 

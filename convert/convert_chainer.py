@@ -21,7 +21,18 @@ class ChainerDataReader(object):
         def rename_layer(child_name, layer_name):
             return (child_name + layer_name).replace("/", "_")
 
-        self.parameters = list(itertools.chain(*[[( rename_layer(child.name, param[0]), param[1].data) for param in child.namedparams()] for child in children]))
+        self.parameters = []
+        for child in children:
+            if child.__class__ == chainer.links.normalization.batch_normalization.BatchNormalization:
+                self.parameters.append((rename_layer(child.name, '_mean'), child.avg_mean))
+                self.parameters.append((rename_layer(child.name, '_stddev'), np.sqrt(child.avg_var)))
+            if child.__class__ == ResidualBlock:
+                for block_child in child.children():
+                    if block_child.__class__ == chainer.links.normalization.batch_normalization.BatchNormalization:
+                        self.parameters.append((rename_layer(child.name + '_' + block_child.name, '_mean'), block_child.avg_mean))
+                        self.parameters.append((rename_layer(child.name + '_' + block_child.name, '_stddev'), np.sqrt(block_child.avg_var)))
+            for param in child.namedparams():
+                self.parameters.append((rename_layer(child.name, param[0]), param[1].data))
 
 
     def dump(self, dst_path):
@@ -36,7 +47,7 @@ class ChainerDataReader(object):
         for key, data in self.parameters:
             print(key)
             data = convert(data)
-            s += ("  modelParams[\"%s\"] = StyleModelData(modelName: modelName, rawFileName: \"%s\")\n" % (key, key))
+            s += ("  modelParams[\"%s\"] = FileParameterBuffer(modelName: modelName, rawFileName: \"%s\")\n" % (key, key))
             s += ("  //%s shape = %s\n" % (key, data.shape))
 
             # Save the individual files.

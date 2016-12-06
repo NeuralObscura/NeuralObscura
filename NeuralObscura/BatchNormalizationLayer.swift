@@ -14,12 +14,16 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
         channelsIn: Int,
         beta: ParameterBuffer,
         gamma: ParameterBuffer,
+        mean: ParameterBuffer,
+        stddev: ParameterBuffer,
         debug: Bool = false) {
         super.init(
             delegate: BatchNormalizationLayerDelegate(
                 channelsIn: channelsIn,
                 beta: beta,
-                gamma: gamma),
+                gamma: gamma,
+                mean: mean,
+                stddev: stddev),
             debug: debug)
     }
 }
@@ -27,6 +31,8 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
 class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     let beta: MTLBuffer
     let gamma: MTLBuffer
+    let mean: MTLBuffer
+    let stddev: MTLBuffer
     let channelsIn: Int
     
     private var sourceImage: MPSImage!
@@ -34,10 +40,14 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
     init(
          channelsIn: Int,
          beta: ParameterBuffer,
-         gamma: ParameterBuffer) {
+         gamma: ParameterBuffer,
+         mean: ParameterBuffer,
+         stddev: ParameterBuffer) {
         self.channelsIn = Int(channelsIn)
         self.beta = ShaderRegistry.getDevice().makeBuffer(bytes: beta.pointer(), length: beta.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
         self.gamma = ShaderRegistry.getDevice().makeBuffer(bytes: gamma.pointer(), length: gamma.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        self.mean = ShaderRegistry.getDevice().makeBuffer(bytes: mean.pointer(), length: mean.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        self.stddev = ShaderRegistry.getDevice().makeBuffer(bytes: stddev.pointer(), length: stddev.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
     }
     
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
@@ -60,6 +70,8 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
         encoder.setTexture(destinationImage.texture, at: 1)
         encoder.setBuffer(gamma, offset: 0, at: 2)
         encoder.setBuffer(beta, offset: 0, at: 3)
+        encoder.setBuffer(mean, offset: 0, at: 4)
+        encoder.setBuffer(stddev, offset: 0, at: 5)
         let threadsPerGroup = MTLSizeMake(1, 1, 1)
         let threadGroups = MTLSizeMake(destinationImage.texture.width,
                                        destinationImage.texture.height,
