@@ -23,7 +23,7 @@ kernel void rectifier_linear(texture2d_array<float, access::read> inTexture [[te
 }
 
 
-/* Batch Normalization
+/* Batch Normalization (Test Mode)
  *
  * Formula: output = (gamma * ((input - mean) / stddev)) + beta
  */
@@ -54,6 +54,56 @@ kernel void batch_normalization(texture2d_array<float, access::read> inTexture [
     outTexture.write(output, gid.xy, gid.z);
 }
 
+
+/* Batch Normalization (Non-test Mode)
+ *
+ * Formula: output = (gamma * ((input - mean) / stddev)) + beta
+ * Thread Group configuration:
+ *         let threadsPerGroup = MTLSizeMake(1, 1, channelsIn / sourceImage.texture.pixelFormat.pixelCount)
+ *         let threadGroups = MTLSizeMake(1, 1, 1)
+ */
+kernel void batch_normalization_nt(texture2d_array<float, access::read> inTexture [[texture(0)]],
+                                   texture2d_array<float, access::write> outTexture [[texture(1)]],
+                                   const device float* gamma [[ buffer(2) ]],
+                                   const device float* beta [[ buffer(3) ]],
+                                   uint3 gid [[thread_position_in_grid]]) {
+    uint height = inTexture.get_height();
+    uint width = inTexture.get_width();
+    float4 sum = float4(0.0, 0.0, 0.0, 0.0);
+    uint slot = (gid.z * 4); // where in gamma & beta to read from
+
+    for(uint j = 0; j < width; j++) {
+        for(uint i = 0; i < height; i++) {
+            sum += inTexture.read(uint2(j, i), gid.z);
+        }
+    }
+
+    float4 mean = sum / float4(width*height);
+    float4 stddev = float4(0.0, 0.0, 0.0, 0.0);
+    for(uint j = 0; j < width; j++) {
+        for(uint i = 0; i < height; i++) {
+            stddev += pow((inTexture.read(uint2(j, i), gid.z) - mean), 2);
+        }
+    }
+    stddev /= (width*height)-1;
+    stddev = sqrt(stddev) + 0.00002; // Prevent divide by 0 (chainer constant)
+
+    for(uint j = 0; j < width; j++) {
+        for(uint i = 0; i < height; i++) {
+            float4 x_hat = (inTexture.read(uint2(j, i), gid.z) - mean) / stddev;
+            float4 y = stddev;
+
+            y[0] = (gamma[slot] * x_hat[0]) + beta[slot];
+            y[1] = (gamma[slot+1] * x_hat[1]) + beta[slot+1];
+            y[2] = (gamma[slot+2] * x_hat[2]) + beta[slot+2];
+            y[3] = (gamma[slot+3] * x_hat[3]) + beta[slot+3];
+
+            outTexture.write(y, uint2(j, i), gid.z);
+        }
+    }
+}
+
+
 /* Deconvolution Interpixel Stride
  *
  * Formula: output[i * stride][j * stride] = input[i][j]
@@ -66,6 +116,7 @@ kernel void deconvolution_interpixel_stride(texture2d_array<float, access::read>
     uint2 outLoc = uint2(gid.x * *stride, gid.y * *stride);
     outTexture.write(outColor, outLoc, gid.z);
 }
+
 
 /* Add two matrices together
  *
@@ -81,6 +132,7 @@ kernel void add(texture2d_array<float, access::read> inTexture1 [[texture(0)]],
     outTexture.write(output, gid.xy, gid.z);
 }
 
+
 /* Tanh cleanup and adjustment. To be used at the end of style processing
  *
  * Formula: output = (tanh(input)+1)*127.5
@@ -92,6 +144,7 @@ kernel void tanh_adjustment(texture2d<float, access::read> inTexture [[texture(0
     float4 output = (tanh(input) + 1) * 127.5;
     outTexture.write(output, gid.xy, gid.z);
 }
+
 
 /* RGBA -> BRGA
  *
