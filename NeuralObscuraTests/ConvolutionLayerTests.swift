@@ -208,6 +208,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        print(outputImg)
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)

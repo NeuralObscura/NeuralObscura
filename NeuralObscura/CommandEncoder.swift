@@ -26,13 +26,18 @@ open class CommandEncoder {
     
     func getDestinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
         let destDesc = delegate.getDestinationImageDescriptor(sourceImage: sourceImage)
+        let img: MPSImage!
         if debug || bottomCallbacks.isEmpty {
-            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            img = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            if debug {
+                DebugFrameStorage.registerFrame(img)
+            }
         } else {
-            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
-            img.readCount = bottomCallbacks.count
-            return img
+            let _img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            _img .readCount = bottomCallbacks.count
+            img = _img
         }
+        return img
     }
     
     func forward(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, sourcePosition: Int = 0) -> MPSImage? {

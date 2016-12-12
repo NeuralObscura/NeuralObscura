@@ -406,13 +406,14 @@ class NeuralStyleModel {
         modelHandle = h
     }
 
-    func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
+    func execute(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
         var outputImage: MPSImage? = nil
 
         autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
             outputImage = modelHandle.execute(commandBuffer: commandBuffer, sourceImage: sourceImage)
         }
+        print(DebugFrameStorage.getFrames().count)
 
         return outputImage!
     }

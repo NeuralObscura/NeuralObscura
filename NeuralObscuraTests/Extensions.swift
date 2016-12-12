@@ -153,17 +153,11 @@ extension MPSImage {
 
     override open var description: String {
         switch self.pixelFormat {
-        case .r8Unorm:
+        case .r8Unorm, .rgba8Unorm:
             return UnormToString()
-        case .rgba8Unorm:
-            return UnormToString()
-        case .rgba32Float:
+        case .r32Float, .rgba32Float:
             return Float32ToString()
-        case .r32Float:
-            return Float32ToString()
-        case .r16Float:
-            return Float16ToString()
-        case .rgba16Float:
+        case .r16Float, .rgba16Float:
             return Float16ToString()
         default:
             fatalError("Unknown MTLPixelFormat: \(texture.pixelFormat)")
@@ -241,7 +235,7 @@ extension MPSImage {
         return outputString
     }
 
-    func Float16ToString() -> String {
+    func Float16ToString(channelMajor: Bool = true) -> String {
         let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
         let bytesPerImage = self.height * bytesPerRow
 
@@ -263,19 +257,33 @@ extension MPSImage {
 
 
             let convertedBuffer = Conversions.float16toFloat32(Array(buffer))
-
-            outputString += convertedBuffer.enumerated().map { [unowned self] (idx, e) in
-                var r = ""
-                if idx % (self.width * self.pixelFormat.pixelCount) == 0 {
-                    r += String(format: " \n%.2f ", e)
-                } else {
-                    if self.pixelFormat.pixelCount > 1 && idx % self.pixelFormat.pixelCount == 0 {
-                        r += "| "
+            if channelMajor {
+                print(self.pixelFormat.pixelCount)
+                var channels = Array(repeating: "", count: self.pixelFormat.pixelCount)
+                convertedBuffer.enumerated().forEach { [unowned self] (idx, e) in
+                    if idx % (self.width * self.pixelFormat.pixelCount) == 0 {
+                        channels[idx % self.pixelFormat.pixelCount] += String(format: "\n%.2f ", e)
+                    } else {
+                        channels[idx % self.pixelFormat.pixelCount] += String(format: "%.2f ", e)
                     }
-                    r += String(format: "%.2f ", e)
                 }
-                return r
+                for c in channels {
+                    outputString += c + "\n"
+                }
+            } else {
+                outputString += convertedBuffer.enumerated().map { [unowned self] (idx, e) in
+                    var r = ""
+                    if idx % (self.width * self.pixelFormat.pixelCount) == 0 {
+                        r += String(format: " \n%.2f ", e)
+                    } else {
+                        if self.pixelFormat.pixelCount > 1 && idx % self.pixelFormat.pixelCount == 0 {
+                            r += "| "
+                        }
+                        r += String(format: "%.2f ", e)
+                    }
+                    return r
                 }.joined() + "\n"
+            }
         }
 
         return outputString
