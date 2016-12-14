@@ -15,7 +15,7 @@ extension MTLDevice {
     func MakeTestMPSImage(width: Int,
                           height: Int,
                           featureChannels: Int = 1,
-                          pixelFormat: MTLPixelFormat = .r16Float,
+                          pixelFormat: MTLPixelFormat = .r32Float,
                           textureType: MTLTextureType = .type2DArray,
                           values: [[Float32]]) -> MPSImage {
         // ravel the values
@@ -38,7 +38,7 @@ extension MTLDevice {
     func MakeTestMPSImage(width: Int,
                           height: Int,
                           featureChannels: Int = 1,
-                          pixelFormat: MTLPixelFormat = .r16Float,
+                          pixelFormat: MTLPixelFormat = .r32Float,
                           textureType: MTLTextureType = .type2DArray,
                           values: [Float32]) -> MPSImage {
         let textureDesc = MTLTextureDescriptor()
@@ -89,6 +89,9 @@ extension MPSImage {
             return false
         }
 
+        debugPrint(lhs)
+        debugPrint(rhs)
+
         guard ( lhs.width == rhs.width &&
             lhs.height == rhs.height &&
             lhs.pixelSize == rhs.pixelSize &&
@@ -130,6 +133,9 @@ extension MPSImage {
 
                 let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
                 let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhsPixelArea)
+
+                debugPrint(lhsBufferPtr)
+                debugPrint(rhsBufferPtr)
                 
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
@@ -144,6 +150,16 @@ extension MPSImage {
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
+            case .r32Float, .rgba32Float:
+                let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: Float32.self, capacity: rhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<Float32>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<Float32>(start: rhsPtr, count: rhsPixelArea)
+
+                if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
+                    return false
+                }
             default:
                 print("Unrecognized pixel format \(lhs.pixelFormat)")
                 return false
@@ -154,6 +170,7 @@ extension MPSImage {
     }
 
     func isLossyEqual(_ rhs: [Float32], percision: Int) -> Bool {
+        let maxDifference = powf(10.0, Float(-percision))
         let lhs = self
 
         guard ( lhs.width * lhs.height * lhs.featureChannels == rhs.count ) else { return false }
@@ -167,7 +184,7 @@ extension MPSImage {
         let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsImageSize, alignedTo: lhs.pixelSize)
 
         let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
-        var lhsStr = [String]()
+        var lhsFloats = [Float32]()
 
         for i in 0...(slices-1) {
             lhsTexture.getBytes(lhsRawPtr,
@@ -188,8 +205,20 @@ extension MPSImage {
 
                 let lhsFloatValues = Conversions.float16toFloat32(lhsFloat16Values)
 
-                lhsStr += lhsFloatValues.enumerated().map { [unowned self] (idx, e) in
-                    String(format: "%.\(percision)f ", e)
+                lhsFloats += lhsFloatValues.enumerated().map { [unowned self] (idx, e) in
+                    Float32(e)
+                }
+            case .r32Float, .rgba32Float:
+                let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<Float32>(start: lhsPtr, count: lhsPixelArea)
+
+                let lhsFloatValues = lhsBufferPtr.enumerated().map { [unowned self] (idx, e) in
+                    e
+                }
+
+                lhsFloats += lhsFloatValues.enumerated().map { [unowned self] (idx, e) in
+                    Float32(e)
                 }
             default:
                 print("Unrecognized pixel format \(lhs.pixelFormat)")
@@ -197,12 +226,10 @@ extension MPSImage {
             }
         }
 
-        let rhsStr = rhs.map { (e) in
-            String(format: "%.\(percision)f ", e)
-        }
-
-        if lhsStr != rhsStr {
-            return false
+        for i in 0...(rhs.count - 1) {
+            if abs(lhsFloats[i] - rhs[i]) > maxDifference {
+                return false
+            }
         }
 
         return true

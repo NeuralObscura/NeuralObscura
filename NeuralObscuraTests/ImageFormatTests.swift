@@ -12,7 +12,7 @@ import MetalPerformanceShaders
 @testable import NeuralObscura
 
 class ImageFormatTests: CommandEncoderBaseTest {
-    func testImageFormatMatchesExpectations() {
+    func testImageFormatMatchesExpectationsRGBA8Unorm() {
         let mergedChannelsAlpha = [[255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [255, 0, 0, 255],
                                    [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255], [0, 0, 255, 255],
                                    [0, 0, 255, 255], [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255],
@@ -21,7 +21,7 @@ class ImageFormatTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 4,
                                              height: 4,
                                              featureChannels: 3,
-                                             pixelFormat: MTLPixelFormat.rgba16Float,
+                                             pixelFormat: .rgba8Unorm,
                                              values: mergedChannelsAlpha)
 
         let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!
@@ -31,5 +31,101 @@ class ImageFormatTests: CommandEncoderBaseTest {
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 
         XCTAssertEqual(testImg, expImg)
+    }
+
+    func testUIImageToTestRGBA8Unorm() {
+        let debug2RawValues = [[255, 0, 0, 255], [200, 0, 0, 255],
+                               [150, 0, 0, 255], [100, 0, 0, 255]] as [[Float32]]
+
+        let expImg = device.MakeTestMPSImage(width: 2,
+                                             height: 2,
+                                             featureChannels: 3,
+                                             pixelFormat: .rgba8Unorm,
+                                             values: debug2RawValues)
+
+        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice())
+        let outputImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+
+        XCTAssertEqual(outputImg, expImg)
+    }
+
+    func testImageFormatMatchesExpectationsRGBA16Float() {
+        let mergedChannelsAlpha = [[255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [255, 0, 0, 255],
+                                   [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255], [0, 0, 255, 255],
+                                   [0, 0, 255, 255], [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255],
+                                   [255, 0, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255], [255, 0, 0, 255]] as [[Float32]]
+
+        let expImg = device.MakeTestMPSImage(width: 4,
+                                             height: 4,
+                                             featureChannels: 3,
+                                             pixelFormat: .rgba16Float,
+                                             values: mergedChannelsAlpha)
+
+        let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: imagePath)!
+        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba16Float)
+
+        let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+
+        XCTAssertEqual(testImg, expImg)
+    }
+
+    func testUIImageToTestRGBA16Float() {
+        let debug2RawValues = [[255, 0, 0, 255], [200, 0, 0, 255],
+                               [150, 0, 0, 255], [100, 0, 0, 255]] as [[Float32]]
+
+        let expImg = device.MakeTestMPSImage(width: 2,
+                                             height: 2,
+                                             featureChannels: 3,
+                                             pixelFormat: .rgba16Float,
+                                             values: debug2RawValues)
+
+        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba16Float)
+        let outputImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+        
+        XCTAssertEqual(outputImg, expImg)
+    }
+
+    func testImageFormatMatchesExpectationsRGBA32Float() {
+        let mergedChannelsAlpha = [[255, 0, 0, 255], [0, 255, 0, 255], [0, 0, 255, 255], [255, 0, 0, 255],
+                                   [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255], [0, 0, 255, 255],
+                                   [0, 0, 255, 255], [0, 255, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255],
+                                   [255, 0, 0, 255], [0, 0, 255, 255], [0, 255, 0, 255], [255, 0, 0, 255]] as [[Float32]]
+
+        let expImg = device.MakeTestMPSImage(width: 4,
+                                             height: 4,
+                                             featureChannels: 3,
+                                             pixelFormat: .rgba32Float,
+                                             values: mergedChannelsAlpha)
+
+        let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: imagePath)!
+        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
+
+        let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+
+        XCTAssertEqual(testImg, expImg)
+    }
+
+    func testUIImageToTestRGBA32Float() {
+        let debug2RawValues = [[255, 0, 0, 255], [200, 0, 0, 255],
+                               [150, 0, 0, 255], [100, 0, 0, 255]] as [[Float32]]
+
+        let expImg = device.MakeTestMPSImage(width: 2,
+                                             height: 2,
+                                             featureChannels: 3,
+                                             pixelFormat: .rgba32Float,
+                                             values: debug2RawValues)
+
+        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
+        let outputImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+
+        XCTAssertEqual(outputImg, expImg)
     }
 }

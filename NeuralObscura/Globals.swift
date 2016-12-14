@@ -9,4 +9,4 @@
 import Foundation
 import MetalPerformanceShaders
 
-let textureFormat = MPSImageFeatureChannelFormat.float16
+let textureFormat = MPSImageFeatureChannelFormat.float32
