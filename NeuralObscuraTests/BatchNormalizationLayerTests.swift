@@ -18,7 +18,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let featureChannelsOut = 32
         let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
         let image = UIImage.init(contentsOfFile: debug2ImagePath)!
-        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice())
+        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: featureChannelsIn)
 
@@ -96,7 +96,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeTestMPSImage(width: 2,
                                               height: 2,
                                               featureChannels: 4,
-                                              pixelFormat: MTLPixelFormat.rgba16Float,
+                                              pixelFormat: MTLPixelFormat.rgba32Float,
                                               values: [[1,2,3,4], [4,3,2,1],
                                                        [3,4,2,1], [2,1,3,4]] as [[Float32]])
 
@@ -119,7 +119,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeTestMPSImage(width: 2,
                                              height: 2,
                                              featureChannels: 4,
-                                             pixelFormat: MTLPixelFormat.rgba16Float,
+                                             pixelFormat: MTLPixelFormat.rgba32Float,
                                              values: [[4,4,7,11], [13,6,5,2],
                                                       [10,8,5,2], [7,2,7,11]] as [[Float32]])
 

@@ -55,8 +55,8 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
             self.mean = ShaderRegistry.getDevice().makeBuffer(bytes: mean!.pointer(), length: mean!.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
             self.stddev = ShaderRegistry.getDevice().makeBuffer(bytes: stddev!.pointer(), length: stddev!.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
         } else {
-            self.mean = ShaderRegistry.getDevice().makeBuffer(length: channelsIn * MemoryLayout<UInt16>.size, options: MTLResourceOptions.storageModePrivate)
-            self.stddev = ShaderRegistry.getDevice().makeBuffer(length: channelsIn * MemoryLayout<UInt16>.size, options: MTLResourceOptions.storageModePrivate)
+            self.mean = ShaderRegistry.getDevice().makeBuffer(length: channelsIn * MemoryLayout<Float32>.size, options: MTLResourceOptions.storageModePrivate)
+            self.stddev = ShaderRegistry.getDevice().makeBuffer(length: channelsIn * MemoryLayout<Float32>.size, options: MTLResourceOptions.storageModePrivate)
         }
     }
     

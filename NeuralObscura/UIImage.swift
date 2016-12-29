@@ -32,7 +32,8 @@ extension UIImage {
         return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
     }
 
-    func createMTLTextureForDevice(device: MTLDevice) -> MTLTexture {
+    func createMTLTextureForDevice(device: MTLDevice,
+                                   pixelFormat: MTLPixelFormat = .rgba8Unorm) -> MTLTexture {
         let colorSpace = CGColorSpaceCreateDeviceRGB()
         let ciContext = CIContext.init(mtlDevice: device)
 
@@ -45,7 +46,6 @@ extension UIImage {
         let width = image!.width
         let height = image!.height
         let bounds = CGRect(x: 0, y: 0, width: width, height: height)
-        let pixelFormat = MTLPixelFormat.rgba16Float
         let rowBytes = MTLPixelFormat.rgba8Unorm.bytesPerRow(width)
         let pixelArea = width * height * pixelFormat.pixelCount
 
@@ -65,18 +65,41 @@ extension UIImage {
                                                                          mipmapped: false)
         let texture = device.makeTexture(descriptor: textureDescriptor)
 
-        let imageBuffer = UnsafeBufferPointer<UInt8>(start: context!.data!.bindMemory(to: UInt8.self, capacity: pixelArea),
-                                                     count: pixelArea)
-        let imageFloats = imageBuffer.enumerated().map { [unowned self] (idx, e) in
-            Float32(e)
+        switch pixelFormat {
+        case .rgba8Unorm:
+            texture.replace(region: MTLRegionMake2D(0, 0, width, height),
+                            mipmapLevel: 0,
+                            withBytes: context!.data!,
+                            bytesPerRow: pixelFormat.bytesPerRow(width))
+        case .rgba16Float:
+            let imageBuffer = UnsafeBufferPointer<UInt8>(start: context!.data!.bindMemory(to: UInt8.self,
+                                                                                          capacity: pixelArea),
+                                                         count: pixelArea)
+            let imageFloats = imageBuffer.enumerated().map { [unowned self] (idx, e) in
+                Float32(e)
+            }
+
+            let imageFloat16 = Conversions.float32toFloat16(imageFloats)
+
+            texture.replace(region: MTLRegionMake2D(0, 0, width, height),
+                            mipmapLevel: 0,
+                            withBytes: imageFloat16,
+                            bytesPerRow: pixelFormat.bytesPerRow(width))
+        case .rgba32Float:
+            let imageBuffer = UnsafeBufferPointer<UInt8>(start: context!.data!.bindMemory(to: UInt8.self,
+                                                                                          capacity: pixelArea),
+                                                         count: pixelArea)
+            let imageFloats = imageBuffer.enumerated().map { [unowned self] (idx, e) in
+                Float32(e)
+            }
+
+            texture.replace(region: MTLRegionMake2D(0, 0, width, height),
+                            mipmapLevel: 0,
+                            withBytes: imageFloats,
+                            bytesPerRow: pixelFormat.bytesPerRow(width))
+        default:
+            fatalError("Unknown MTLPixelFormat: \(self)")
         }
-
-        let imageFloat16 = Conversions.float32toFloat16(imageFloats)
-
-        texture.replace(region: MTLRegionMake2D(0, 0, width, height),
-                        mipmapLevel: 0,
-                        withBytes: imageFloat16,
-                        bytesPerRow: MTLPixelFormat.rgba16Float.bytesPerRow(width))
         
         return texture
     }
