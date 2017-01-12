@@ -1,3 +1,4 @@
 convert/tmp/*
 *.pyc
 NeuralObscura.xcodeproj/xcuserdata/*
+.idea
