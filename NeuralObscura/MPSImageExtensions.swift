@@ -124,8 +124,8 @@ extension MPSImage {
         return true
     }
     
-    func isLossyEqual(_ rhs: [Float32], percision: Int) -> Bool {
-        let maxDifference = powf(10.0, Float(-percision))
+    func isLossyEqual(_ rhs: [Float32], precision: Int) -> Bool {
+        let maxDifference = powf(10.0, Float(-precision))
         let lhs = self
         
         guard ( lhs.width * lhs.height * lhs.featureChannels == rhs.count ) else { return false }
@@ -168,6 +168,8 @@ extension MPSImage {
         
         for i in 0...(rhs.count - 1) {
             if abs(lhsFloats[i] - rhs[i]) > maxDifference {
+                print(lhsFloats[i])
+                print(rhs[i])
                 return false
             }
         }

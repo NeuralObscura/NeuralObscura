@@ -15,10 +15,12 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
     
     func testProofOfConcept() {
         /* Create an input test image */
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 3, 3, 0,
-                                                                            0, 6, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 3, 3, 0,
+                                                   0, 6, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         /* Create our CommandEncoder */
         let w: [Float] = [1, 1,
                           1, 1]
@@ -40,11 +42,14 @@ class MPSCNNConvolutionTests: CommandEncoderBaseTest {
         conv.clipRect.size = MTLSizeMake(testImg.width + 1, testImg.height + 1, 1)
         
         /* Create an expected output image */
-        let expImg = device.MakeMPSImage(width: 5, height: 5, values: [0, 0, 0, 0, 0,
-                                                                           0, 3, 6, 3, 0,
-                                                                           0, 9, 13, 4, 0,
-                                                                           0, 6,  7, 1, 0,
-                                                                           0, 0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 5,
+                                         height: 5,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0, 0,
+                                                  0, 3, 6, 3, 0,
+                                                  0, 9, 13, 4, 0,
+                                                  0, 6,  7, 1, 0,
+                                                  0, 0, 0, 0, 0] as [Float32])
 
         /*  Create an output image */
         let outputImg = MPSImage(

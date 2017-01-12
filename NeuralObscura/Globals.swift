@@ -9,4 +9,22 @@
 import Foundation
 import MetalPerformanceShaders
 
-let textureFormat = MPSImageFeatureChannelFormat.float32
+let textureFormat = MPSImageFeatureChannelFormat.float16
+
+var testTextureFormatRGBA: MTLPixelFormat {
+    switch textureFormat {
+    case MPSImageFeatureChannelFormat.float16:
+        return MTLPixelFormat.rgba16Float
+    default:
+        return MTLPixelFormat.rgba32Float
+    }
+}
+
+var testTextureFormatR: MTLPixelFormat {
+    switch textureFormat {
+    case MPSImageFeatureChannelFormat.float16:
+        return MTLPixelFormat.r16Float
+    default:
+        return MTLPixelFormat.r32Float
+    }
+}

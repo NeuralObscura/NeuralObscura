@@ -16,7 +16,7 @@ class RGBAToBRGALayerTests: CommandEncoderBaseTest {
         let testImg = device.MakeMPSImage(width: 2,
                                               height: 2,
                                               featureChannels: 4,
-                                              pixelFormat: MTLPixelFormat.rgba32Float,
+                                              pixelFormat: testTextureFormatRGBA,
                                               textureType: .type2D,
                                               values: [[1,2,3,4], [4,3,2,1],
                                                        [4,3,2,1], [1,2,3,4]] as [[Float32]])
@@ -30,7 +30,7 @@ class RGBAToBRGALayerTests: CommandEncoderBaseTest {
         let expImg = device.MakeMPSImage(width: 2,
                                              height: 2,
                                              featureChannels: 4,
-                                             pixelFormat: MTLPixelFormat.rgba32Float,
+                                             pixelFormat: testTextureFormatRGBA,
                                              textureType: .type2D,
                                              values: [[3,1,2,4], [2,4,3,1],
                                                       [2,4,3,1], [3,1,2,4]] as [[Float32]])

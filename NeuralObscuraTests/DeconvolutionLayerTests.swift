@@ -33,10 +33,13 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             padding: 0,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                           0, 1, 0, 0,
-                                                                           0, 0, 1, 0,
-                                                                           0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 4,
+                                         height: 4,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0,
+                                                  0, 1, 0, 0,
+                                                  0, 0, 1, 0,
+                                                  0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -46,10 +49,12 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testIdentityHalfPadding() {
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 0,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 1, 0, 0,
+                                                   0, 0, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -66,10 +71,13 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             padding: 1,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                           0, 1, 0, 0,
-                                                                           0, 0, 1, 0,
-                                                                           0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 4,
+                                         height: 4,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0,
+                                                  0, 1, 0, 0,
+                                                  0, 0, 1, 0,
+                                                  0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -79,12 +87,14 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testIdentityFullPadding() {
-        let testImg = device.MakeMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
-                                                                            0, 0, 0, 0, 0, 0,
-                                                                            0, 0, 1, 0, 1, 0,
-                                                                            0, 0, 0, 1, 0, 0,
-                                                                            0, 0, 0, 0, 0, 0,
-                                                                            0, 0, 0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 6,
+                                          height: 6,
+                                          values: [0, 0, 0, 0, 0, 0,
+                                                   0, 0, 0, 0, 0, 0,
+                                                   0, 0, 1, 0, 1, 0,
+                                                   0, 0, 0, 1, 0, 0,
+                                                   0, 0, 0, 0, 0, 0,
+                                                   0, 0, 0, 0, 0, 0] as [Float32])
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
                                           0, 1, 0,
@@ -100,10 +110,13 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             padding: 2,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                           0, 1, 0, 1,
-                                                                           0, 0, 1, 0,
-                                                                           0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 4,
+                                         height: 4,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0,
+                                                  0, 1, 0, 1,
+                                                  0, 0, 1, 0,
+                                                  0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -113,10 +126,12 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testSumHalfPaddingNonUnitStride() {
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 0,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 1, 0, 0,
+                                                   0, 0, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
@@ -134,13 +149,16 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             stride: 2,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 7, height: 7, values: [0, 0, 0, 0, 0, 0, 0,
-                                                                           0, 1, 1, 1, 0, 0, 0,
-                                                                           0, 1, 1, 1, 0, 0, 0,
-                                                                           0, 1, 1, 2, 1, 1, 0,
-                                                                           0, 0, 0, 1, 1, 1, 0,
-                                                                           0, 0, 0, 1, 1, 1, 0,
-                                                                           0, 0, 0, 0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 7,
+                                         height: 7,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0, 0, 0, 0,
+                                                  0, 1, 1, 1, 0, 0, 0,
+                                                  0, 1, 1, 1, 0, 0, 0,
+                                                  0, 1, 1, 2, 1, 1, 0,
+                                                  0, 0, 0, 1, 1, 1, 0,
+                                                  0, 0, 0, 1, 1, 1, 0,
+                                                  0, 0, 0, 0, 0, 0, 0] as [Float32])
         
         /* Run our test */
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)

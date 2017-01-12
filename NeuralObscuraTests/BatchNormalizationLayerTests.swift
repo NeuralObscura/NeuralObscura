@@ -63,12 +63,12 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
                       -0.41, -0.04, 0.63, 0.09, 0.66, -0.42, -0.75, 0.09,
                       -0.73, 0.12, 0.74, 0.09, 0.57, -0.38, -0.51, 0.09] as [Float32]
 
-        XCTAssert(outputImg.isLossyEqual(expImg, percision: 2))
+        XCTAssert(outputImg.isLossyEqual(expImg, precision: 2))
     }
 
     func testOneFeatureBatchNormalization() {
         let testImg = device.MakeMPSImage(width: 2, height: 2, values: [1, 1,
-                                                                            1, 1] as [Float32])
+                                                                        1, 1] as [Float32])
         /* Create our CommandEncoder */
         let gamma_pb = MemoryParameterBuffer([2])
         let beta_pb = MemoryParameterBuffer([1])
@@ -85,8 +85,11 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
 
 
-        let expImg = device.MakeMPSImage(width: 2, height: 2, values: [3, 3,
-                                                                           3, 3] as [Float32])
+        let expImg = device.MakeMPSImage(width: 2,
+                                         height: 2,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [3, 3,
+                                                  3, 3] as [Float32])
 
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -94,11 +97,11 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
 
     func testMultipleFeatureBatchNormalization() {
         let testImg = device.MakeMPSImage(width: 2,
-                                              height: 2,
-                                              featureChannels: 4,
-                                              pixelFormat: MTLPixelFormat.rgba32Float,
-                                              values: [[1,2,3,4], [4,3,2,1],
-                                                       [3,4,2,1], [2,1,3,4]] as [[Float32]])
+                                          height: 2,
+                                          featureChannels: 4,
+                                          pixelFormat: testTextureFormatRGBA,
+                                          values: [[1,2,3,4], [4,3,2,1],
+                                                   [3,4,2,1], [2,1,3,4]] as [[Float32]])
 
         /* Create our CommandEncoder*/
         let gamma_pb = MemoryParameterBuffer([3,2,2,3])
@@ -117,11 +120,11 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
 
         let expImg = device.MakeMPSImage(width: 2,
-                                             height: 2,
-                                             featureChannels: 4,
-                                             pixelFormat: MTLPixelFormat.rgba32Float,
-                                             values: [[4,4,7,11], [13,6,5,2],
-                                                      [10,8,5,2], [7,2,7,11]] as [[Float32]])
+                                         height: 2,
+                                         featureChannels: 4,
+                                         pixelFormat: testTextureFormatRGBA,
+                                         values: [[4,4,7,11], [13,6,5,2],
+                                                  [10,8,5,2], [7,2,7,11]] as [[Float32]])
 
 
         /* Verify the result */

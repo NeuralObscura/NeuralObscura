@@ -13,7 +13,7 @@ import MetalPerformanceShaders
 @testable import NeuralObscura
 
 class FileParameterBufferTests: CommandEncoderBaseTest {
-    let percision: Float = 10000
+    let precision: Float = 10000
 
     func testFileParameterBufferLoadsBias() {
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
@@ -31,8 +31,8 @@ class FileParameterBufferTests: CommandEncoderBaseTest {
         let buffer = UnsafeBufferPointer<Float32>(start: b_pb.pointer(), count: b_pb.length / MemoryLayout<Float32>.size)
 
         buffer.enumerated().forEach { [unowned self] (idx, e) in
-            let actual   = Int(e * self.percision)
-            let expected = Int(expectedBias[idx] * self.percision)
+            let actual   = Int(e * self.precision)
+            let expected = Int(expectedBias[idx] * self.precision)
             XCTAssertEqual(actual, expected)
         }
     }
