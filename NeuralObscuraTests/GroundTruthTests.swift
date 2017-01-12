@@ -16,7 +16,7 @@ class GroundTruthTests: CommandEncoderBaseTest {
     func testGroundTruthConv() {
         let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
         let image = UIImage.init(contentsOfFile: debug2ImagePath)!
-        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 
@@ -62,7 +62,7 @@ class GroundTruthTests: CommandEncoderBaseTest {
     func testGroundTruthConvRelu() {
         let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
         let image = UIImage.init(contentsOfFile: debug2ImagePath)!
-        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 

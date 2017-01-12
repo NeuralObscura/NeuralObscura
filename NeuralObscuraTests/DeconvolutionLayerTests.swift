@@ -15,7 +15,7 @@ import MetalPerformanceShaders
 class DeconvolutionLayerTests: CommandEncoderBaseTest {
     
     func testIdentityNoPadding() {
-        let testImg = device.MakeTestMPSImage(width: 2, height: 2, values: [1, 0,
+        let testImg = device.MakeMPSImage(width: 2, height: 2, values: [1, 0,
                                                                             0, 1] as [Float32])
         
         /* Create our CommandEncoder */
@@ -33,7 +33,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             padding: 0,
             debug: true)
         
-        let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
+        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 0,
                                                                            0, 0, 1, 0,
                                                                            0, 0, 0, 0] as [Float32])
@@ -46,7 +46,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testIdentityHalfPadding() {
-        let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
+        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 0,
                                                                             0, 0, 1, 0,
                                                                             0, 0, 0, 0] as [Float32])
@@ -66,7 +66,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             padding: 1,
             debug: true)
         
-        let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
+        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 0,
                                                                            0, 0, 1, 0,
                                                                            0, 0, 0, 0] as [Float32])
@@ -79,7 +79,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testIdentityFullPadding() {
-        let testImg = device.MakeTestMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
+        let testImg = device.MakeMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
                                                                             0, 0, 0, 0, 0, 0,
                                                                             0, 0, 1, 0, 1, 0,
                                                                             0, 0, 0, 1, 0, 0,
@@ -100,7 +100,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             padding: 2,
             debug: true)
         
-        let expImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
+        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                            0, 1, 0, 1,
                                                                            0, 0, 1, 0,
                                                                            0, 0, 0, 0] as [Float32])
@@ -113,7 +113,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testSumHalfPaddingNonUnitStride() {
-        let testImg = device.MakeTestMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
+        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
                                                                             0, 1, 0, 0,
                                                                             0, 0, 1, 0,
                                                                             0, 0, 0, 0] as [Float32])
@@ -134,7 +134,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             stride: 2,
             debug: true)
         
-        let expImg = device.MakeTestMPSImage(width: 7, height: 7, values: [0, 0, 0, 0, 0, 0, 0,
+        let expImg = device.MakeMPSImage(width: 7, height: 7, values: [0, 0, 0, 0, 0, 0, 0,
                                                                            0, 1, 1, 1, 0, 0, 0,
                                                                            0, 1, 1, 1, 0, 0, 0,
                                                                            0, 1, 1, 2, 1, 1, 0,

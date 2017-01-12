@@ -410,7 +410,7 @@ class NeuralStyleModel {
         modelHandle = h
     }
 
-    func forward(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
+    func execute(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
         var outputImage: MPSImage? = nil
 
         autoreleasepool {

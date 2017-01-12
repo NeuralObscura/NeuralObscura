@@ -14,7 +14,7 @@ import MetalPerformanceShaders
 class ReLULayerTests: CommandEncoderBaseTest {
 
     func testReLULayer() {
-        let testImg = device.MakeTestMPSImage(width: 2, height: 2, values: [-9, -1,
+        let testImg = device.MakeMPSImage(width: 2, height: 2, values: [-9, -1,
                                                                             1, 2] as [Float32])
         /* Create our CommandEncoder */
         let relu = ReLULayer()
@@ -23,7 +23,7 @@ class ReLULayerTests: CommandEncoderBaseTest {
         let outputImg = relu.execute(commandBuffer: commandBuffer, sourceImage: testImg)
 
 
-        let expImg = device.MakeTestMPSImage(width: 2, height: 2, values: [0, 0,
+        let expImg = device.MakeMPSImage(width: 2, height: 2, values: [0, 0,
                                                                            1, 2] as [Float32])
 
         /* Verify the result */

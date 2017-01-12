@@ -13,21 +13,21 @@ import MetalPerformanceShaders
 
 class AdditionShaderTests: CommandEncoderBaseTest {
     func testResidualBlockSummationShader() {
-        let testImg1 = device.MakeTestMPSImage(width: 2,
+        let testImg1 = device.MakeMPSImage(width: 2,
                                                height: 2,
                                                featureChannels: 4,
                                                pixelFormat: MTLPixelFormat.rgba32Float,
                                                values: [[1,2,3,4], [4,3,2,1],
                                                         [3,4,2,1], [2,1,3,4]])
 
-        let testImg2 = device.MakeTestMPSImage(width: 2,
+        let testImg2 = device.MakeMPSImage(width: 2,
                                                height: 2,
                                                featureChannels: 4,
                                                pixelFormat: MTLPixelFormat.rgba32Float,
                                                values: [[1,2,3,4], [4,3,2,1],
                                                         [3,4,2,1], [2,1,3,4]])
 
-        let outputImg = device.MakeTestMPSImage(width: 2,
+        let outputImg = device.MakeMPSImage(width: 2,
                                                 height: 2,
                                                 featureChannels: 4,
                                                 pixelFormat: MTLPixelFormat.rgba32Float,
@@ -49,7 +49,7 @@ class AdditionShaderTests: CommandEncoderBaseTest {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
 
-        let expImg = device.MakeTestMPSImage(width: 2,
+        let expImg = device.MakeMPSImage(width: 2,
                                              height: 2,
                                              featureChannels: 4,
                                              pixelFormat: MTLPixelFormat.rgba32Float,

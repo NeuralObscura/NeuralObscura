@@ -18,7 +18,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let featureChannelsOut = 32
         let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
         let image = UIImage.init(contentsOfFile: debug2ImagePath)!
-        let inputMtlTexture = image.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: featureChannelsIn)
 
@@ -67,7 +67,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
     }
 
     func testOneFeatureBatchNormalization() {
-        let testImg = device.MakeTestMPSImage(width: 2, height: 2, values: [1, 1,
+        let testImg = device.MakeMPSImage(width: 2, height: 2, values: [1, 1,
                                                                             1, 1] as [Float32])
         /* Create our CommandEncoder */
         let gamma_pb = MemoryParameterBuffer([2])
@@ -85,7 +85,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
 
 
-        let expImg = device.MakeTestMPSImage(width: 2, height: 2, values: [3, 3,
+        let expImg = device.MakeMPSImage(width: 2, height: 2, values: [3, 3,
                                                                            3, 3] as [Float32])
 
         /* Verify the result */
@@ -93,7 +93,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
     }
 
     func testMultipleFeatureBatchNormalization() {
-        let testImg = device.MakeTestMPSImage(width: 2,
+        let testImg = device.MakeMPSImage(width: 2,
                                               height: 2,
                                               featureChannels: 4,
                                               pixelFormat: MTLPixelFormat.rgba32Float,
@@ -116,7 +116,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         /* Run our test */
         let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
 
-        let expImg = device.MakeTestMPSImage(width: 2,
+        let expImg = device.MakeMPSImage(width: 2,
                                              height: 2,
                                              featureChannels: 4,
                                              pixelFormat: MTLPixelFormat.rgba32Float,

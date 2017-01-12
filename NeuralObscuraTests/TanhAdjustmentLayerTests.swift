@@ -13,7 +13,7 @@ import MetalPerformanceShaders
 
 class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
     func testTanhAdjustmentLayer() {
-        let testImg = device.MakeTestMPSImage(width: 2,
+        let testImg = device.MakeMPSImage(width: 2,
                                               height: 2,
                                               featureChannels: 4,
                                               pixelFormat: MTLPixelFormat.rgba32Float,
@@ -27,7 +27,7 @@ class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
         /* Run our test */
         let outputImg = tanhAdj.execute(commandBuffer: commandBuffer, sourceImage: testImg)
 
-        let expImg = device.MakeTestMPSImage(width: 2,
+        let expImg = device.MakeMPSImage(width: 2,
                                              height: 2,
                                              featureChannels: 4,
                                              pixelFormat: MTLPixelFormat.rgba32Float,
