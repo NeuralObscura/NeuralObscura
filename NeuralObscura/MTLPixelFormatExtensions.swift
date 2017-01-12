@@ -8,7 +8,7 @@
 import MetalPerformanceShaders
 
 extension MTLPixelFormat {
-    var pixelCount: Int {
+    var channelCount: Int {
         switch self {
         case .rgba8Unorm:
             return 4
@@ -47,18 +47,18 @@ extension MTLPixelFormat {
     }
 
     func featureChannelsToSlices(_ featureChannels: Int) -> Int {
-        return Int(ceil(Float(featureChannels) / Float(self.pixelCount)))
+        return Int(ceil(Float(featureChannels) / Float(self.channelCount)))
     }
 
     func typedSize(width: Int, height: Int) -> Int {
-        return width * height * self.pixelCount
+        return width * height * self.channelCount
     }
 
     func featureChannels(_ arrayLength: Int) -> Int {
-        return arrayLength * self.pixelCount
+        return arrayLength * self.channelCount
     }
 
     func bytesPerRow(_ width: Int) -> Int {
-        return width * self.pixelCount * self.sizeOfDataType
+        return width * self.channelCount * self.sizeOfDataType
     }
 }

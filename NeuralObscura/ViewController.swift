@@ -100,14 +100,14 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         // note the configurable options
         let input = imageView.image!
 
-        let inputMtlTexture = input.createMTLTextureForDevice(device: ShaderRegistry.getDevice(), pixelFormat: .rgba32Float)
-        let output = model.forward(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: input, pixelFormat: .rgba32Float)
+        let output = model.execute(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
         print("done")
 
         if(Int(input.size.width) == inputMtlTexture.width) {
-            imageView.image! = UIImage.MPSImageToUIImage(image: output, orientation: UIImageOrientation.up)
+            imageView.image! = output.toUIImage(orientation: UIImageOrientation.up)
         } else {
-            imageView.image! = UIImage.MPSImageToUIImage(image: output, orientation: UIImageOrientation.right)
+            imageView.image! = output.toUIImage(orientation: UIImageOrientation.right)
         }
     }
 }
