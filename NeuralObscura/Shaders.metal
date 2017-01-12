@@ -79,14 +79,15 @@ kernel void batch_normalization_nt(texture2d_array<float, access::read> inTextur
     }
 
     float4 mean = sum / float4(width*height);
-    float4 stddev = float4(0.0, 0.0, 0.0, 0.0);
+    float4 vari = float4(0.0, 0.0, 0.0, 0.0);
     for(uint j = 0; j < width; j++) {
         for(uint i = 0; i < height; i++) {
-            stddev += pow((inTexture.read(uint2(j, i), gid.z) - mean), 2);
+            vari += (inTexture.read(uint2(j, i), gid.z) - mean) *
+            (inTexture.read(uint2(j, i), gid.z) - mean);
         }
     }
-    stddev /= (width*height)-1;
-    stddev = sqrt(stddev) + 0.00002; // Prevent divide by 0 (chainer constant)
+    vari /= (width*height);
+    float4 stddev = sqrt(vari) + 0.0000001; // Prevent divide by 0 (chainer constant)
 
     for(uint j = 0; j < width; j++) {
         for(uint i = 0; i < height; i++) {
