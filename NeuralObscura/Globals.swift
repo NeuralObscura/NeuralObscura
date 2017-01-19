@@ -9,4 +9,6 @@
 import Foundation
 import MetalPerformanceShaders
 
-let textureFormat = MPSImageFeatureChannelFormat.float32
+let textureFormat = MPSImageFeatureChannelFormat.float16
+
+let blockSize = 8192
