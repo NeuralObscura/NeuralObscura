@@ -14,10 +14,12 @@ import MetalPerformanceShaders
 class ConvolutionLayerTests: CommandEncoderBaseTest {
     
     func testIdentityNoPadding() {
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 1,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 1, 0, 1,
+                                                   0, 0, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -34,8 +36,11 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             padding: 0,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 2, height: 2, values: [1, 0,
-                                                                           0, 1] as [Float32])
+        let expImg = device.MakeMPSImage(width: 2,
+                                         height: 2,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [1, 0,
+                                                  0, 1] as [Float32])
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -46,9 +51,9 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
     
     func testIdentityHalfPadding() {
         let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 1,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+                                                                        0, 1, 0, 1,
+                                                                        0, 0, 1, 0,
+                                                                        0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -65,10 +70,13 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             padding: 1,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                           0, 1, 0, 1,
-                                                                           0, 0, 1, 0,
-                                                                           0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 4,
+                                         height: 4,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0,
+                                                  0, 1, 0, 1,
+                                                  0, 0, 1, 0,
+                                                  0, 0, 0, 0] as [Float32])
         
         
         /* Run our test */
@@ -79,10 +87,12 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
     }
 
     func testIdentityFullPadding() {
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 1,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 1, 0, 1,
+                                                   0, 0, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([0, 0, 0,
@@ -99,12 +109,15 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             padding: 2,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
-                                                                           0, 0, 0, 0, 0, 0,
-                                                                           0, 0, 1, 0, 1, 0,
-                                                                           0, 0, 0, 1, 0, 0,
-                                                                           0, 0, 0, 0, 0, 0,
-                                                                           0, 0, 0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 6,
+                                         height: 6,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0, 0, 0,
+                                                  0, 0, 0, 0, 0, 0,
+                                                  0, 0, 1, 0, 1, 0,
+                                                  0, 0, 0, 1, 0, 0,
+                                                  0, 0, 0, 0, 0, 0,
+                                                  0, 0, 0, 0, 0, 0] as [Float32])
         
         
         /* Run our test */
@@ -135,8 +148,11 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             padding: 0,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 2, height: 2, values: [2, 3,
-                                                                           2, 3] as [Float32])
+        let expImg = device.MakeMPSImage(width: 2,
+                                         height: 2,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [2, 3,
+                                                  2, 3] as [Float32])
         
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
@@ -146,10 +162,12 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testSumHalfPadding() {
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 1,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 1, 0, 1,
+                                                   0, 0, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
                                           1, 1, 1,
@@ -165,10 +183,13 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             padding: 1,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 4, height: 4, values: [1, 1, 2, 1,
-                                                                           1, 2, 3, 2,
-                                                                           1, 2, 3, 2,
-                                                                           0, 1, 1, 1] as [Float32])
+        let expImg = device.MakeMPSImage(width: 4,
+                                         height: 4,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [1, 1, 2, 1,
+                                                  1, 2, 3, 2,
+                                                  1, 2, 3, 2,
+                                                  0, 1, 1, 1] as [Float32])
         
         
         /* Run our test */
@@ -178,10 +199,12 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
     }
     
     func testSumFullPadding() {
-        let testImg = device.MakeMPSImage(width: 4, height: 4, values: [0, 0, 0, 0,
-                                                                            0, 1, 0, 1,
-                                                                            0, 0, 1, 0,
-                                                                            0, 0, 0, 0] as [Float32])
+        let testImg = device.MakeMPSImage(width: 4,
+                                          height: 4,
+                                          values: [0, 0, 0, 0,
+                                                   0, 1, 0, 1,
+                                                   0, 0, 1, 0,
+                                                   0, 0, 0, 0] as [Float32])
         
         /* Create our CommandEncoder */
         let w_pb = MemoryParameterBuffer([1, 1, 1,
@@ -198,12 +221,15 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             padding: 2,
             debug: true)
         
-        let expImg = device.MakeMPSImage(width: 6, height: 6, values: [0, 0, 0, 0, 0, 0,
-                                                                           0, 1, 1, 2, 1, 1,
-                                                                           0, 1, 2, 3, 2, 1,
-                                                                           0, 1, 2, 3, 2, 1,
-                                                                           0, 0, 1, 1, 1, 0,
-                                                                           0, 0, 0, 0, 0, 0] as [Float32])
+        let expImg = device.MakeMPSImage(width: 6,
+                                         height: 6,
+                                         pixelFormat: testTextureFormatR,
+                                         values: [0, 0, 0, 0, 0, 0,
+                                                  0, 1, 1, 2, 1, 1,
+                                                  0, 1, 2, 3, 2, 1,
+                                                  0, 1, 2, 3, 2, 1,
+                                                  0, 0, 1, 1, 1, 0,
+                                                  0, 0, 0, 0, 0, 0] as [Float32])
         
         
         /* Run our test */

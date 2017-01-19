@@ -16,7 +16,7 @@ class GroundTruthTests: CommandEncoderBaseTest {
     func testGroundTruthConv() {
         let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
         let image = UIImage.init(contentsOfFile: debug2ImagePath)!
-        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: testTextureFormatRGBA)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 
@@ -56,13 +56,13 @@ class GroundTruthTests: CommandEncoderBaseTest {
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
         /* Verify the result */
-        XCTAssert(outputImg.isLossyEqual(expImg, percision: 2))
+        XCTAssert(outputImg.isLossyEqual(expImg, precision: -1))
     }
 
     func testGroundTruthConvRelu() {
         let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
         let image = UIImage.init(contentsOfFile: debug2ImagePath)!
-        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: testTextureFormatRGBA)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 
@@ -101,8 +101,9 @@ class GroundTruthTests: CommandEncoderBaseTest {
 
         /* Run our test */
         let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+
         /* Verify the result */
-        XCTAssert(outputImg.isLossyEqual(expImg, percision: 2))
+        XCTAssert(outputImg.isLossyEqual(expImg, precision: -1))
     }
 
 }
