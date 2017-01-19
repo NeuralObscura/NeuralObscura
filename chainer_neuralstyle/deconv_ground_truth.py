@@ -90,6 +90,9 @@ x = Variable(image)
 (td, gt) = model(x)
 td_result = cuda.to_cpu(td.data)
 gt_result = cuda.to_cpu(gt.data)
-np.save(args.tdout, td_result)
-np.save(args.gtout, gt_result)
+# Original VGG form (c_o, c_i, h, w) -> (c_o, h, w, c_i)
+np.save(args.tdout, td_result.transpose((0, 2, 3, 1)))
+np.save(args.gtout, gt_result.transpose((0, 2, 3, 1)))
 
+# Run me:
+# python chainer_neuralstyle/deconv_ground_truth.py NeuralObscura/debug.png --gtout NeuralObscuraTests/testdata/deconv-ground-truth.npy --tdout NeuralObscuraTests/testdata/deconv-test-data.npy --params chainer_neuralstyle/models/composition.model

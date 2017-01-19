@@ -46,7 +46,7 @@ extension MPSImage {
         guard let rhs = rawRhs as? MPSImage else {
             return false
         }
-        
+
         guard ( lhs.width == rhs.width &&
             lhs.height == rhs.height &&
             lhs.pixelSize == rhs.pixelSize &&
@@ -299,7 +299,9 @@ extension MPSImage {
         return outputString
     }
     
-    static func loadFromNumpy(_ url: URL) {
+    static func loadFromNumpy(_ url: URL,
+                              destinationPixelFormat: MTLPixelFormat = .rgba32Float
+                              ) -> MPSImage {
         // determine correct way of addressing file (string?)
         // first open file for binary reading
         let data = try! NSMutableData(contentsOf: url, options: Data.ReadingOptions.uncached)
@@ -330,13 +332,55 @@ extension MPSImage {
         let shape = shapeString .map { (dim) -> Int in
             Int(dim)!
         }
-        
-        // then copy file body to buffer
-        // close file or release data object
-        // then init texture with buffer (or straight to mpsimage?)
-        // return mps image
-        
-        // TODO: Add ground truth test files to project
-        // TODO: Group ML tests
+
+        let bodyLen = shape.reduce(1,*)
+
+        /*
+         The first 6 bytes are a magic string: exactly “x93NUMPY”.
+         The next 1 byte is an unsigned byte: the major version number of the 
+           file format, e.g. x01.
+         The next 1 byte is an unsigned byte: the minor version number of the 
+           file format, e.g. x00. Note: the version of the file format is not 
+           tied to the version of the numpy package.
+         The next 2 bytes form a little-endian unsigned short int: the length 
+           of the header data HEADER_LEN.
+         6 + 1 + 1 + 2 + headerLen
+        */
+        let bodyData = (ptr + 10 + headerLen).bindMemory(to: Float32.self, capacity: bodyLen)
+        let bodyBuff = UnsafeBufferPointer<Float32>.init(start: bodyData, count: bodyLen)
+
+        var values = [] as [Float32]
+
+        bodyBuff.forEach { (v) in
+            values.append(v)
+        }
+
+        var result: MPSImage
+
+        switch shape.count {
+        case 2:
+            let width = shape[0]
+            let height = shape[1]
+            result =  ShaderRegistry.getDevice().MakeMPSImage(width: width,
+                                                           height: height,
+                                                           pixelFormat: destinationPixelFormat,
+                                                           values: values)
+        case 4:
+            let channelsOut = shape[0]
+            let height = shape[1]
+            let width = shape[2]
+            let channelsIn = shape[3]
+
+            result =  ShaderRegistry.getDevice().MakeMPSImage(width: width,
+                                                              height: height,
+                                                              featureChannels: channelsIn,
+                                                              pixelFormat: destinationPixelFormat,
+                                                              values: values)
+
+        default:
+            fatalError("Unknown shape dimensions: \(shape)")
+        }
+
+        return result
     }
 }

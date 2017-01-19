@@ -45,35 +45,79 @@ extension MTLDevice {
         textureDesc.width = width
         textureDesc.height = height
         textureDesc.pixelFormat = pixelFormat
+        textureDesc.arrayLength = pixelFormat.featureChannelsToSlices(featureChannels)
         let texture = self.makeTexture(descriptor: textureDesc)
         let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
-
-        switch pixelFormat {
-        case .rgba16Float, .r16Float:
-            let sourceBytes = Conversions.float32toFloat16(values)
-            texture.replace(
-                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                mipmapLevel: 0,
-                withBytes: sourceBytes,
-                bytesPerRow: bytesPerRow)
-        case .rgba8Unorm, .r8Unorm:
-            var convertedValues = [UInt8]()
-            for v in values {
-                convertedValues.append(UInt8(v))
-            }
-            texture.replace(
-                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                mipmapLevel: 0,
-                withBytes: convertedValues,
-                bytesPerRow: bytesPerRow)
-        default:
-            texture.replace(
-                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                mipmapLevel: 0,
-                withBytes: values,
-                bytesPerRow: bytesPerRow)
+        let bytesPerImage = textureDesc.pixelFormat.bytesPerImage(width: textureDesc.width,
+                                                                  height: textureDesc.height)
+        let sliceWidth = pixelFormat.typedSize(width: textureDesc.width,
+                                               height: textureDesc.height)
+        let valuesBySlice = stride(from: 0, to: values.count, by: sliceWidth).map {
+            Array(values[$0..<min($0 + sliceWidth, values.count)])
         }
 
+        if textureType == .type2DArray {
+            for slice in 0...textureDesc.arrayLength-1 {
+                switch pixelFormat {
+                case .rgba16Float, .r16Float:
+                    let sourceBytes = Conversions.float32toFloat16(valuesBySlice[slice])
+                    texture.replace(
+                        region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                        mipmapLevel: 0,
+                        slice: slice,
+                        withBytes: sourceBytes,
+                        bytesPerRow: bytesPerRow,
+                        bytesPerImage: bytesPerImage)
+                case .rgba8Unorm, .r8Unorm:
+                    var convertedValues = [UInt8]()
+                    for v in valuesBySlice[slice] {
+                        convertedValues.append(UInt8(v))
+                    }
+                    texture.replace(
+                        region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                        mipmapLevel: 0,
+                        slice: slice,
+                        withBytes: convertedValues,
+                        bytesPerRow: bytesPerRow,
+                        bytesPerImage: bytesPerImage)
+                default:
+                    texture.replace(
+                        region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                        mipmapLevel: 0,
+                        slice: slice,
+                        withBytes: valuesBySlice[slice],
+                        bytesPerRow: bytesPerRow,
+                        bytesPerImage: bytesPerImage)
+                }
+            }
+
+        } else {
+            switch pixelFormat {
+            case .rgba16Float, .r16Float:
+                let sourceBytes = Conversions.float32toFloat16(values)
+                texture.replace(
+                    region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                    mipmapLevel: 0,
+                    withBytes: sourceBytes,
+                    bytesPerRow: bytesPerRow)
+            case .rgba8Unorm, .r8Unorm:
+                var convertedValues = [UInt8]()
+                for v in values {
+                    convertedValues.append(UInt8(v))
+                }
+                texture.replace(
+                    region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                    mipmapLevel: 0,
+                    withBytes: convertedValues,
+                    bytesPerRow: bytesPerRow)
+            default:
+                texture.replace(
+                    region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
+                    mipmapLevel: 0,
+                    withBytes: values,
+                    bytesPerRow: bytesPerRow)
+            }
+        }
         return MPSImage(texture: texture, featureChannels: featureChannels)
     }
     
