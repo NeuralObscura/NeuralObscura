@@ -105,5 +105,10 @@ class GroundTruthTests: CommandEncoderBaseTest {
         /* Verify the result */
         XCTAssert(outputImg.isLossyEqual(expImg, precision: -1))
     }
-
+    
+    func testGroundTruthDeconv() {
+        let url = Bundle(for: type(of: self))
+            .url(forResource: "deconv-test-data", withExtension: "npy", subdirectory: "testdata")!
+        MPSImage.loadFromNumpy(url)
+    }
 }

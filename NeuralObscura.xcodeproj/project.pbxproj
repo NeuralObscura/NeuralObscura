@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		072D18901E2D7D8B00E3A502 /* testdata in Resources */ = {isa = PBXBuildFile; fileRef = 072D188F1E2D7D8B00E3A502 /* testdata */; };
 		0762E9771E157CF4005EF3EB /* MTLDeviceExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0762E9761E157CF4005EF3EB /* MTLDeviceExtensions.swift */; };
 		0762E9791E157D31005EF3EB /* MPSImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0762E9781E157D31005EF3EB /* MPSImageExtensions.swift */; };
 		0762E97B1E158A58005EF3EB /* MTLTextureExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0762E97A1E158A58005EF3EB /* MTLTextureExtensions.swift */; };
@@ -73,6 +74,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		072D188F1E2D7D8B00E3A502 /* testdata */ = {isa = PBXFileReference; lastKnownFileType = folder; path = testdata; sourceTree = "<group>"; };
 		0762E9761E157CF4005EF3EB /* MTLDeviceExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLDeviceExtensions.swift; sourceTree = "<group>"; };
 		0762E9781E157D31005EF3EB /* MPSImageExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MPSImageExtensions.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		0762E97A1E158A58005EF3EB /* MTLTextureExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLTextureExtensions.swift; sourceTree = "<group>"; };
@@ -238,6 +240,7 @@
 		DA0B0C721D8BAB4000ED7982 /* NeuralObscuraTests */ = {
 			isa = PBXGroup;
 			children = (
+				072D188F1E2D7D8B00E3A502 /* testdata */,
 				DA8A6C831DDD5F5800C6D125 /* AdditionShaderTests.swift */,
 				DA8A6C841DDD5F5800C6D125 /* FileParameterBufferTests.swift */,
 				DA8A6C851DDD5F5800C6D125 /* ImageFormatTests.swift */,
@@ -398,6 +401,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				072D18901E2D7D8B00E3A502 /* testdata in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

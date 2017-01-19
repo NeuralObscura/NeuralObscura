@@ -298,4 +298,45 @@ extension MPSImage {
         
         return outputString
     }
+    
+    static func loadFromNumpy(_ url: URL) {
+        // determine correct way of addressing file (string?)
+        // first open file for binary reading
+        let data = try! NSMutableData(contentsOf: url, options: Data.ReadingOptions.uncached)
+        let ptr = data.bytes
+        
+        // read header to determine shape, assume float
+        let magicStringPtr = ptr.bindMemory(to: UInt8.self, capacity: 8)
+        let magicStringBuf: UnsafeBufferPointer<UInt8> = UnsafeBufferPointer<UInt8>.init(start: magicStringPtr, count: 8)
+        let expectedMagicString: [UInt8] = [0x93, 0x4E, 0x55, 0x4D, 0x50, 0x59, 0x01, 0x00] /* 0x93NUMPY10 */
+        assert(magicStringBuf.elementsEqual(expectedMagicString), "Invalid .npy file")
+        let headerLen = Int((ptr + 8).bindMemory(to: UInt16.self, capacity: 1).pointee)
+        let headerData = data.subdata(with: NSMakeRange(10, headerLen))
+        let headerString = String(data: headerData, encoding: .ascii)!
+        let cmpts = headerString.components(separatedBy: "'")
+        
+        // Parse numpy type description
+        let descr = cmpts[3]
+        assert(descr == "<f4", "little-endian 32 bit floats (<f4) are the only numpy type currently supported")
+        
+        // Assume 'fortran_order': False
+        
+        // Parse shape
+        let shapeArea = cmpts[8]
+        let shapeEndRange = shapeArea.range(of: "}")!
+        let shapeStart = shapeArea.index(shapeArea.startIndex, offsetBy: 3)
+        let shapeEnd = shapeArea.index(shapeEndRange.upperBound, offsetBy: -4)
+        let shapeString = String(shapeArea.substring(with: shapeStart ..< shapeEnd))!.components(separatedBy: ", ")
+        let shape = shapeString .map { (dim) -> Int in
+            Int(dim)!
+        }
+        
+        // then copy file body to buffer
+        // close file or release data object
+        // then init texture with buffer (or straight to mpsimage?)
+        // return mps image
+        
+        // TODO: Add ground truth test files to project
+        // TODO: Group ML tests
+    }
 }
