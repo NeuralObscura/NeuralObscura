@@ -24,4 +24,19 @@ extension MTLTexture {
 
         return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
     }
+
+    func fill(_ sourceBytes: UnsafeRawPointer,
+              slice: Int = 0) {
+        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
+        let bytesPerImage = bytesPerRow * self.height
+
+        self.replace(
+            region: MTLRegionMake2D(0, 0, self.width, self.height),
+            mipmapLevel: 0,
+            slice: slice,
+            withBytes: sourceBytes,
+            bytesPerRow: bytesPerRow,
+            bytesPerImage: bytesPerImage)
+    }
+
 }

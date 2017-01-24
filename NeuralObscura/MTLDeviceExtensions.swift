@@ -50,10 +50,8 @@ extension MTLDevice {
 
         let texture = { () -> MTLTexture in 
             switch textureType {
-            case .type2D:
-                return self.createTextureByRegion(textureDesc: textureDesc, values: values)
-            case .type2DArray:
-                return self.createTextureBySlices(textureDesc: textureDesc, values: values)
+            case .type2D, .type2DArray:
+                return self.createTexture2D(textureDesc: textureDesc, values: values)
             default:
                 fatalError("Unknown MTLTextureType: \(textureType)")
             }
@@ -62,45 +60,8 @@ extension MTLDevice {
         return MPSImage(texture: texture, featureChannels: featureChannels)
     }
 
-    private func createTextureByRegion(textureDesc: MTLTextureDescriptor,
-                                       values: [Float32]) -> MTLTexture {
-        let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
-        let texture = self.makeTexture(descriptor: textureDesc)
-
-        switch textureDesc.pixelFormat {
-        case .rgba16Float, .r16Float:
-            let sourceBytes = Conversions.float32toFloat16(values)
-            texture.replace(
-                region: MTLRegionMake2D(0, 0, texture.width, texture.height),
-                mipmapLevel: 0,
-                withBytes: sourceBytes,
-                bytesPerRow: bytesPerRow)
-        case .rgba8Unorm, .r8Unorm:
-            var convertedValues = [UInt8]()
-            for v in values {
-                convertedValues.append(UInt8(v))
-            }
-            texture.replace(
-                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                mipmapLevel: 0,
-                withBytes: convertedValues,
-                bytesPerRow: bytesPerRow)
-        case .rgba32Float, .r32Float:
-            texture.replace(
-                region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                mipmapLevel: 0,
-                withBytes: values,
-                bytesPerRow: bytesPerRow)
-        default:
-            fatalError("Unknown MTLPixelFormat: \(textureDesc.pixelFormat)")
-        }
-        return texture
-    }
-
-    private func createTextureBySlices(textureDesc: MTLTextureDescriptor,
-                                       values: [Float32]) -> MTLTexture {
-        let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
-        let bytesPerImage = bytesPerRow * textureDesc.height
+    private func createTexture2D(textureDesc: MTLTextureDescriptor,
+                                 values: [Float32]) -> MTLTexture {
         let sliceWidth = textureDesc.width *
             textureDesc.height *
             textureDesc.pixelFormat.channelCount
@@ -114,33 +75,15 @@ extension MTLDevice {
             switch textureDesc.pixelFormat {
             case .rgba16Float, .r16Float:
                 let sourceBytes = Conversions.float32toFloat16(valuesBySlice[slice])
-                texture.replace(
-                    region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                    mipmapLevel: 0,
-                    slice: slice,
-                    withBytes: sourceBytes,
-                    bytesPerRow: bytesPerRow,
-                    bytesPerImage: bytesPerImage)
+                texture.fill(sourceBytes, slice: slice)
             case .rgba8Unorm, .r8Unorm:
                 var convertedValues = [UInt8]()
                 for v in valuesBySlice[slice] {
                     convertedValues.append(UInt8(v))
                 }
-                texture.replace(
-                    region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                    mipmapLevel: 0,
-                    slice: slice,
-                    withBytes: convertedValues,
-                    bytesPerRow: bytesPerRow,
-                    bytesPerImage: bytesPerImage)
+                texture.fill(convertedValues, slice: slice)
             case .rgba32Float, .r32Float:
-                texture.replace(
-                    region: MTLRegionMake2D(0, 0, textureDesc.width, textureDesc.height),
-                    mipmapLevel: 0,
-                    slice: slice,
-                    withBytes: valuesBySlice[slice],
-                    bytesPerRow: bytesPerRow,
-                    bytesPerImage: bytesPerImage)
+                texture.fill(values, slice: slice)
             default:
                 fatalError("Unknown MTLPixelFormat: \(textureDesc.pixelFormat)")
             }
@@ -184,29 +127,20 @@ extension MTLDevice {
 
         switch pixelFormat {
         case .rgba8Unorm:
-            texture.replace(region: MTLRegionMake2D(0, 0, width, height),
-                            mipmapLevel: 0,
-                            withBytes: context!.data!,
-                            bytesPerRow: pixelFormat.bytesPerRow(width))
+            texture.fill(context!.data!)
         case .rgba16Float:
             let imageBuffer = UnsafeBufferPointer<UInt8>(
                 start: context!.data!.bindMemory(to: UInt8.self, capacity: pixelArea),
                 count: pixelArea)
             let imageFloats = imageBuffer.enumerated().map { (idx, e) in Float32(e) }
             let imageFloat16 = Conversions.float32toFloat16(imageFloats)
-            texture.replace(region: MTLRegionMake2D(0, 0, width, height),
-                            mipmapLevel: 0,
-                            withBytes: imageFloat16,
-                            bytesPerRow: pixelFormat.bytesPerRow(width))
+            texture.fill(imageFloat16)
         case .rgba32Float:
             let imageBuffer = UnsafeBufferPointer<UInt8>(
                 start: context!.data!.bindMemory(to: UInt8.self, capacity: pixelArea),
                 count: pixelArea)
             let imageFloats = imageBuffer.enumerated().map { (idx, e) in Float32(e) }
-            texture.replace(region: MTLRegionMake2D(0, 0, width, height),
-                            mipmapLevel: 0,
-                            withBytes: imageFloats,
-                            bytesPerRow: pixelFormat.bytesPerRow(width))
+            texture.fill(imageFloats)
         default:
             fatalError("Unknown MTLPixelFormat: \(self)")
         }

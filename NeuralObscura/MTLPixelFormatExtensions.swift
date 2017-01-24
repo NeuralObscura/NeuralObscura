@@ -60,5 +60,5 @@ extension MTLPixelFormat {
 
     func bytesPerRow(_ width: Int) -> Int {
         return width * self.channelCount * self.sizeOfDataType
-    } 
+    }
 }
