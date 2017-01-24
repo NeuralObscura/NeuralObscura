@@ -13,10 +13,10 @@ import MetalPerformanceShaders
 
 class MPSImageExtensionsTests: CommandEncoderBaseTest {
 
-    func testGroundTruthDeconv() {
+    func testLoadFromNumpy() {
         let url = Bundle(for: type(of: self))
             .url(forResource: "test_loadFromNumpy_data", withExtension: "npy", subdirectory: "testdata")!
-        let outputImg = MPSImage.loadFromNumpy(url, destinationPixelFormat: .rgba32Float)
+        let outputImg = MPSImage.loadFromNumpy(url, destinationPixelFormat: .r32Float)
 
         let expImg = [1.1, 2.2, 3.3, 4.4] as [Float32]
 
