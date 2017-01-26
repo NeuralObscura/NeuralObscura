@@ -1,14 +1,20 @@
 # Neural Obscura
 
-## Dev Notes
+## Objectives
 
-We're implementing the [yusuketomoto/chainer-fast-neuralstyle](https://github.com/yusuketomoto/chainer-fast-neuralstyle/blob/master/net.py)
-neural network on the iphone using Metal.
+The project seeks to build a general purpose, fast, modern GPU based Deep Neural Network framework.
 
-Referencing the Apple MetalPerformanceShaders CNN example project.
+Goals:
 
-## Debug data
+1. Be fast enough to be able to operate in realtime / near realtime, supporting live video processing.
+1. Be modern enough to support cutting edge Deep Learning techniques.
+1. Be general purpose enough to make a variety of models effective.
+1. Be able to support loading models trained on a computer from popular frameworks, for use on the device.
 
-This gist https://gist.github.com/dinedal/977e3f55705f7cb5d50b3ac1d3eb7856 contains the debug run output for tubingen.jpg
+## End Game
 
-This gist https://gist.github.com/dinedal/ab4232ed63b542c163b9ede3043f8c21 contains the debug run output for debug.png
+- Create demonstration app(s) that effectively use the framework.
+  - Style Transfer
+  - Classifier
+- Attempt to solicit VC interest and secure funding
+- Open source if unable to do so.
