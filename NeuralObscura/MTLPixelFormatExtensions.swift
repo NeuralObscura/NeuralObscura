@@ -27,7 +27,7 @@ extension MTLPixelFormat {
         }
     }
 
-    var sizeOfDataType: Int {
+    var channelSize: Int {
         switch self {
         case .rgba8Unorm:
             return MemoryLayout<UInt8>.size
@@ -59,6 +59,11 @@ extension MTLPixelFormat {
     }
 
     func bytesPerRow(_ width: Int) -> Int {
-        return width * self.channelCount * self.sizeOfDataType
-    } 
+        return width * self.channelCount * self.channelSize
+    }
+
+    func bytesPerImage(width: Int, height: Int) -> Int {
+        return self.bytesPerRow(width) * height
+    }
 }
+

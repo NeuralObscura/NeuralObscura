@@ -260,59 +260,63 @@ extension MPSImage {
     }
     
     func Float16ToString() -> String {
-        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
-        let bytesPerImage = self.height * bytesPerRow
+        let numSlices = pixelFormat.featureChannelsToSlices(featureChannels)
+        let numValues = width * height * numSlices * pixelFormat.channelCount
+        let ptr = UnsafeMutablePointer<UInt16>.allocate(capacity: numValues)
         
-        let ptr = UnsafeMutablePointer<UInt16>.allocate(capacity: self.pixelFormat.typedSize(width: self.width,
-                                                                                             height: self.height))
-        var outputString: String = ""
         
-        let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
-        
-        for i in 0...(slices-1) {
-            self.texture.getBytes(ptr,
-                                  bytesPerRow: bytesPerRow,
-                                  bytesPerImage: bytesPerImage,
-                                  from: MTLRegionMake2D(0, 0, self.width, self.height),
-                                  mipmapLevel: 0,
-                                  slice: i)
-            let buffer = UnsafeBufferPointer<UInt16>(start: ptr, count: self.pixelFormat.typedSize(width: self.width,
-                                                                                                   height: self.height))
-            
-            
-            let convertedBuffer = Conversions.float16toFloat32(Array(buffer))
-            
-            var channels = Array(repeating: "", count: self.pixelFormat.channelCount)
-            convertedBuffer.enumerated().forEach { [unowned self] (idx, e) in
-                if idx % (self.width * self.pixelFormat.channelCount) == 0 {
-                    channels[idx % self.pixelFormat.channelCount] += String(format: "\n%.2f ", e)
-                } else {
-                    channels[idx % self.pixelFormat.channelCount] += String(format: "%.2f ", e)
-                }
-            }
-            for c in channels {
-                outputString += c + "\n"
-            }
-
+        let sliceRowSize = width * pixelFormat.channelCount * pixelFormat.channelSize
+        let sliceSize = sliceRowSize * height
+        for i in 0 ..< numSlices {
+            texture.getBytes(ptr + (i * sliceSize),
+                             bytesPerRow: sliceRowSize,
+                             bytesPerImage: sliceSize,
+                             from: MTLRegionMake2D(0, 0, width, height),
+                             mipmapLevel: 0,
+                             slice: i)
         }
         
-        return outputString
+        let buffer = UnsafeBufferPointer<UInt16>(start: ptr, count: numValues)
+        let array = Array.init(buffer)
+        let converted = Conversions.float16toFloat32(array)
+        
+        var channels = Array(repeating: "", count: featureChannels)
+        
+        let sliceCount = self.width * self.height * self.pixelFormat.channelCount
+        let sliceRowCount = self.width * self.pixelFormat.channelCount
+        
+        converted.enumerated().forEach { [unowned self] (idx, e) in
+            let slice = idx / sliceCount
+            let y = (idx % sliceCount) / sliceRowCount
+            /* let x = (idx % sliceRowCount) / self.pixelFormat.channelCount */
+            let sliceChannel = idx % self.pixelFormat.channelCount
+            let absChannel = slice * self.pixelFormat.channelCount + sliceChannel
+            
+            channels[absChannel] += String(format: "%.2f ", e)
+            if y == (self.width - 1) {
+                channels[absChannel] += "\n"
+            }
+        }
+        
+        return channels[0..<featureChannels].joined(separator: "\n")
     }
     
     static func loadFromNumpy(_ url: URL,
                               destinationPixelFormat: MTLPixelFormat = .rgba32Float
                               ) -> MPSImage {
-        // determine correct way of addressing file (string?)
-        // first open file for binary reading
         let data = try! NSMutableData(contentsOf: url, options: Data.ReadingOptions.uncached)
         let ptr = data.bytes
         
-        // read header to determine shape, assume float
+        /* Assert magic string */
         let magicStringPtr = ptr.bindMemory(to: UInt8.self, capacity: 8)
         let magicStringBuf: UnsafeBufferPointer<UInt8> = UnsafeBufferPointer<UInt8>.init(start: magicStringPtr, count: 8)
         let expectedMagicString: [UInt8] = [0x93, 0x4E, 0x55, 0x4D, 0x50, 0x59, 0x01, 0x00] /* 0x93NUMPY10 */
         assert(magicStringBuf.elementsEqual(expectedMagicString), "Invalid .npy file")
+        
+        /* Read header length */
         let headerLen = Int((ptr + 8).bindMemory(to: UInt16.self, capacity: 1).pointee)
+        
+        /* Read header values */
         let headerData = data.subdata(with: NSMakeRange(10, headerLen))
         let headerString = String(data: headerData, encoding: .ascii)!
         let cmpts = headerString.components(separatedBy: "'")
@@ -321,7 +325,7 @@ extension MPSImage {
         let descr = cmpts[3]
         assert(descr == "<f4", "little-endian 32 bit floats (<f4) are the only numpy type currently supported")
         
-        // Assume 'fortran_order': False
+        // Skip parse 'fortran_order': False
         
         // Parse shape
         let shapeArea = cmpts[8]
@@ -366,7 +370,7 @@ extension MPSImage {
                                                            pixelFormat: destinationPixelFormat,
                                                            values: values)
         case 4:
-            let channelsOut = shape[0]
+            /* let channelsOut = shape[0] */
             let height = shape[1]
             let width = shape[2]
             let channelsIn = shape[3]

@@ -28,5 +28,3 @@ var testTextureFormatR: MTLPixelFormat {
         return MTLPixelFormat.r32Float
     }
 }
-
-let blockSize = 8192

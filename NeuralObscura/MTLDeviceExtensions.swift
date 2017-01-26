@@ -12,11 +12,11 @@ import UIKit
 
 extension MTLDevice {
     func MakeMPSImage(width: Int,
-                          height: Int,
-                          featureChannels: Int = 1,
-                          pixelFormat: MTLPixelFormat = .r32Float,
-                          textureType: MTLTextureType = .type2DArray,
-                          values: [[Float32]]) -> MPSImage {
+                      height: Int,
+                      featureChannels: Int = 1,
+                      pixelFormat: MTLPixelFormat = .r32Float,
+                      textureType: MTLTextureType = .type2DArray,
+                      values: [[Float32]]) -> MPSImage {
         // ravel the values
         var ravelValues = [Float32]()
         for pixel in values {
@@ -26,11 +26,11 @@ extension MTLDevice {
         }
 
         return MakeMPSImage(width: width,
-                                height: height,
-                                featureChannels: featureChannels,
-                                pixelFormat: pixelFormat,
-                                textureType: textureType,
-                                values: ravelValues)
+                            height: height,
+                            featureChannels: featureChannels,
+                            pixelFormat: pixelFormat,
+                            textureType: textureType,
+                            values: ravelValues)
     }
 
     // values are expected to be raveled
@@ -46,7 +46,6 @@ extension MTLDevice {
         textureDesc.height = height
         textureDesc.pixelFormat = pixelFormat
         textureDesc.arrayLength = pixelFormat.featureChannelsToSlices(featureChannels)
-
 
         let texture = { () -> MTLTexture in 
             switch textureType {
@@ -65,6 +64,7 @@ extension MTLDevice {
     private func createTextureByRegion(textureDesc: MTLTextureDescriptor,
                                        values: [Float32]) -> MTLTexture {
         let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
+        
         let texture = self.makeTexture(descriptor: textureDesc)
 
         switch textureDesc.pixelFormat {
@@ -101,9 +101,7 @@ extension MTLDevice {
                                        values: [Float32]) -> MTLTexture {
         let bytesPerRow = textureDesc.pixelFormat.bytesPerRow(textureDesc.width)
         let bytesPerImage = bytesPerRow * textureDesc.height
-        let sliceWidth = textureDesc.width *
-            textureDesc.height *
-            textureDesc.pixelFormat.channelCount
+        let sliceWidth = textureDesc.width * textureDesc.height * textureDesc.pixelFormat.channelCount
 
         let valuesBySlice = stride(from: 0, to: values.count, by: sliceWidth).map {
             Array(values[$0..<min($0 + sliceWidth, values.count)])

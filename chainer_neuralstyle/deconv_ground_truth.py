@@ -49,8 +49,6 @@ class DeconvolutionNet(chainer.Chain):
             r4=ResidualBlock(128, 128),
             r5=ResidualBlock(128, 128),
             d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
-            d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
-            d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
             b1=L.BatchNormalization(32),
             b2=L.BatchNormalization(64),
             b3=L.BatchNormalization(128)
