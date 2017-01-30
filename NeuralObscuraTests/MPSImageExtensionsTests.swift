@@ -22,4 +22,30 @@ class MPSImageExtensionsTests: CommandEncoderBaseTest {
 
         XCTAssert(outputImg.isLossyEqual(expImg, precision: 2))
     }
+
+    func testFloat32ToString() {
+        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image,
+                                                                        pixelFormat: .rgba32Float)
+
+        let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+
+        let expString = "255.00 200.00 150.00 100.00 \n0.00 0.00 0.00 0.00 \n0.00 0.00 0.00 0.00 \n255.00 255.00 255.00 255.00 \n"
+
+        XCTAssertEqual(testImg.Float32ToString(), expString)
+    }
+
+    func testFloat16ToString() {
+        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
+        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image,
+                                                                        pixelFormat: .rgba16Float)
+
+        let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
+
+        let expString = "255.00 200.00 150.00 100.00 \n0.00 0.00 0.00 0.00 \n0.00 0.00 0.00 0.00 \n255.00 255.00 255.00 255.00 \n"
+
+        XCTAssertEqual(testImg.Float16ToString(), expString)
+    }
 }
