@@ -147,8 +147,8 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         if self.stride > 1 {
             let convInputDesc = MPSImageDescriptor(
                 channelFormat: textureFormat,
-                width: (sourceImage.width * stride) - 1,
-                height: (sourceImage.height * stride) - 1,
+                width: (sourceImage.width * stride) - stride + 1,
+                height: (sourceImage.height * stride) - stride + 1,
                 featureChannels: sourceImage.featureChannels)
             intermediateImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: convInputDesc)
             
