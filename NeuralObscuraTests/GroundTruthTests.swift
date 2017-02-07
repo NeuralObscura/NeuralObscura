@@ -105,7 +105,7 @@ class GroundTruthTests: CommandEncoderBaseTest {
         /* Verify the result */
         XCTAssert(outputImg.isLossyEqual(expImg, precision: -1))
     }
-    
+
     func testGroundTruthDeconv() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv-test-data", withExtension: "npy", subdirectory: "testdata")!
@@ -115,13 +115,14 @@ class GroundTruthTests: CommandEncoderBaseTest {
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")
 
         let deconv = DeconvolutionLayer(
-            kernelSize: 9,
-            channelsIn: 3,
-            channelsOut: 32,
+            kernelSize: 4,
+            channelsIn: 128,
+            channelsOut: 64,
             w: w_pb,
             b: b_pb,
-            relu: true,
-            padding: 4,
+            relu: false,
+            padding: 1,
+            stride: 2,
             debug: true)
 
         let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)

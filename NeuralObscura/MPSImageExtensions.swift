@@ -186,7 +186,7 @@ extension MPSImage {
         case .r16Float, .rgba16Float:
             return Float16ToString()
         default:
-            fatalError("Unknown MTLPixelFormat: \(texture.pixelFormat)")
+            fatalError("Unknown MTLPixelFormat: \(self.pixelFormat)")
         }
     }
 
