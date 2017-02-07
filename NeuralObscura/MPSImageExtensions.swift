@@ -50,8 +50,9 @@ extension MPSImage {
         guard ( lhs.width == rhs.width &&
             lhs.height == rhs.height &&
             lhs.pixelSize == rhs.pixelSize &&
-            lhs.pixelFormat == rhs.pixelFormat) else { return false }
-
+            lhs.pixelFormat == rhs.pixelFormat &&
+            lhs.featureChannels == rhs.featureChannels) else { return false }
+        
         let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
         let lhsImageSize = lhs.height * lhsRowSize
         let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.channelCount
@@ -178,16 +179,18 @@ extension MPSImage {
     }
 
     override open var description: String {
+        var desc = "MPSImage \(self.hash) with width: \(self.width), height: \(self.height), feature channels: \(self.featureChannels), pixelFormat raw value: \(self.pixelFormat.rawValue)\n\n"
         switch self.pixelFormat {
         case .r8Unorm, .rgba8Unorm:
-            return UnormToString()
+            desc += UnormToString()
         case .r32Float, .rgba32Float:
-            return Float32ToString()
+            desc += Float32ToString()
         case .r16Float, .rgba16Float:
-            return Float16ToString()
+            desc += Float16ToString()
         default:
             fatalError("Unknown MTLPixelFormat: \(texture.pixelFormat)")
         }
+        return desc
     }
 
     func UnormToString() -> String {
