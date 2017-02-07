@@ -90,9 +90,6 @@ extension MPSImage {
                 let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
                 let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhsPixelArea)
 
-                debugPrint(lhsBufferPtr)
-                debugPrint(rhsBufferPtr)
-
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
@@ -169,8 +166,6 @@ extension MPSImage {
 
         for i in 0...(rhs.count - 1) {
             if abs(lhsFloats[i] - rhs[i]) > maxDifference {
-                print(lhsFloats[i])
-                print(rhs[i])
                 return false
             }
         }
