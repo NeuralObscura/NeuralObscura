@@ -112,18 +112,17 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
     func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         let inHeight = sourceImage.height
         let inWidth = sourceImage.width
-        
-        let kernelSize = convolution.kernelWidth
+
         let stride = self.stride
         let channelsOut = convolution.outputFeatureChannels
         
-        let outHeight = stride * (inHeight - 1) + kernelSize - 2 * padding
-        let outWidth = stride * (inWidth - 1) + kernelSize - 2 * padding
-        
+        let outHeight = stride * (inHeight - 1) + convolution.kernelHeight - 2 * padding
+        let outWidth = stride * (inWidth - 1) + convolution.kernelWidth - 2 * padding
+
         /* Assert the constraint on input size, kernel size, padding, stride. */
-        assert((outHeight + 2 * padding - kernelSize) % stride == 0,
+        assert((outHeight + 2 * padding - convolution.kernelHeight) % stride == 0,
                "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the height dimension.")
-        assert((outWidth + 2 * padding - kernelSize) % stride == 0,
+        assert((outWidth + 2 * padding - convolution.kernelWidth) % stride == 0,
                "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the width dimension.")
         
         let descriptor = MPSImageDescriptor(
