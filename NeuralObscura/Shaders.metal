@@ -238,13 +238,12 @@ _3d_index _1d_index_to_3d_index(_3d_shape shape, uint index) {
 }
 
 
-/* Matrix Multiply (W * x) based on thread position in grid which should be over the range of output matrix locations
+/* Tensor dot of the feature map and the weights array over the c_in axis 
+ *
  * input featureMap has dimensions (c_in, h, w)
  * input weights has size c_out * kh * kw * c_in
  * gid[0] takes values from 0..(c_out * kh * kw)
  * gid[1] takes values from 0..(h * w)
- *
- * This shader takes the tensor dot of the feature map and the weights array over the c_in axis.
  *
  * output buffer has size c_out * kh * kw * h * w
  */
