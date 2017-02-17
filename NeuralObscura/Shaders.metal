@@ -157,3 +157,136 @@ kernel void rgba_to_brga(texture2d<float, access::read> inTexture [[texture(0)]]
     float4 output = float4(input[2], input[0], input[1], input[3]);
     outTexture.write(output, gid.xy, gid.z);
 }
+
+struct _2d_shape {
+    uint a;
+    uint b;
+}
+
+struct _2d_index {
+    uint x;
+    uint y;
+}
+
+struct _3d_shape {
+    uint a;
+    uint b;
+    uint c;
+}
+
+struct _3d_index {
+    uint x;
+    uint y;
+    uint z;
+}
+
+struct _4d_shape {
+    uint a;
+    uint b;
+    uint c;
+    uint d;
+}
+
+struct _4d_index {
+    uint x;
+    uint y;
+    uint z;
+    uint w;
+}
+
+struct _5d_shape {
+    uint a;
+    uint b;
+    uint e;
+    uint d;
+    uint e;
+}
+
+struct _5d_index {
+    uint x;
+    uint y;
+    uint z;
+    uint w;
+    uint v;
+}
+
+uint _4d_index_to_1d_index(_4d_shape shape, weights_index_t index) {
+    return  index.x * (shape.b * shape.c * shape.d)
+          + index.y * (shape.c * shape.d)
+          + index.z * (shape.d)
+          + index.w;
+}
+
+uint _5d_index_to_1d_index(_5d_shape shape, _5d_index index) {
+    return index.x * (shape.b * shape.c * shape.d * shape.e)
+         + index.y * (shape.c shape.d * shape.e)
+         + index.z * (shape.d * shape.e)
+         + index.w * (shape.e)
+         + index.v;
+}
+
+_2d_index _1d_index_to_2d_index(_2d_shape shape, uint index) {
+    return (_2d_index) { index / shape.b, index % shape.b }
+}
+
+_3d_index _1d_index_to_3d_index(_3d_shape shape, uint index) {
+    uint x = index / (shape.b * shape.c);
+    uint y = (index % (shape.b * shape.c)) / (shape.c);
+    uint z = index % shape.c;
+    return (_3d_index) { x, y, z };
+}
+
+
+/* Matrix Multiply (W * x) based on thread position in grid which should be over the range of output matrix locations
+ * input featureMap has dimensions (c_in, h, w)
+ * input weights has size c_out * kh * kw * c_in
+ * gid[0] takes values from 0..(c_out * kh * kw)
+ * gid[1] takes values from 0..(h * w)
+ *
+ * This shader takes the tensor dot of the feature map and the weights array over the c_in axis.
+ *
+ * output buffer has size c_out * kh * kw * h * w
+ */
+kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> featureMap [[texture(0)]],
+                                       float* output [[buffer(1) ]],
+                                       const device float* weights [[ buffer(2) ]],
+                                       const device uint* weightsShapeParam [[ buffer(3) ]],
+                                       uint2 gid [[thread_position_in_grid]]) {
+    uint nc_out = *weightsShapeParam;
+    uint nkh = *(weightsShapeParam + 1);
+    uint nkw = *(weightsShapeParam + 2);
+    uint nc_in = *(kernelShape + 3);
+    _4d_shape weightsShape = { nc_out, nkh, nkw, nc_in };
+    
+    uint nh = featureMap.get_height();
+    uint nw = featureMap.get_width();
+    
+    /* gid[1] is a 1d index into a 3d array with shape (nc_out, nkh, nkw) */
+    _3d_shape rightKernelShape = { nc_out, nkh, nkw };
+    _3d_index rightKernelIndex = _1d_index_to_3d_index(kernelShape, gid[1])
+    
+    /* rightKernelIndex has the form { x: c_out, y: kh, z: kw } */
+    uint c_out = rightKernelIndex.x;
+    uint kh = rightKernelIndex.y;
+    uint kw = rightKernelIndex.z;
+    
+    /* gid[0] is a 1d index into a 2d array with shape (nh, nw) */
+    _2d_shape locShape = { nh, nw };
+    _2d_index locIndex = _1d_index_to_2d_index(locShape, gid[0]);
+    
+    /* locIndex has the form { x: h, y: w } */
+    uint h = locIndex.x;
+    uint w = locIndex.y;
+    
+    _5d_shape outputShape = { nc_out, nkh, nkw, nh, nw };
+    _5d_index outputIndex = { c_out, kh, kw, h, w };
+    
+    float acc = 0;
+    for (uint c_in = 0; c_in < nc_in; c_in++) {
+        _4d_index weightsIndex = { c_out, kh, kw, c_in };
+        float weightValue = weights[_4d_index_to_1d_index(weightsShape, weightsIndex)];
+        float featureMapValue = featureMap.read(uint2(w, h), c_in / 4)[c_in % 4];
+        acc += weightValue * featureMapValue;
+    }
+    output[_5d_index_to_1d_index(outputShape, outputIndex)] = acc;
+}
