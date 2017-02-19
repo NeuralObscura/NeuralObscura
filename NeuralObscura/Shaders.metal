@@ -34,23 +34,24 @@ kernel void batch_normalization(texture2d_array<float, access::read> inTexture [
                                 const device float* mean [[ buffer(4) ]],
                                 const device float* stddev [[ buffer(5) ]],
                                 uint3 gid [[thread_position_in_grid]]) {
+    uint buffer_idx = gid.z * 4;
     float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = float4(input.r - mean[gid.z],
-                           input.g - mean[gid.z+1],
-                           input.b - mean[gid.z+2],
-                           input.a - mean[gid.z+3]);
-    output = float4(output.r / stddev[gid.z],
-                    output.g / stddev[gid.z+1],
-                    output.b / stddev[gid.z+2],
-                    output.a / stddev[gid.z+3]);
-    output = float4(output.r * gamma[gid.z],
-                    output.g * gamma[gid.z+1],
-                    output.b * gamma[gid.z+2],
-                    output.a * gamma[gid.z+3]);
-    output = float4(output.r + beta[gid.z],
-                    output.g + beta[gid.z+1],
-                    output.b + beta[gid.z+2],
-                    output.a + beta[gid.z+3]);
+    float4 output = float4(input.r - mean[buffer_idx],
+                           input.g - mean[buffer_idx+1],
+                           input.b - mean[buffer_idx+2],
+                           input.a - mean[buffer_idx+3]);
+    output = float4(output.r / stddev[buffer_idx],
+                    output.g / stddev[buffer_idx+1],
+                    output.b / stddev[buffer_idx+2],
+                    output.a / stddev[buffer_idx+3]);
+    output = float4(output.r * gamma[buffer_idx],
+                    output.g * gamma[buffer_idx+1],
+                    output.b * gamma[buffer_idx+2],
+                    output.a * gamma[buffer_idx+3]);
+    output = float4(output.r + beta[buffer_idx],
+                    output.g + beta[buffer_idx+1],
+                    output.b + beta[buffer_idx+2],
+                    output.a + beta[buffer_idx+3]);
     outTexture.write(output, gid.xy, gid.z);
 }
 
