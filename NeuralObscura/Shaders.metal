@@ -237,7 +237,7 @@ _3d_index _1d_index_to_3d_index(_3d_shape shape, uint index) {
 }
 
 
-/* Tensor dot of the feature map and the weights array over the c_in axis 
+/* Tensor dot of the feature map and the weights array over the c_in axis
  *
  * input featureMap has dimensions (c_in, h, w)
  * input weights has size c_out * kh * kw * c_in
@@ -251,14 +251,15 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
                                        const device float* weights [[ buffer(2) ]],
                                        const device uint* weightsShapeParam [[ buffer(3) ]],
                                        uint2 gid [[thread_position_in_grid]]) {
-    uint nc_out = *weightsShapeParam;
-    uint nkh = *(weightsShapeParam + 1);
-    uint nkw = *(weightsShapeParam + 2);
-    uint nc_in = *(kernelShape + 3);
+    uint nc_out = weightsShapeParam[0];
+    uint nkh = weightsShapeParam[1];
+    uint nkw = weightsShapeParam[2];
+    uint nc_in = kernelShape[3];
     _4d_shape weightsShape = { nc_out, nkh, nkw, nc_in };
     
     uint nh = featureMap.get_height();
     uint nw = featureMap.get_width();
+    uint nslices = featureMap.get_array_size();
     
     /* gid[1] is a 1d index into a 3d array with shape (nc_out, nkh, nkw) */
     _3d_shape rightKernelShape = { nc_out, nkh, nkw };
@@ -280,12 +281,22 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
     _5d_shape outputShape = { nc_out, nkh, nkw, nh, nw };
     _5d_index outputIndex = { c_out, kh, kw, h, w };
     
-    float acc = 0;
-    for (uint c_in = 0; c_in < nc_in; c_in++) {
-        _4d_index weightsIndex = { c_out, kh, kw, c_in };
-        float weightValue = weights[_4d_index_to_1d_index(weightsShape, weightsIndex)];
-        float featureMapValue = featureMap.read(uint2(w, h), c_in / 4)[c_in % 4];
-        acc += weightValue * featureMapValue;
+    float sum = 0;
+    float error = 0;
+    for (uint slice = 0; slice < nslices; slice++) {
+        float4 weightValues;
+        _4d_index weightsIndex = { c_out, kh, kw, slice * 4 };
+        uint base = _4d_index_to_1d_index(weightsShape, weightsIndex)
+        for (uint c_in_offset = 0; c_in_offset < 4; c_in_offset++) {
+            weightsChunk[c_in_offset] = weights[base + c_in_offset];
+        }
+        float4 featureMapValues = featureMap.read(uint2(w, h), slice);
+        float termGroup = dot(weightValues, featureMapValues);
+        /* https://en.wikipedia.org/wiki/Kahan_summation_algorithm */
+        float y = termGroup - error;
+        float t = sum + y;
+        c = (t - sum) - y;
+        sum = t;
     }
-    output[_5d_index_to_1d_index(outputShape, outputIndex)] = acc;
+    output[_5d_index_to_1d_index(outputShape, outputIndex)] = sum;
 }
