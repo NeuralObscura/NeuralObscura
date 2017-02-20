@@ -19,13 +19,20 @@ import MetalPerformanceShaders
  and `k` is the kernel size in that dimension.
  */
 class DeconvolutionLayer: UnaryCommandEncoder {
+    private var input: AnyCommandEncoder<MPSImage>!
+    
     private let useTemporary: Bool
     private var consumerCount: Int = 0
-    private var input: AnyCommandEncoder<MPSImage>!
-    private let convolution: MPSCNNConvolution
-    private let padding: Int
-    private let stride: Int
+    
     private let interpixelStride: MTLBuffer?
+    private let kernelSize: UInt32
+    private let channelsIn: UInt32
+    private let channelsOut: UInt32
+    private let w: ParameterBuffer
+    private let b: ParameterBuffer
+    private let relu: Bool
+    private let padding: UInt32
+    private let stride: UInt32
     
     init(
         kernelSize: Int,
@@ -33,55 +40,20 @@ class DeconvolutionLayer: UnaryCommandEncoder {
         channelsOut: Int,
         w: ParameterBuffer,
         b: ParameterBuffer,
-        relu: Bool = true,
-        padding: Int = 0, // TODO: Revisit this default
-        stride: Int = 1,
-        destinationFeatureChannelOffset: Int = 0,
-        groupNum: Int = 1,
+        relu: Bool,
+        padding: Int,
+        stride: Int,
         useTemporary: Bool = false) {
     
         self.useTemporary = useTemporary
-        self.padding = padding
-        self.stride = stride
-        
-        if stride > 1 {
-            var s = UInt(stride)
-            self.interpixelStride = ShaderRegistry.getDevice().makeBuffer(
-                bytes: &s,
-                length: MemoryLayout<UInt>.size,
-                options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        } else { interpixelStride = nil }
-        
-        var neuronFilter: MPSCNNNeuron?
-        if relu {
-            neuronFilter = MPSCNNNeuronReLU(device: ShaderRegistry.getDevice(), a: 0)
-        }
-        
-        // create appropriate convolution descriptor with appropriate stride
-        let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: kernelSize,
-                                                   kernelHeight: kernelSize,
-                                                   inputFeatureChannels: channelsIn,
-                                                   outputFeatureChannels: channelsOut,
-                                                   neuronFilter: neuronFilter)
-        
-        /* The effective stride is 1, because we're performing deconvolution with a convolution layer */
-        convDesc.strideInPixelsX = 1
-        convDesc.strideInPixelsY = 1
-        
-        assert((groupNum > 0), "Group size can't be less than 1")
-        convDesc.groups = Int(groupNum)
-        
-        // initialize the convolution layer by calling the parent's (MPSCNNConvlution's) initializer
-        convolution = MPSCNNConvolution(
-            device: ShaderRegistry.getDevice(),
-            convolutionDescriptor: convDesc,
-            kernelWeights: w.pointer(),
-            biasTerms: b.pointer(),
-            flags: MPSCNNConvolutionFlags.none)
-        convolution.destinationFeatureChannelOffset = destinationFeatureChannelOffset
-        convolution.edgeMode = .zero
-        let effectivePadding = kernelSize - padding - 1
-        convolution.offset = MPSOffset(x: 1 - effectivePadding, y: 1 - effectivePadding, z: 0)
+        self.kernelSize = UInt32(kernelSize)
+        self.channelsIn = UInt32(channelsIn)
+        self.channelsOut = UInt32(channelsOut)
+        self.w = w
+        self.b = b
+        self.relu = relu
+        self.padding = UInt32(padding)
+        self.stride = UInt32(stride)
     }
     
     func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
@@ -117,15 +89,14 @@ class DeconvolutionLayer: UnaryCommandEncoder {
         let inWidth = sourceImage.width
 
         let stride = self.stride
-        let channelsOut = convolution.outputFeatureChannels
         
-        let outHeight = stride * (inHeight - 1) + convolution.kernelHeight - 2 * padding
-        let outWidth = stride * (inWidth - 1) + convolution.kernelWidth - 2 * padding
+        let outHeight = stride * (inHeight - 1) + kernelSize - 2 * padding
+        let outWidth = stride * (inWidth - 1) + kernelSize - 2 * padding
 
         /* Assert the constraint on input size, kernel size, padding, stride. */
-        assert((outHeight + 2 * padding - convolution.kernelHeight) % stride == 0,
+        assert((outHeight + 2 * padding - kernelSize) % stride == 0,
                "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the height dimension.")
-        assert((outWidth + 2 * padding - convolution.kernelWidth) % stride == 0,
+        assert((outWidth + 2 * padding - kernelSize) % stride == 0,
                "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the width dimension.")
         
         let descriptor = MPSImageDescriptor(
@@ -138,38 +109,41 @@ class DeconvolutionLayer: UnaryCommandEncoder {
     }
     
     private func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
-        var intermediateImage: MPSImage! = sourceImage
+        let matrixWidth = sourceImage.height * sourceImage.width
+        let matrixHeight = Int(channelsOut * kernelSize * kernelSize)
+        var weightsShape = [channelsOut, kernelSize, kernelSize, channelsIn] as [UInt32]
         
-        /* We don't need interpixel stride if the stride is 1 */
-        if self.stride > 1 {
-            let convInputDesc = MPSImageDescriptor(
-                channelFormat: textureFormat,
-                width: (sourceImage.width * stride) - stride + 1,
-                height: (sourceImage.height * stride) - stride + 1,
-                featureChannels: sourceImage.featureChannels)
-            intermediateImage = MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: convInputDesc)
-            
-            let encoder = commandBuffer.makeComputeCommandEncoder()
-            encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "deconvolution_interpixel_stride"))
-            encoder.setTexture(sourceImage.texture, at: 0)
-            encoder.setTexture(intermediateImage.texture, at: 1)
-            encoder.setBuffer(interpixelStride!, offset: 0, at: 2)
-            // TODO: Optimize
-            let threadsPerGroups = MTLSizeMake(1, 1, 1)
-            let threadGroups = MTLSizeMake(
-                destinationImage.texture.width,
-                destinationImage.texture.height,
-                destinationImage.texture.arrayLength)
-            encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroups)
-            encoder.endEncoding()
-            
-            if let image = sourceImage as? MPSTemporaryImage {
-                image.readCount -= 1
-            }
+        let weightsShapeBuffer = ShaderRegistry.getDevice().makeBuffer(
+            bytes: &weightsShape,
+            length: MemoryLayout<UInt32>.size * weightsShape.count,
+            options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        let weightsBuffer = ShaderRegistry.getDevice().makeBuffer(
+            bytes: self.w.pointer(),
+            length: self.w.lengthInBytes(),
+            options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        let tensordot = ShaderRegistry.getDevice().makeBuffer(
+            length: MemoryLayout<Float32>.size * matrixWidth * matrixHeight,
+            options: MTLResourceOptions.storageModePrivate)
+        
+        let tensordotPipelineState = ShaderRegistry.getOrLoad(name: "deconvolution_v2_tensordot")
+        let encoder = commandBuffer.makeComputeCommandEncoder()
+        encoder.setComputePipelineState(tensordotPipelineState)
+        encoder.setTexture(sourceImage.texture, at: 0)
+        encoder.setBuffer(tensordot, offset: 0, at: 1)
+        encoder.setBuffer(weightsBuffer, offset: 0, at: 2)
+        encoder.setBuffer(weightsShapeBuffer, offset: 0, at: 3)
+        
+        let threadGroupWidth = tensordotPipelineState.threadExecutionWidth
+        let threadGroupHeight = tensordotPipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
+        let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
+        let gridShape = MTLSize(width: (matrixWidth + threadGroupWidth - 1) / threadGroupWidth,
+                                          height: (matrixHeight + threadGroupHeight - 1) / threadGroupHeight,
+                                          depth: 1)
+        encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
+        encoder.endEncoding()
+        if let image = sourceImage as? MPSTemporaryImage {
+            image.readCount -= 1
         }
-        
-        // encode standard convolution
-        convolution.encode(commandBuffer: commandBuffer, sourceImage: intermediateImage, destinationImage: destinationImage)
     }
 }
 
