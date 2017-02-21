@@ -352,17 +352,15 @@ extension MPSImage {
                                                               height: height,
                                                               pixelFormat: destinationPixelFormat,
                                                               values: values)
-        case 4:
-            let channelsOut = shape[0]
+        case 3:
+            let channels = shape[0]
             let height = shape[1]
             let width = shape[2]
-            let channelsIn = shape[3]
-
-            result =  ShaderRegistry.getDevice().MakeMPSImage(width: width,
-                                                              height: height,
-                                                              featureChannels: channelsIn,
-                                                              pixelFormat: destinationPixelFormat,
-                                                              values: values)
+            result = ShaderRegistry.getDevice().MakeMPSImage(width: width,
+                                                             height: height,
+                                                             featureChannels: channels,
+                                                             pixelFormat: destinationPixelFormat,
+                                                             values: values)
 
         default:
             fatalError("Unknown shape dimensions: \(shape)")

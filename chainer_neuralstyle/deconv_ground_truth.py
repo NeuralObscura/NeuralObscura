@@ -89,10 +89,16 @@ image = image.reshape((1,) + image.shape)
 x = Variable(image)
 (td, gt) = model(x)
 td_result = cuda.to_cpu(td.data)
+td_shape = td_result.shape
+assert td_shape[0] == 1
+td_shape_new = td_shape[1:]
+    
 gt_result = cuda.to_cpu(gt.data)
-# Original VGG form (c_o, c_i, h, w) -> (c_o, h, w, c_i)
-np.save(args.tdout, td_result.transpose((0, 2, 3, 1)))
-np.save(args.gtout, gt_result.transpose((0, 2, 3, 1)))
+gt_shape = gt_result.shape
+assert gt_shape[0] == 1
+gt_shape_new = gt_shape[1:]
+np.save(args.tdout, td_result.reshape(td_shape_new))
+np.save(args.gtout, gt_result.reshape(gt_shape_new))
 
 # Run me:
 # python chainer_neuralstyle/deconv_ground_truth.py NeuralObscura/debug.png --gtout NeuralObscuraTests/testdata/deconv-ground-truth.npy --tdout NeuralObscuraTests/testdata/deconv-test-data.npy --params chainer_neuralstyle/models/composition.model
