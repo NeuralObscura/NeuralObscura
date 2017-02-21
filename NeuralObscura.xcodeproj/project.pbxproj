@@ -18,7 +18,8 @@
 		077BB3D51D9B063F0022578C /* BatchNormalizationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */; };
 		077BB3E71DA39D080022578C /* CommandEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3E61DA39D080022578C /* CommandEncoder.swift */; };
 		077E558C1DC699B500111255 /* MPSCNNConvolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */; };
-		078642C11DDAD892006A3AFB /* Chain.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642B61DDAD892006A3AFB /* Chain.swift */; };
+		0782F4A81E5BA961005A6FBD /* TensorDotLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0782F4A71E5BA961005A6FBD /* TensorDotLayer.swift */; };
+		0782F4AA1E5BAB64005A6FBD /* DeconvolutionBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0782F4A91E5BAB64005A6FBD /* DeconvolutionBlock.swift */; };
 		078642C31DDAD892006A3AFB /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642B81DDAD892006A3AFB /* Errors.swift */; };
 		078642C41DDAD892006A3AFB /* Globals.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642B91DDAD892006A3AFB /* Globals.swift */; };
 		078642C51DDAD892006A3AFB /* Conversions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642BA1DDAD892006A3AFB /* Conversions.swift */; };
@@ -86,7 +87,8 @@
 		077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationLayer.swift; sourceTree = "<group>"; };
 		077BB3E61DA39D080022578C /* CommandEncoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoder.swift; sourceTree = "<group>"; };
 		077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSCNNConvolutionTests.swift; sourceTree = "<group>"; };
-		078642B61DDAD892006A3AFB /* Chain.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Chain.swift; sourceTree = "<group>"; };
+		0782F4A71E5BA961005A6FBD /* TensorDotLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorDotLayer.swift; sourceTree = "<group>"; };
+		0782F4A91E5BAB64005A6FBD /* DeconvolutionBlock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionBlock.swift; sourceTree = "<group>"; };
 		078642B81DDAD892006A3AFB /* Errors.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		078642B91DDAD892006A3AFB /* Globals.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Globals.swift; sourceTree = "<group>"; };
 		078642BA1DDAD892006A3AFB /* Conversions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Conversions.swift; sourceTree = "<group>"; };
@@ -168,6 +170,8 @@
 				077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */,
 				078642CD1DDAE596006A3AFB /* SummationLayer.swift */,
 				DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */,
+				0782F4A71E5BA961005A6FBD /* TensorDotLayer.swift */,
+				0782F4A91E5BAB64005A6FBD /* DeconvolutionBlock.swift */,
 			);
 			name = CommandEncoders;
 			sourceTree = "<group>";
@@ -177,7 +181,6 @@
 			children = (
 				DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */,
 				DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */,
-				078642B61DDAD892006A3AFB /* Chain.swift */,
 				DA9A565E1D9253C000E55916 /* Shaders.metal */,
 				077BB3E61DA39D080022578C /* CommandEncoder.swift */,
 				078642CC1DDAD8A8006A3AFB /* Utilities */,
@@ -431,7 +434,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				DA6942671DEAAB2900285327 /* RGBAToBRGALayer.swift in Sources */,
-				078642C11DDAD892006A3AFB /* Chain.swift in Sources */,
+				0782F4A81E5BA961005A6FBD /* TensorDotLayer.swift in Sources */,
 				077BB3CC1D98E0890022578C /* FullyConnectedLayer.swift in Sources */,
 				DA0B0C611D8BAB4000ED7982 /* ViewController.swift in Sources */,
 				DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */,
@@ -447,6 +450,7 @@
 				078642CE1DDAE596006A3AFB /* SummationLayer.swift in Sources */,
 				077BB3D51D9B063F0022578C /* BatchNormalizationLayer.swift in Sources */,
 				077BB3CE1D98E0E50022578C /* ResidualBlock.swift in Sources */,
+				0782F4AA1E5BAB64005A6FBD /* DeconvolutionBlock.swift in Sources */,
 				078642C51DDAD892006A3AFB /* Conversions.swift in Sources */,
 				078642C31DDAD892006A3AFB /* Errors.swift in Sources */,
 				07A30DAE1E74F909001077B1 /* Variables.swift in Sources */,

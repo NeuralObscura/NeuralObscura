@@ -46,7 +46,6 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
         let sourceImage = input.forward(commandBuffer: commandBuffer)
-        print(sourceImage)
         let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga"))

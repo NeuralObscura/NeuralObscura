@@ -218,4 +218,9 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
         XCTAssertEqual(outputImg, expImg)
     }
 
+    func testTensorDot() {
+        // load weights file into buffer
+        // load image file into mpsimage
+        
+    }
 }

@@ -101,8 +101,8 @@ class DeconvolutionLayer: UnaryCommandEncoder {
         
         let descriptor = MPSImageDescriptor(
             channelFormat: textureFormat,
-            width: outWidth,
-            height: outHeight,
+            width: Int(outWidth),
+            height: Int(outHeight),
             featureChannels: channelsOut)
         
         return descriptor
