@@ -44,6 +44,7 @@
 		DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */; };
 		DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */; };
 		DA70CE2D1E308B310057D586 /* MPSImageExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA70CE2C1E308B310057D586 /* MPSImageExtensionsTests.swift */; };
+		DA7FE94C1E555B87004C6A5B /* DeconvPart2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7FE94B1E555B87004C6A5B /* DeconvPart2Tests.swift */; };
 		DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C591DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift */; };
 		DA8A6C881DDD5F5800C6D125 /* AdditionShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C831DDD5F5800C6D125 /* AdditionShaderTests.swift */; };
 		DA8A6C891DDD5F5800C6D125 /* FileParameterBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C841DDD5F5800C6D125 /* FileParameterBufferTests.swift */; };
@@ -118,6 +119,7 @@
 		DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterBuffer.swift; sourceTree = "<group>"; };
 		DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModel.swift; sourceTree = "<group>"; };
 		DA70CE2C1E308B310057D586 /* MPSImageExtensionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSImageExtensionsTests.swift; sourceTree = "<group>"; };
+		DA7FE94B1E555B87004C6A5B /* DeconvPart2Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvPart2Tests.swift; sourceTree = "<group>"; };
 		DA8A6C591DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLPixelFormatExtensions.swift; sourceTree = "<group>"; };
 		DA8A6C831DDD5F5800C6D125 /* AdditionShaderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdditionShaderTests.swift; sourceTree = "<group>"; };
 		DA8A6C841DDD5F5800C6D125 /* FileParameterBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = FileParameterBufferTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -257,6 +259,7 @@
 				DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */,
 				DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */,
 				DA70CE2C1E308B310057D586 /* MPSImageExtensionsTests.swift */,
+				DA7FE94B1E555B87004C6A5B /* DeconvPart2Tests.swift */,
 			);
 			path = NeuralObscuraTests;
 			sourceTree = "<group>";
@@ -465,6 +468,7 @@
 				DA8A6C8A1DDD5F5800C6D125 /* ImageFormatTests.swift in Sources */,
 				DA8A6C8C1DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift in Sources */,
 				DA8A6C8B1DDD5F5800C6D125 /* ReLULayerTests.swift in Sources */,
+				DA7FE94C1E555B87004C6A5B /* DeconvPart2Tests.swift in Sources */,
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,
 				07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */,
 				DA6942651DEAAADE00285327 /* RGBAToBRGALayerTests.swift in Sources */,
