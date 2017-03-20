@@ -18,7 +18,7 @@ class NeuralStyleModel {
     let c1, c2, c3: ConvolutionLayer
     let b1, b2, b3, b4, b5: BatchNormalizationLayer
     let r1, r2, r3, r4, r5: ResidualBlock
-    let d1, d2, d3: DeconvolutionLayer
+    let d1, d2, d3: DeconvolutionBlock
     let tanhAdj: TanhAdjustmentLayer
     let rgba_to_brga: RGBAToBRGALayer
     let model: AnyCommandEncoder<MPSImage>

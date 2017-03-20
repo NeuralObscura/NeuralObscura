@@ -46,7 +46,8 @@ class DeconvolutionBlock: UnaryCommandEncoder {
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
-        return t1.forward(commandBuffer: commandBuffer)
+        // TODO: This "as!" is to force compilation for testing purposes.
+        return t1.forward(commandBuffer: commandBuffer) as! MPSImage
     }
     
     // private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {

@@ -233,10 +233,14 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         
         /* Run our test */
+<<<<<<< HEAD
         let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
         
         print(outputImg)
+=======
+        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+>>>>>>> origin/deconv_pt2
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)

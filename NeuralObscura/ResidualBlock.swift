@@ -89,8 +89,8 @@ class ResidualBlock: UnaryCommandEncoder {
     func chain(_ top: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
         var h = r1.chain(b1.chain(c1.chain(top)))
         h = b2.chain(c2.chain(h))
-        h = s1.chain(top, h)
-        return h
+        s1.chain(top, h)
+        return AnyCommandEncoder<MPSImage>(self)
     }
     
     func registerConsumer() {
