@@ -81,8 +81,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 0,
-            debug: true)
+            padding: 0)
         
         let expImg = device.MakeMPSImage(width: 4,
                                          height: 4,
@@ -93,7 +92,8 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
                                                   0, 0, 0, 0] as [Float32])
         
         /* Run our test */
-        let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -119,8 +119,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 1,
-            debug: true)
+            padding: 1)
         
         let expImg = device.MakeMPSImage(width: 4,
                                          height: 4,
@@ -131,7 +130,8 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
                                                   0, 0, 0, 0] as [Float32])
         
         /* Run our test */
-        let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -158,8 +158,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 2,
-            debug: true)
+            padding: 2)
         
         let expImg = device.MakeMPSImage(width: 4,
                                          height: 4,
@@ -170,7 +169,8 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
                                                   0, 0, 0, 0] as [Float32])
         
         /* Run our test */
-        let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -197,8 +197,7 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 1,
-            stride: 2,
-            debug: true)
+            stride: 2)
         
         let expImg = device.MakeMPSImage(width: 7,
                                          height: 7,
@@ -212,7 +211,8 @@ class DeconvolutionLayerTests: CommandEncoderBaseTest {
                                                   0, 0, 0, 0, 0, 0, 0] as [Float32])
         
         /* Run our test */
-        let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)

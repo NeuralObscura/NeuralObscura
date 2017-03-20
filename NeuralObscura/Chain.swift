@@ -9,10 +9,3 @@
 import Foundation
 import MetalPerformanceShaders
 
-protocol UnaryChain {
-    mutating func chain(_ top: CommandEncoder) -> CommandEncoder
-}
-
-protocol BinaryChain {
-    mutating func chain(_ topA: CommandEncoder, _ topB: CommandEncoder) -> CommandEncoder
-}

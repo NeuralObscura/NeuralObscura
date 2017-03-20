@@ -32,8 +32,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: true,
-            padding: 4,
-            debug: true)
+            padding: 4)
 
         /* Create our CommandEncoder*/
         let gamma = FileParameterBuffer(modelName: "composition", rawFileName: "b1_gamma")
@@ -43,7 +42,8 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
                                           gamma: gamma,
                                           testMode: false)
         /* Run our test */
-        let outputImg = bn.chain(conv).execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = bn.chain(conv.chain(MPSImageVariable(testImg))).forward(commandBuffer: commandBuffer)
+        execute()
 
         /* Verify the result */
         let expImg = [-0.53, 1.41, -0.07, 0.94, -0.53, -0.37, -0.07, -0.47,
@@ -82,7 +82,8 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
                                          testMode: true)
 
         /* Run our test */
-        let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = bn.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
 
 
         let expImg = device.MakeMPSImage(width: 2,
@@ -117,7 +118,8 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
                                          testMode: true)
 
         /* Run our test */
-        let outputImg = bn.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = bn.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
 
         let expImg = device.MakeMPSImage(width: 2,
                                          height: 2,

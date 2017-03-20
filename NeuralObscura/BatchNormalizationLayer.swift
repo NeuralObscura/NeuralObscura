@@ -10,6 +10,16 @@ import Foundation
 import MetalPerformanceShaders
 
 class BatchNormalizationLayer: UnaryCommandEncoder {
+    private let beta: MTLBuffer
+    private let gamma: MTLBuffer
+    private let mean: MTLBuffer
+    private let stddev: MTLBuffer
+    private let channelsIn: Int
+    private let testMode: Bool
+    private let useTemporary: Bool
+    private var consumerCount: Int = 0
+    private var input: AnyCommandEncoder<MPSImage>!
+    
     init(
         channelsIn: Int,
         beta: ParameterBuffer,
@@ -17,36 +27,9 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
         mean: ParameterBuffer? = nil,
         stddev: ParameterBuffer? = nil,
         testMode: Bool = false,
-        debug: Bool = false) {
-        super.init(
-            delegate: BatchNormalizationLayerDelegate(
-                channelsIn: channelsIn,
-                beta: beta,
-                gamma: gamma,
-                mean: mean,
-                stddev: stddev,
-                testMode: testMode),
-            debug: debug)
-    }
-}
-
-class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
-    let beta: MTLBuffer
-    let gamma: MTLBuffer
-    let mean: MTLBuffer
-    let stddev: MTLBuffer
-    let channelsIn: Int
-    let testMode: Bool
-    
-    private var sourceImage: MPSImage!
-
-    init(
-         channelsIn: Int,
-         beta: ParameterBuffer,
-         gamma: ParameterBuffer,
-         mean: ParameterBuffer? = nil,
-         stddev: ParameterBuffer? = nil,
-         testMode: Bool) {
+        useTemporary: Bool = false) {
+        
+        self.useTemporary = useTemporary
         self.channelsIn = Int(channelsIn)
         self.testMode = testMode
         self.beta = ShaderRegistry.getDevice().makeBuffer(bytes: beta.pointer(), length: beta.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
@@ -60,7 +43,35 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
         }
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+    func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
+        self.input = input
+        input.registerConsumer()
+        return AnyCommandEncoder<MPSImage>(self)
+    }
+    
+    func registerConsumer() {
+        consumerCount += 1
+    }
+    
+    func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let sourceImage = input.forward(commandBuffer: commandBuffer)
+        let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
+        encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        return destinationImage
+    }
+    
+    private func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let destDesc = destinationImageDescriptor(sourceImage: sourceImage)
+        if useTemporary {
+            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+        }
+    }
+    
+    private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         return MPSImageDescriptor(
             channelFormat: textureFormat,
             width: sourceImage.width,
@@ -68,12 +79,7 @@ class BatchNormalizationLayerDelegate: CommandEncoderDelegate {
             featureChannels: sourceImage.featureChannels)
     }
     
-    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
-        self.sourceImage = sourceImage
-        return true
-    }
-    
-    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
+    private func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         let encoder = commandBuffer.makeComputeCommandEncoder()
         if testMode {
             encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "batch_normalization"))

@@ -10,43 +10,65 @@ import Foundation
 import MetalPerformanceShaders
 
 class SummationLayer: BinaryCommandEncoder {
-    init(debug: Bool = false) {
-        super.init(
-            delegate: SummationLayerDelegate(),
-            debug: debug)
-    }
-}
+    typealias InputTypeA = MPSImage
+    typealias InputTypeB = MPSImage
 
-class SummationLayerDelegate: CommandEncoderDelegate {
-    private var sourceImageA: MPSImage!
-    private var sourceImageB: MPSImage!
     private var inputsSupplied = 0
+    private let useTemporary: Bool
+    private var consumerCount: Int = 0
+    var inputA: AnyCommandEncoder<InputTypeA>!
+    var inputB: AnyCommandEncoder<InputTypeB>!
     
-    init() {}
+    init(useTemporary: Bool = false) {
+        self.useTemporary = useTemporary
+    }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
-        return MPSImageDescriptor(
+    func chain(
+        _ inputA: AnyCommandEncoder<InputTypeA>,
+        _ inputB: AnyCommandEncoder<InputTypeB>) -> AnyCommandEncoder<MPSImage> {
+        self.inputA = inputA
+        self.inputB = inputB
+        inputA.registerConsumer()
+        return AnyCommandEncoder<MPSImage>(self)
+    }
+    
+    func registerConsumer() {
+        consumerCount += 1
+    }
+    
+    func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let sourceImageA = inputA.forward(commandBuffer: commandBuffer)
+        let sourceImageB = inputB.forward(commandBuffer: commandBuffer)
+        let destinationImage = self.destinationImage(sourceImageA: sourceImageA, commandBuffer: commandBuffer)
+        encode(
+            commandBuffer: commandBuffer,
+            sourceImageA: sourceImageA,
+            sourceImageB: sourceImageB,
+            destinationImage: destinationImage)
+        return destinationImage
+    }
+    
+    private func destinationImage(sourceImageA: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let destDesc = MPSImageDescriptor(
             channelFormat: textureFormat,
-            width: sourceImage.width,
-            height: sourceImage.height,
-            featureChannels: sourceImage.featureChannels)
-    }
-    
-    
-    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
-        switch sourcePosition {
-        case 0:
-            self.sourceImageA = sourceImage
-        case 1:
-            self.sourceImageB = sourceImage
-        default:
-            fatalError("Invalid sourcePosition: \(sourcePosition)")
+            width: sourceImageA.width,
+            height: sourceImageA.height,
+            featureChannels: sourceImageA.featureChannels)
+        if useTemporary {
+            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
         }
-        inputsSupplied += 1
-        return inputsSupplied == 2
     }
     
-    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
+    private func encode(
+        commandBuffer: MTLCommandBuffer,
+        sourceImageA: MPSImage,
+        sourceImageB: MPSImage,
+        destinationImage: MPSImage) {
+        
         let encoder = commandBuffer.makeComputeCommandEncoder()
         encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "add"))
         encoder.setTexture(sourceImageA.texture, at: 0)

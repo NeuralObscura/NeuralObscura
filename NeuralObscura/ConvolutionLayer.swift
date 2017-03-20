@@ -10,38 +10,11 @@ import Foundation
 import MetalPerformanceShaders
 
 class ConvolutionLayer: UnaryCommandEncoder {
-    init(
-        kernelSize: Int,
-        channelsIn: Int,
-        channelsOut: Int,
-        w: ParameterBuffer,
-        b: ParameterBuffer,
-        relu: Bool = true,
-        padding: Int = 0,
-        stride: Int = 1,
-        destinationFeatureChannelOffset: Int = 0,
-        groupNum: Int = 1,
-        debug: Bool = false) {
-        super.init(
-            delegate: ConvolutionLayerDelegate(
-                kernelSize: kernelSize,
-                channelsIn: channelsIn,
-                channelsOut: channelsOut,
-                w: w,
-                b: b,
-                relu: relu,
-                padding: padding,
-                stride: stride,
-                destinationFeatureChannelOffset: destinationFeatureChannelOffset,
-                groupNum: groupNum),
-            debug: debug)
-    }
-}
-
-class ConvolutionLayerDelegate: CommandEncoderDelegate {
-    let convolution: MPSCNNConvolution
-    let padding: Int
-    private var sourceImage: MPSImage!
+    private let useTemporary: Bool
+    private var consumerCount: Int = 0
+    private let convolution: MPSCNNConvolution
+    private let padding: Int
+    private var input: AnyCommandEncoder<MPSImage>!
     
     init(
         kernelSize: Int,
@@ -53,7 +26,10 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         padding: Int = 0,
         stride: Int = 1,
         destinationFeatureChannelOffset: Int = 0,
-        groupNum: Int = 1) {
+        groupNum: Int = 1,
+        useTemporary: Bool = false) {
+        
+        self.useTemporary = useTemporary
         self.padding = padding
         
         var neuronFilter: MPSCNNNeuron?
@@ -85,7 +61,35 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
         convolution.offset = MPSOffset(x: (convolution.kernelWidth / 2) - padding, y: (convolution.kernelHeight / 2) - padding, z: 0)
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+    func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
+        self.input = input
+        input.registerConsumer()
+        return AnyCommandEncoder<MPSImage>(self)
+    }
+    
+    func registerConsumer() {
+        consumerCount += 1
+    }
+    
+    func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let sourceImage = input.forward(commandBuffer: commandBuffer)
+        let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
+        convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        return destinationImage
+    }
+    
+    private func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let destDesc = destinationImageDescriptor(sourceImage: sourceImage)
+        if useTemporary {
+            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+        }
+    }
+    
+    private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         let inHeight = sourceImage.height
         let inWidth = sourceImage.width
         
@@ -102,15 +106,5 @@ class ConvolutionLayerDelegate: CommandEncoderDelegate {
             featureChannels: channelsOut)
 
         return descriptor
-    }
-
-    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
-        self.sourceImage = sourceImage
-        return true
-    }
-    
-    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
-        // decrements sourceImage.readCount
-        convolution.encode(commandBuffer: commandBuffer, sourceImage: self.sourceImage, destinationImage: destinationImage)
     }
 }

@@ -14,12 +14,11 @@ import MetalPerformanceShaders
  * Blocks simulate a layer by encapsulating multiple inner layers, structured like a sub-network.
  * chain() and encode() methods should not expose any direct linkages to inner layers
  */
-class ResidualBlock: UnaryChain {
-    let c1, c2: ConvolutionLayer
-    let b1, b2: BatchNormalizationLayer
-    let s1: SummationLayer
-    let r1: ReLULayer
-    
+class ResidualBlock: UnaryCommandEncoder {
+    private let c1, c2: ConvolutionLayer
+    private let b1, b2: BatchNormalizationLayer
+    private let r1: ReLULayer
+    private let s1: SummationLayer
     
     /* A property to keep info from init time whether we will pad input image or not for use during encode call */
     fileprivate var padding = true
@@ -31,7 +30,7 @@ class ResidualBlock: UnaryChain {
         channelsOut: Int,
         kernelSize: Int = 3,
         stride: Int = 1,
-        debug: Bool = false) {
+        useTemporary: Bool = false) {
         
         /* Load the block parameters */
         let c1_w = modelParams[blockName + "_c1_W"]!
@@ -57,8 +56,16 @@ class ResidualBlock: UnaryChain {
             relu: false,
             padding: 1,
             stride: stride,
-            debug: debug)
+            useTemporary: useTemporary)
 
+        b1 = BatchNormalizationLayer(channelsIn: channelsOut,
+                                     beta: b1_beta,
+                                     gamma: b1_gamma,
+                                     mean: b1_mean,
+                                     stddev: b1_stddev)
+
+        r1 = ReLULayer()
+        
         c2 = ConvolutionLayer(
             kernelSize: kernelSize,
             channelsIn: channelsOut,
@@ -68,31 +75,29 @@ class ResidualBlock: UnaryChain {
             relu: false,
             padding: 1,
             stride: stride,
-            debug: debug)
-
-        b1 = BatchNormalizationLayer(channelsIn: channelsOut,
-                                     beta: b1_beta,
-                                     gamma: b1_gamma,
-                                     mean: b1_mean,
-                                     stddev: b1_stddev)
+            useTemporary: useTemporary)
+        
         b2 = BatchNormalizationLayer(channelsIn: channelsOut,
                                      beta: b2_beta,
                                      gamma: b2_gamma,
                                      mean: b2_mean,
                                      stddev: b2_stddev)
+        
         s1 = SummationLayer()
-        
-        r1 = ReLULayer()
-        
     }
     
-    func chain(_ top: CommandEncoder) -> CommandEncoder {
-
+    func chain(_ top: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
         var h = r1.chain(b1.chain(c1.chain(top)))
-        
         h = b2.chain(c2.chain(h))
-        
-        return s1.chain(top, h)
+        h = s1.chain(top, h)
+        return h
     }
     
+    func registerConsumer() {
+        s1.registerConsumer()
+    }
+    
+    func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        return s1.forward(commandBuffer: commandBuffer)
+    }
 }
