@@ -14,7 +14,6 @@
 		077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3C91D98E0010022578C /* ConvolutionLayer.swift */; };
 		077BB3CC1D98E0890022578C /* FullyConnectedLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */; };
 		077BB3CE1D98E0E50022578C /* ResidualBlock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3CD1D98E0E50022578C /* ResidualBlock.swift */; };
-		077BB3D21D9B05260022578C /* DeconvolutionLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3D11D9B05260022578C /* DeconvolutionLayer.swift */; };
 		077BB3D51D9B063F0022578C /* BatchNormalizationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */; };
 		077BB3E71DA39D080022578C /* CommandEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077BB3E61DA39D080022578C /* CommandEncoder.swift */; };
 		077E558C1DC699B500111255 /* MPSCNNConvolutionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */; };
@@ -83,7 +82,6 @@
 		077BB3C91D98E0010022578C /* ConvolutionLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayer.swift; sourceTree = "<group>"; };
 		077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = FullyConnectedLayer.swift; sourceTree = "<group>"; };
 		077BB3CD1D98E0E50022578C /* ResidualBlock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ResidualBlock.swift; sourceTree = "<group>"; };
-		077BB3D11D9B05260022578C /* DeconvolutionLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionLayer.swift; sourceTree = "<group>"; };
 		077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationLayer.swift; sourceTree = "<group>"; };
 		077BB3E61DA39D080022578C /* CommandEncoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoder.swift; sourceTree = "<group>"; };
 		077E558B1DC699B500111255 /* MPSCNNConvolutionTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSCNNConvolutionTests.swift; sourceTree = "<group>"; };
@@ -166,7 +164,6 @@
 				077BB3C91D98E0010022578C /* ConvolutionLayer.swift */,
 				077BB3CD1D98E0E50022578C /* ResidualBlock.swift */,
 				077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */,
-				077BB3D11D9B05260022578C /* DeconvolutionLayer.swift */,
 				077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */,
 				078642CD1DDAE596006A3AFB /* SummationLayer.swift */,
 				DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */,
@@ -440,7 +437,6 @@
 				DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */,
 				078642C81DDAD892006A3AFB /* Weak.swift in Sources */,
 				DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */,
-				077BB3D21D9B05260022578C /* DeconvolutionLayer.swift in Sources */,
 				078642C61DDAD892006A3AFB /* ReLULayer.swift in Sources */,
 				DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift in Sources */,
 				078642C41DDAD892006A3AFB /* Globals.swift in Sources */,

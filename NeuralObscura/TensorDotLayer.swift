@@ -43,22 +43,12 @@ class TensorDotLayer: UnaryCommandEncoder {
         input.registerConsumer()
         return AnyCommandEncoder<MTLBuffer>(self)
     }
-
-    func destinationBufferSize(sourceImage: MPSImage) -> Int {
-        let inHeight = sourceImage.height
-        let inWidth = sourceImage.width
-        return channelsOut * kernelSize * kernelSize * inHeight * inWidth
-    }
+    
+    func registerConsumer() {}
     
     func forward(commandBuffer: MTLCommandBuffer) -> MTLBuffer {
         let sourceImage = input.forward(commandBuffer: commandBuffer)
-        let bufSize = destinationBufferSize()
-        let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
-        // TODO: Needs wiring
-    }
-    
-    func encode(commandBuffer: MTLCommandBuffer, destinationBuffer: MTLBuffer) {
-        let matrixWidth = sourceImage!.height * sourceImage!.width
+        let matrixWidth = sourceImage.height * sourceImage.width
         let matrixHeight = Int(channelsOut * kernelSize * kernelSize)
         var weightsShape = [
             UInt32(channelsOut),
@@ -84,18 +74,21 @@ class TensorDotLayer: UnaryCommandEncoder {
         encoder.setBuffer(tensordot, offset: 0, at: 1)
         encoder.setBuffer(weightsBuffer, offset: 0, at: 2)
         encoder.setBuffer(weightsShapeBuffer, offset: 0, at: 3)
-        
         let threadGroupWidth = tensordotPipelineState.threadExecutionWidth
         let threadGroupHeight = tensordotPipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
         let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
-        let gridShape = MTLSize(width: (matrixWidth + threadGroupWidth - 1) / threadGroupWidth,
-                                          height: (matrixHeight + threadGroupHeight - 1) / threadGroupHeight,
-                                          depth: 1)
+        let gridShape = MTLSize(
+            width: (matrixWidth + threadGroupWidth - 1) / threadGroupWidth,
+            height: (matrixHeight + threadGroupHeight - 1) / threadGroupHeight,
+            depth: 1)
         encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
         encoder.endEncoding()
+        
         if let image = sourceImage as? MPSTemporaryImage {
             image.readCount -= 1
         }
+        
+        return tensordot
     }
 }
 

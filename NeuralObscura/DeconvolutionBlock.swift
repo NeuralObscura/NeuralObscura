@@ -30,23 +30,48 @@ class DeconvolutionBlock: UnaryCommandEncoder {
         relu: Bool = true,
         padding: Int = 0, // TODO: Revisit this default
         stride: Int = 1,
-        debug: Bool = false) {
+        useTemporary: Bool = false) {
         
         t1 = TensorDotLayer(
             kernelSize: kernelSize,
             channelsIn: channelsIn,
             channelsOut: channelsOut,
-            w: w,
-            debug: debug)
+            w: w)
         
     }
     
     func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
-        return t1.chain(input)
+        t1.chain(input)
+        return AnyCommandEncoder<MPSImage>(self)
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        return t1.forward(commandBuffer: commandBuffer)
     }
+    
+    // private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+    //     let inHeight = sourceImage.height
+    //     let inWidth = sourceImage.width
+
+    //     let stride = self.stride
+    //     
+    //     let outHeight = stride * (inHeight - 1) + kernelSize - 2 * padding
+    //     let outWidth = stride * (inWidth - 1) + kernelSize - 2 * padding
+
+    //     /* Assert the constraint on input size, kernel size, padding, stride. */
+    //     assert((outHeight + 2 * padding - kernelSize) % stride == 0,
+    //            "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the height dimension.")
+    //     assert((outWidth + 2 * padding - kernelSize) % stride == 0,
+    //            "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the width dimension.")
+    //     
+    //     let descriptor = MPSImageDescriptor(
+    //         channelFormat: textureFormat,
+    //         width: Int(outWidth),
+    //         height: Int(outHeight),
+    //         featureChannels: channelsOut)
+    //     
+    //     return descriptor
+    // }
 }
 
 

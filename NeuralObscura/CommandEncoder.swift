@@ -62,38 +62,3 @@ class AnyCommandEncoder<T>: CommandEncoder {
         }
     }
 }
-
-
-//open class UnaryCommandEncoder: CommandEncoder, UnaryChain {
-//    var top: CommandEncoder?
-//    
-//    func chain(_ top: CommandEncoder) -> CommandEncoder {
-//        self.top = top
-//        self.head = top.head
-//        top.registerBottom() {
-//            [unowned self] (commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage? in
-//            self.forward(commandBuffer: commandBuffer, sourceImage: sourceImage)
-//        }
-//        return self
-//    }
-//}
-//
-//open class BinaryCommandEncoder: CommandEncoder, BinaryChain {
-//    var topA: CommandEncoder?
-//    var topB: CommandEncoder?
-//    
-//    func chain(_ topA: CommandEncoder, _ topB: CommandEncoder) -> CommandEncoder {
-//        self.topA = topA
-//        self.topB = topB
-//        self.head = topA.head
-//        topA.registerBottom() {
-//            [unowned self] (commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage? in
-//            self.forward(commandBuffer: commandBuffer, sourceImage: sourceImage, sourcePosition: 0)
-//        }
-//        topB.registerBottom() {
-//            [unowned self] (commandBuffer: MTLCommandBuffer, sourceImage: MPSImage) -> MPSImage? in
-//            self.forward(commandBuffer: commandBuffer, sourceImage: sourceImage, sourcePosition: 1)
-//        }
-//        return self
-//    }
-//}
