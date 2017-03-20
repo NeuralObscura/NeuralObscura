@@ -14,13 +14,14 @@ class NeuralStyleModel {
     let debug: Bool
     var modelParams = [String: ParameterBuffer]()
     
+    let src: MPSImageVariable
     let c1, c2, c3: ConvolutionLayer
     let b1, b2, b3, b4, b5: BatchNormalizationLayer
     let r1, r2, r3, r4, r5: ResidualBlock
     let d1, d2, d3: DeconvolutionLayer
     let tanhAdj: TanhAdjustmentLayer
     let rgba_to_brga: RGBAToBRGALayer
-    let modelHandle: CommandEncoder
+    let model: AnyCommandEncoder<MPSImage>
 
     init(modelName: String,
          debug: Bool = false) {
@@ -213,6 +214,8 @@ class NeuralStyleModel {
         //d1_b shape = (64,)
 
         /* Init model encoders */
+        src = MPSImageVariable()
+        
         rgba_to_brga = RGBAToBRGALayer()
 
         // c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
@@ -224,8 +227,7 @@ class NeuralStyleModel {
             b: modelParams["c1_b"]!,
             relu: true,
             padding: 4,
-            stride: 1,
-            debug: debug)
+            stride: 1)
 
         // b1=L.BatchNormalization(32),
         b1 = BatchNormalizationLayer(
@@ -244,8 +246,7 @@ class NeuralStyleModel {
             b: modelParams["c2_b"]!,
             relu: true,
             padding: 1,
-            stride: 2,
-            debug: debug)
+            stride: 2)
 
         // b2=L.BatchNormalization(64),
         b2 = BatchNormalizationLayer(
@@ -264,8 +265,7 @@ class NeuralStyleModel {
             b: modelParams["c3_b"]!,
             relu: true,
             padding: 1,
-            stride: 2,
-            debug: debug)
+            stride: 2)
 
         // b3=L.BatchNormalization(128),
         b3 = BatchNormalizationLayer(
@@ -280,40 +280,35 @@ class NeuralStyleModel {
             modelParams: modelParams,
             blockName: "r1",
             channelsIn: 128,
-            channelsOut: 128,
-            debug: debug)
+            channelsOut: 128)
 
         // r2=ResidualBlock(128, 128),
         r2 = ResidualBlock(
             modelParams: modelParams,
             blockName: "r2",
             channelsIn: 128,
-            channelsOut: 128,
-            debug: debug)
+            channelsOut: 128)
 
         // r3=ResidualBlock(128, 128),
         r3 = ResidualBlock(
             modelParams: modelParams,
             blockName: "r3",
             channelsIn: 128,
-            channelsOut: 128,
-            debug: debug)
+            channelsOut: 128)
 
         // r4=ResidualBlock(128, 128),
         r4 = ResidualBlock(
             modelParams: modelParams,
             blockName: "r4",
             channelsIn: 128,
-            channelsOut: 128,
-            debug: debug)
+            channelsOut: 128)
 
         // r5=ResidualBlock(128, 128),
         r5 = ResidualBlock(
             modelParams: modelParams,
             blockName: "r5",
             channelsIn: 128,
-            channelsOut: 128,
-            debug: debug)
+            channelsOut: 128)
 
         // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
         d1 = DeconvolutionLayer(
@@ -323,8 +318,7 @@ class NeuralStyleModel {
             w: modelParams["d1_W"]!,
             b: modelParams["d1_b"]!,
             padding: 1,
-            stride: 2,
-            debug: debug)
+            stride: 2)
 
         // b4=L.BatchNormalization(64),
         b4 = BatchNormalizationLayer(
@@ -342,8 +336,7 @@ class NeuralStyleModel {
             w: modelParams["d2_W"]!,
             b: modelParams["d2_b"]!,
             padding: 1,
-            stride: 2,
-            debug: debug)
+            stride: 2)
 
         // b5=L.BatchNormalization(32),
         b5 = BatchNormalizationLayer(
@@ -362,14 +355,13 @@ class NeuralStyleModel {
             b: modelParams["d3_b"]!,
             relu: false,
             padding: 4,
-            stride: 1,
-            debug: debug)
+            stride: 1)
 
         tanhAdj = TanhAdjustmentLayer()
 
         /* Chain model encoders together */
-        var h: CommandEncoder
-        h = rgba_to_brga
+        var h: AnyCommandEncoder<MPSImage>
+        h = rgba_to_brga.chain(src)
 
         // h = self.b1(F.elu(self.c1(top)), test=test)
         h = b1.chain(c1.chain(h))
@@ -407,15 +399,16 @@ class NeuralStyleModel {
         // return (F.tanh(y)+1)*127.5
         h = tanhAdj.chain(h)
         
-        modelHandle = h
+        model = h
     }
 
     func execute(commandQueue: MTLCommandQueue, sourceImage: MPSImage) -> MPSImage {
+        src.setValue(sourceImage)
         var outputImage: MPSImage? = nil
 
         autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
-            outputImage = modelHandle.execute(commandBuffer: commandBuffer, sourceImage: sourceImage)
+            outputImage = model.forward(commandBuffer: commandBuffer)
         }
 
         return outputImage!

@@ -10,31 +10,10 @@ import Foundation
 import MetalPerformanceShaders
 
 class FullyConnectedLayer: UnaryCommandEncoder {
-    init(
-        kernelSize: Int,
-        channelsIn: Int,
-        channelsOut: Int,
-        w: ParameterBuffer,
-        b: ParameterBuffer,
-        neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
-        destinationFeatureChannelOffset: Int = 0,
-        debug: Bool = false) {
-        super.init(
-            delegate: FullyConnectedLayerDelegate(
-                kernelSize: kernelSize,
-                channelsIn: channelsIn,
-                channelsOut: channelsOut,
-                w: w,
-                b: b,
-                neuronFilter: neuronFilter,
-                destinationFeatureChannelOffset: destinationFeatureChannelOffset),
-            debug: debug)
-    }
-}
-
-class FullyConnectedLayerDelegate: CommandEncoderDelegate {
-    let fullyConnected: MPSCNNFullyConnected
-    private var sourceImage: MPSImage!
+    private let fullyConnected: MPSCNNFullyConnected
+    private let useTemporary: Bool
+    private var consumerCount: Int = 0
+    private var input: AnyCommandEncoder<MPSImage>!
     
     init(
         kernelSize: Int,
@@ -43,8 +22,10 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         w: ParameterBuffer,
         b: ParameterBuffer,
         neuronFilter: MPSCNNNeuron? = MPSCNNNeuronSigmoid(),
-        destinationFeatureChannelOffset: Int = 0){
+        destinationFeatureChannelOffset: Int = 0,
+        useTemporary: Bool = false) {
         
+        self.useTemporary = useTemporary
         // create appropriate convolution descriptor (in fully connected, stride is always 1)
         let convDesc = MPSCNNConvolutionDescriptor(kernelWidth: kernelSize,
                                                    kernelHeight: kernelSize,
@@ -61,21 +42,35 @@ class FullyConnectedLayerDelegate: CommandEncoderDelegate {
         fullyConnected.destinationFeatureChannelOffset = destinationFeatureChannelOffset
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
-        return MPSImageDescriptor(
+    func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
+        self.input = input
+        input.registerConsumer()
+        return AnyCommandEncoder<MPSImage>(self)
+    }
+    
+    func registerConsumer() {
+        consumerCount += 1
+    }
+    
+    func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let sourceImage = input.forward(commandBuffer: commandBuffer)
+        let destinationImage = self.destinationImage(input: sourceImage, commandBuffer: commandBuffer)
+        fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        return destinationImage
+    }
+    
+    private func destinationImage(input: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let destDesc =  MPSImageDescriptor(
             channelFormat: textureFormat,
             width: 1,
             height: 1,
             featureChannels: fullyConnected.outputFeatureChannels)
+        if useTemporary {
+            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+        }
     }
-    
-    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
-        self.sourceImage = sourceImage
-        return true
-    }
-    
-    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
-        fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-    }
-    
 }

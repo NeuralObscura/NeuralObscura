@@ -19,6 +19,14 @@ import MetalPerformanceShaders
  and `k` is the kernel size in that dimension.
  */
 class DeconvolutionLayer: UnaryCommandEncoder {
+    private let useTemporary: Bool
+    private var consumerCount: Int = 0
+    private var input: AnyCommandEncoder<MPSImage>!
+    private let convolution: MPSCNNConvolution
+    private let padding: Int
+    private let stride: Int
+    private let interpixelStride: MTLBuffer?
+    
     init(
         kernelSize: Int,
         channelsIn: Int,
@@ -30,42 +38,9 @@ class DeconvolutionLayer: UnaryCommandEncoder {
         stride: Int = 1,
         destinationFeatureChannelOffset: Int = 0,
         groupNum: Int = 1,
-        debug: Bool = false) {
-        super.init(
-            delegate: DeconvolutionLayerDelegate(
-                kernelSize: kernelSize,
-                channelsIn: channelsIn,
-                channelsOut: channelsOut,
-                w: w,
-                b: b,
-                relu: relu,
-                padding: padding,
-                stride: stride,
-                destinationFeatureChannelOffset: destinationFeatureChannelOffset,
-                groupNum: groupNum),
-            debug: debug)
-    }
-}
-
-class DeconvolutionLayerDelegate: CommandEncoderDelegate {
-    private let convolution: MPSCNNConvolution
-    private let padding: Int
-    private let stride: Int
-    private let interpixelStride: MTLBuffer?
-    private var sourceImage: MPSImage!
+        useTemporary: Bool = false) {
     
-    init(
-        kernelSize: Int,
-        channelsIn: Int,
-        channelsOut: Int,
-        w: ParameterBuffer,
-        b: ParameterBuffer,
-        relu: Bool = true,
-        padding: Int  = 0,
-        stride: Int = 1,
-        destinationFeatureChannelOffset: Int = 0,
-        groupNum: Int = 1) {
-        
+        self.useTemporary = useTemporary
         self.padding = padding
         self.stride = stride
         
@@ -109,7 +84,35 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         convolution.offset = MPSOffset(x: 1 - effectivePadding, y: 1 - effectivePadding, z: 0)
     }
     
-    func getDestinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
+    func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
+        self.input = input
+        input.registerConsumer()
+        return AnyCommandEncoder<MPSImage>(self)
+    }
+    
+    func registerConsumer() {
+        consumerCount += 1
+    }
+    
+    func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let sourceImage = input.forward(commandBuffer: commandBuffer)
+        let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
+        encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+        return destinationImage
+    }
+    
+    func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let destDesc = destinationImageDescriptor(sourceImage: sourceImage)
+        if useTemporary {
+            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+        }
+    }
+    
+    private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         let inHeight = sourceImage.height
         let inWidth = sourceImage.width
 
@@ -134,13 +137,7 @@ class DeconvolutionLayerDelegate: CommandEncoderDelegate {
         return descriptor
     }
     
-    
-    func supplyInput(sourceImage: MPSImage, sourcePosition: Int) -> Bool {
-        self.sourceImage = sourceImage
-        return true
-    }
-    
-    func encode(commandBuffer: MTLCommandBuffer, destinationImage: MPSImage) {
+    private func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         var intermediateImage: MPSImage! = sourceImage
         
         /* We don't need interpixel stride if the stride is 1 */

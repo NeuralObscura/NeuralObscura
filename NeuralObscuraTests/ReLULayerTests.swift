@@ -19,11 +19,11 @@ class ReLULayerTests: CommandEncoderBaseTest {
                                           values: [-9, -1,
                                                    1, 2] as [Float32])
         /* Create our CommandEncoder */
-        let relu = ReLULayer()
+        let relu = ReLULayer().chain(MPSImageVariable(testImg))
 
         /* Run our test */
-        let outputImg = relu.execute(commandBuffer: commandBuffer, sourceImage: testImg)
-
+        let outputImg = relu.forward(commandBuffer: commandBuffer)
+        execute()
 
         let expImg = device.MakeMPSImage(width: 2,
                                          height: 2,

@@ -33,8 +33,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 0,
-            debug: true)
+            padding: 0)
         
         let expImg = device.MakeMPSImage(width: 2,
                                          height: 2,
@@ -43,7 +42,8 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                                   0, 1] as [Float32])
         
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -67,8 +67,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 1,
-            debug: true)
+            padding: 1)
         
         let expImg = device.MakeMPSImage(width: 4,
                                          height: 4,
@@ -80,7 +79,8 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -106,8 +106,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 2,
-            debug: true)
+            padding: 2)
         
         let expImg = device.MakeMPSImage(width: 6,
                                          height: 6,
@@ -121,7 +120,8 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -145,8 +145,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 0,
-            debug: true)
+            padding: 0)
         
         let expImg = device.MakeMPSImage(width: 2,
                                          height: 2,
@@ -155,7 +154,8 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                                   2, 3] as [Float32])
         
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -180,8 +180,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 1,
-            debug: true)
+            padding: 1)
         
         let expImg = device.MakeMPSImage(width: 4,
                                          height: 4,
@@ -193,7 +192,9 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+        
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
     }
@@ -218,8 +219,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 2,
-            debug: true)
+            padding: 2)
         
         let expImg = device.MakeMPSImage(width: 6,
                                          height: 6,
@@ -233,7 +233,9 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+        
         print(outputImg)
         
         /* Verify the result */

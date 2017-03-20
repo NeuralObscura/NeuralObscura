@@ -25,7 +25,7 @@ class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
         let tanhAdj = TanhAdjustmentLayer()
 
         /* Run our test */
-        let outputImg = tanhAdj.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = tanhAdj.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
 
         let expImg = device.MakeMPSImage(width: 2,
                                              height: 2,

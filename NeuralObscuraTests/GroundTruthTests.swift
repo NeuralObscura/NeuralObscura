@@ -30,8 +30,7 @@ class GroundTruthTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: false,
-            padding: 4,
-            debug: true)
+            padding: 4)
 
         let expImg = [-106.00, 665.06, -432.24, 150.99, -285.92, 294.37, -395.31,
                       -270.16, 138.08, 565.08, -267.65, 42.14, -84.40, 223.20,
@@ -54,7 +53,9 @@ class GroundTruthTests: CommandEncoderBaseTest {
                       370.32, 23.80, 60.13, -413.34] as [Float32]
 
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+        
         /* Verify the result */
         XCTAssert(outputImg.isLossyEqual(expImg, precision: -1))
     }
@@ -76,8 +77,7 @@ class GroundTruthTests: CommandEncoderBaseTest {
             w: w_pb,
             b: b_pb,
             relu: true,
-            padding: 4,
-            debug: true)
+            padding: 4)
 
         let expImg = [0, 665.06, 0, 150.99, 0, 294.37, 0,
                       0, 138.08, 565.08, 0, 42.14, 0, 223.20,
@@ -100,7 +100,8 @@ class GroundTruthTests: CommandEncoderBaseTest {
                       370.32, 23.80, 60.13, 0] as [Float32]
 
         /* Run our test */
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
 
         /* Verify the result */
         XCTAssert(outputImg.isLossyEqual(expImg, precision: -1))
@@ -122,10 +123,10 @@ class GroundTruthTests: CommandEncoderBaseTest {
             b: b_pb,
             relu: false,
             padding: 1,
-            stride: 2,
-            debug: true)
+            stride: 2)
 
-        let outputImg = deconv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
 
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv-ground-truth", withExtension: "npy", subdirectory: "testdata")!

@@ -25,7 +25,8 @@ class RGBAToBRGALayerTests: CommandEncoderBaseTest {
         let tanhAdj = RGBAToBRGALayer()
 
         /* Run our test */
-        let outputImg = tanhAdj.execute(commandBuffer: commandBuffer, sourceImage: testImg)
+        let outputImg = tanhAdj.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
 
         let expImg = device.MakeMPSImage(width: 2,
                                              height: 2,
