@@ -18,6 +18,9 @@ class SummationLayer: BinaryCommandEncoder {
     private var consumerCount: Int = 0
     var inputA: AnyCommandEncoder<InputTypeA>!
     var inputB: AnyCommandEncoder<InputTypeB>!
+    /* Int should be a mtlCommandBuffer.hash value */
+    private var outputMemoId: Int?
+    private var outputMemo: MPSImage?
     
     init(useTemporary: Bool = false) {
         self.useTemporary = useTemporary
@@ -37,15 +40,21 @@ class SummationLayer: BinaryCommandEncoder {
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let sourceImageA = inputA.forward(commandBuffer: commandBuffer)
-        let sourceImageB = inputB.forward(commandBuffer: commandBuffer)
-        let destinationImage = self.destinationImage(sourceImageA: sourceImageA, commandBuffer: commandBuffer)
-        encode(
-            commandBuffer: commandBuffer,
-            sourceImageA: sourceImageA,
-            sourceImageB: sourceImageB,
-            destinationImage: destinationImage)
-        return destinationImage
+        if outputMemoId != nil && outputMemoId! == commandBuffer.hash {
+            return outputMemo!
+        } else {
+            let sourceImageA = inputA.forward(commandBuffer: commandBuffer)
+            let sourceImageB = inputB.forward(commandBuffer: commandBuffer)
+            let destinationImage = self.destinationImage(sourceImageA: sourceImageA, commandBuffer: commandBuffer)
+            encode(
+                commandBuffer: commandBuffer,
+                sourceImageA: sourceImageA,
+                sourceImageB: sourceImageB,
+                destinationImage: destinationImage)
+            outputMemoId = commandBuffer.hash
+            outputMemo = destinationImage
+            return outputMemo!
+        }
     }
     
     private func destinationImage(sourceImageA: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {

@@ -121,8 +121,95 @@ extension MPSImage {
 
         return true
     }
+    
+    func isLossyEqual(image rhs: MPSImage, precision: Int) -> Bool {
+        let maxDifference = powf(10.0, Float(-precision))
+        
+        let lhs = self
 
-    func isLossyEqual(_ rhs: [Float32], precision: Int) -> Bool {
+        guard ( lhs.width == rhs.width &&
+            lhs.height == rhs.height &&
+            lhs.pixelSize == rhs.pixelSize &&
+            lhs.pixelFormat == rhs.pixelFormat &&
+            lhs.featureChannels == rhs.featureChannels) else { return false }
+        
+        let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
+        let lhsImageSize = lhs.height * lhsRowSize
+        let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.channelCount
+        let rhsRowSize: Int = rhs.pixelFormat.bytesPerRow(rhs.width)
+        let rhsImageSize = rhs.height * rhsRowSize
+        let rhsPixelArea = rhs.width * rhs.height * rhs.pixelFormat.channelCount
+
+        let lhsTexture = lhs.texture
+        let rhsTexture = rhs.texture
+
+        let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsImageSize, alignedTo: lhs.pixelSize)
+        let rhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: rhsImageSize, alignedTo: rhs.pixelSize)
+
+        let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
+
+        for i in 0...(slices-1) {
+            lhsTexture.getBytes(lhsRawPtr,
+                                bytesPerRow: lhsRowSize,
+                                bytesPerImage: lhsImageSize,
+                                from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                mipmapLevel: 0,
+                                slice: i)
+            rhsTexture.getBytes(rhsRawPtr,
+                                bytesPerRow: rhsRowSize,
+                                bytesPerImage: rhsImageSize,
+                                from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                mipmapLevel: 0,
+                                slice: i)
+
+            switch lhs.pixelFormat {
+            case .r16Float, .rgba16Float:
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhsPixelArea)
+                
+                let convertedLhs = Conversions.float16toFloat32(Array(lhsBufferPtr))
+                let convertedRhs = Conversions.float16toFloat32(Array(rhsBufferPtr))
+
+                for i in 0...(convertedRhs.count - 1) {
+                    if (abs(convertedLhs[i] - convertedRhs[i]) > maxDifference) {
+                        return false
+                    }
+                }
+            case .r8Unorm, .rgba8Unorm:
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhsPixelArea)
+
+                if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
+                    return false
+                }
+            case .r32Float, .rgba32Float:
+                let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: Float32.self, capacity: rhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<Float32>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<Float32>(start: rhsPtr, count: rhsPixelArea)
+
+                for i in 0...(rhsBufferPtr.count - 1) {
+                    if (abs(lhsBufferPtr[i] - rhsBufferPtr[i]) > maxDifference) {
+                        return false
+                    }
+                }
+            default:
+                print("Unrecognized pixel format \(lhs.pixelFormat)")
+                return false
+            }
+        }
+
+        return true
+    }
+
+    func isLossyEqual(values rhs: [Float32], precision: Int) -> Bool {
         let maxDifference = powf(10.0, Float(-precision))
         let lhs = self
 

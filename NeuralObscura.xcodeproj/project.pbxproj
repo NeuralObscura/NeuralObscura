@@ -30,7 +30,8 @@
 		07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */; };
 		07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */; };
 		07CB823C1E7FA944007BD0BC /* Col2ImLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CB823B1E7FA944007BD0BC /* Col2ImLayer.swift */; };
-		07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */; };
+		07CB823E1E7FB598007BD0BC /* TensorDotLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CB823D1E7FB598007BD0BC /* TensorDotLayerTests.swift */; };
+		07F68DA11DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */; };
 		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
 		DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
@@ -45,15 +46,13 @@
 		DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */; };
 		DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */; };
 		DA70CE2D1E308B310057D586 /* MPSImageExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA70CE2C1E308B310057D586 /* MPSImageExtensionsTests.swift */; };
-		DA7FE94C1E555B87004C6A5B /* Col2ImTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7FE94B1E555B87004C6A5B /* Col2ImTests.swift */; };
+		DA7FE94C1E555B87004C6A5B /* Col2ImLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA7FE94B1E555B87004C6A5B /* Col2ImLayerTests.swift */; };
 		DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C591DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift */; };
 		DA8A6C881DDD5F5800C6D125 /* AdditionShaderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C831DDD5F5800C6D125 /* AdditionShaderTests.swift */; };
 		DA8A6C891DDD5F5800C6D125 /* FileParameterBufferTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C841DDD5F5800C6D125 /* FileParameterBufferTests.swift */; };
 		DA8A6C8A1DDD5F5800C6D125 /* ImageFormatTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C851DDD5F5800C6D125 /* ImageFormatTests.swift */; };
 		DA8A6C8B1DDD5F5800C6D125 /* ReLULayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C861DDD5F5800C6D125 /* ReLULayerTests.swift */; };
 		DA8A6C8C1DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */; };
-		DA8A6C8E1DDD5F6A00C6D125 /* debug2.png in Resources */ = {isa = PBXBuildFile; fileRef = DA8A6C8D1DDD5F6A00C6D125 /* debug2.png */; };
-		DA8A6C901DDD614300C6D125 /* GroundTruthTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */; };
 		DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */ = {isa = PBXBuildFile; fileRef = DA9A565E1D9253C000E55916 /* Shaders.metal */; };
 		DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56641D9E0E0C00E55916 /* tubingen.jpg */; };
 		DA9A566A1DA6165D00E55916 /* debug.png in Resources */ = {isa = PBXBuildFile; fileRef = DA9A56691DA6165D00E55916 /* debug.png */; };
@@ -100,7 +99,8 @@
 		07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoderBaseTest.swift; sourceTree = "<group>"; };
 		07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConvolutionLayerTests.swift; sourceTree = "<group>"; };
 		07CB823B1E7FA944007BD0BC /* Col2ImLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Col2ImLayer.swift; sourceTree = "<group>"; };
-		07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionLayerTests.swift; sourceTree = "<group>"; };
+		07CB823D1E7FB598007BD0BC /* TensorDotLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TensorDotLayerTests.swift; sourceTree = "<group>"; };
+		07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionBlockTests.swift; sourceTree = "<group>"; };
 		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
 		DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = BatchNormalizationLayerTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -121,7 +121,7 @@
 		DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterBuffer.swift; sourceTree = "<group>"; };
 		DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModel.swift; sourceTree = "<group>"; };
 		DA70CE2C1E308B310057D586 /* MPSImageExtensionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MPSImageExtensionsTests.swift; sourceTree = "<group>"; };
-		DA7FE94B1E555B87004C6A5B /* Col2ImTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Col2ImTests.swift; sourceTree = "<group>"; };
+		DA7FE94B1E555B87004C6A5B /* Col2ImLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Col2ImLayerTests.swift; sourceTree = "<group>"; };
 		DA8A6C591DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLPixelFormatExtensions.swift; sourceTree = "<group>"; };
 		DA8A6C831DDD5F5800C6D125 /* AdditionShaderTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AdditionShaderTests.swift; sourceTree = "<group>"; };
 		DA8A6C841DDD5F5800C6D125 /* FileParameterBufferTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = FileParameterBufferTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -129,7 +129,6 @@
 		DA8A6C861DDD5F5800C6D125 /* ReLULayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ReLULayerTests.swift; sourceTree = "<group>"; };
 		DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TanhAdjustmentLayerTests.swift; sourceTree = "<group>"; };
 		DA8A6C8D1DDD5F6A00C6D125 /* debug2.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debug2.png; sourceTree = "<group>"; };
-		DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = GroundTruthTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DA9A565E1D9253C000E55916 /* Shaders.metal */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.metal; path = Shaders.metal; sourceTree = "<group>"; };
 		DA9A56641D9E0E0C00E55916 /* tubingen.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = tubingen.jpg; sourceTree = "<group>"; };
 		DA9A56691DA6165D00E55916 /* debug.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = debug.png; sourceTree = "<group>"; };
@@ -211,14 +210,14 @@
 			isa = PBXGroup;
 			children = (
 				07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */,
-				DA8A6C8F1DDD614300C6D125 /* GroundTruthTests.swift */,
 				DA8A6C861DDD5F5800C6D125 /* ReLULayerTests.swift */,
-				07F68DA01DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift */,
-				DA7FE94B1E555B87004C6A5B /* Col2ImTests.swift */,
 				DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */,
 				DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */,
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
 				DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */,
+				07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */,
+				07CB823D1E7FB598007BD0BC /* TensorDotLayerTests.swift */,
+				DA7FE94B1E555B87004C6A5B /* Col2ImLayerTests.swift */,
 			);
 			name = CommandEncoderTests;
 			sourceTree = "<group>";
@@ -404,12 +403,11 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA8A6C8E1DDD5F6A00C6D125 /* debug2.png in Resources */,
 				DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */,
 				DA9A566A1DA6165D00E55916 /* debug.png in Resources */,
+				DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */,
 				DA0B0C661D8BAB4000ED7982 /* Assets.xcassets in Resources */,
 				DA0B0C641D8BAB4000ED7982 /* Main.storyboard in Resources */,
-				DA9A56651D9E0E0C00E55916 /* tubingen.jpg in Resources */,
 				DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -475,14 +473,14 @@
 				DA8A6C891DDD5F5800C6D125 /* FileParameterBufferTests.swift in Sources */,
 				DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */,
 				DA8A6C881DDD5F5800C6D125 /* AdditionShaderTests.swift in Sources */,
-				DA8A6C901DDD614300C6D125 /* GroundTruthTests.swift in Sources */,
 				07C8C07B1DADAB7900C49827 /* ConvolutionLayerTests.swift in Sources */,
+				07CB823E1E7FB598007BD0BC /* TensorDotLayerTests.swift in Sources */,
 				DA8A6C8A1DDD5F5800C6D125 /* ImageFormatTests.swift in Sources */,
 				DA8A6C8C1DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift in Sources */,
 				DA8A6C8B1DDD5F5800C6D125 /* ReLULayerTests.swift in Sources */,
-				DA7FE94C1E555B87004C6A5B /* Col2ImTests.swift in Sources */,
+				DA7FE94C1E555B87004C6A5B /* Col2ImLayerTests.swift in Sources */,
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,
-				07F68DA11DCD3FDD0072ABD5 /* DeconvolutionLayerTests.swift in Sources */,
+				07F68DA11DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift in Sources */,
 				DA6942651DEAAADE00285327 /* RGBAToBRGALayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -26,6 +26,8 @@ class TensorDotLayer: UnaryCommandEncoder {
     private let channelsOut: Int
     private let w: ParameterBuffer
     private var sourceImage: MPSImage!
+    private var outputMemoId: Int?
+    private var outputMemo: MTLBuffer?
     
     init(
         kernelSize: Int,
@@ -47,48 +49,53 @@ class TensorDotLayer: UnaryCommandEncoder {
     func registerConsumer() {}
     
     func forward(commandBuffer: MTLCommandBuffer) -> MTLBuffer {
-        let sourceImage = input.forward(commandBuffer: commandBuffer)
-        let matrixWidth = sourceImage.height * sourceImage.width
-        let matrixHeight = Int(channelsOut * kernelSize * kernelSize)
-        var weightsShape = [
-            UInt32(channelsOut),
-            UInt32(kernelSize),
-            UInt32(kernelSize),
-            UInt32(channelsIn)]
-        let weightsShapeBuffer = ShaderRegistry.getDevice().makeBuffer(
-            bytes: &weightsShape,
-            length: MemoryLayout<UInt32>.size * weightsShape.count,
-            options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        let weightsBuffer = ShaderRegistry.getDevice().makeBuffer(
-            bytes: self.w.pointer(),
-            length: self.w.lengthInBytes(),
-            options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        let tensordot = ShaderRegistry.getDevice().makeBuffer(
-            length: MemoryLayout<Float32>.size * matrixWidth * matrixHeight,
-            options: MTLResourceOptions.storageModePrivate)
-        
-        let tensordotPipelineState = ShaderRegistry.getOrLoad(name: "deconvolution_v2_tensordot")
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder.setComputePipelineState(tensordotPipelineState)
-        encoder.setTexture(sourceImage.texture, at: 0)
-        encoder.setBuffer(tensordot, offset: 0, at: 1)
-        encoder.setBuffer(weightsBuffer, offset: 0, at: 2)
-        encoder.setBuffer(weightsShapeBuffer, offset: 0, at: 3)
-        let threadGroupWidth = tensordotPipelineState.threadExecutionWidth
-        let threadGroupHeight = tensordotPipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
-        let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
-        let gridShape = MTLSize(
-            width: (matrixWidth + threadGroupWidth - 1) / threadGroupWidth,
-            height: (matrixHeight + threadGroupHeight - 1) / threadGroupHeight,
-            depth: 1)
-        encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
-        encoder.endEncoding()
-        
-        if let image = sourceImage as? MPSTemporaryImage {
-            image.readCount -= 1
+        if outputMemoId != nil && outputMemoId! == commandBuffer.hash {
+            return outputMemo!
+        } else {
+            let sourceImage = input.forward(commandBuffer: commandBuffer)
+            let matrixWidth = sourceImage.height * sourceImage.width
+            let matrixHeight = channelsOut * kernelSize * kernelSize
+            var weightsShape = [
+                UInt32(channelsOut),
+                UInt32(kernelSize),
+                UInt32(kernelSize),
+                UInt32(channelsIn)]
+            let weightsShapeBuffer = ShaderRegistry.getDevice().makeBuffer(
+                bytes: &weightsShape,
+                length: MemoryLayout<UInt32>.size * weightsShape.count,
+                options: MTLResourceOptions.storageModePrivate)
+            let weightsBuffer = ShaderRegistry.getDevice().makeBuffer(
+                bytes: self.w.pointer(),
+                length: self.w.lengthInBytes(),
+                options: MTLResourceOptions.storageModePrivate)
+            let tensordot = ShaderRegistry.getDevice().makeBuffer(
+                length: MemoryLayout<Float32>.size * matrixWidth * matrixHeight,
+                options: MTLResourceOptions.storageModeShared)
+            let tensordotPipelineState = ShaderRegistry.getOrLoad(name: "deconvolution_v2_tensordot")
+            let encoder = commandBuffer.makeComputeCommandEncoder()
+            encoder.setComputePipelineState(tensordotPipelineState)
+            encoder.setTexture(sourceImage.texture, at: 0)
+            encoder.setBuffer(tensordot, offset: 0, at: 1)
+            encoder.setBuffer(weightsBuffer, offset: 0, at: 2)
+            encoder.setBuffer(weightsShapeBuffer, offset: 0, at: 3)
+            let threadGroupWidth = tensordotPipelineState.threadExecutionWidth
+            let threadGroupHeight = tensordotPipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
+            let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
+            let gridShape = MTLSize(
+                width: (matrixWidth + threadGroupWidth - 1) / threadGroupWidth,
+                height: (matrixHeight + threadGroupHeight - 1) / threadGroupHeight,
+                depth: 1)
+            encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
+            encoder.endEncoding()
+            
+            if let image = sourceImage as? MPSTemporaryImage {
+                image.readCount -= 1
+            }
+            
+            outputMemoId = commandBuffer.hash
+            outputMemo = tensordot
+            return outputMemo!
         }
-        
-        return tensordot
     }
 }
 

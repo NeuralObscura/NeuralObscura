@@ -8,18 +8,20 @@
 
 import Foundation
 import MetalPerformanceShaders
-
-/**
- Computes a deconvolution operation.
  
- Our reference implementation found at: https://arxiv.org/pdf/1603.07285.pdf
- 
- Our implementation applies the constraint where in both dimensions the input size is a multiple
- of `i + 2p - k` where `i` is the input size in that dimension, `p` is the padding in that dimension,
- and `k` is the kernel size in that dimension.
- */
+ /**
+  Computes a deconvolution operation.
+  
+  Our reference implementation found at: https://arxiv.org/pdf/1603.07285.pdf
+  
+  Our implementation applies the constraint where in both dimensions the input size is a multiple
+  of `i + 2p - k` where `i` is the input size in that dimension, `p` is the padding in that dimension,
+  and `k` is the kernel size in that dimension.
+  */
 class DeconvolutionBlock: UnaryCommandEncoder {
-    private let t1: TensorDotLayer
+ 
+    private let tensordot: TensorDotLayer
+    private let col2im: Col2ImLayer
     
     init(
         kernelSize: Int,
@@ -32,48 +34,30 @@ class DeconvolutionBlock: UnaryCommandEncoder {
         stride: Int = 1,
         useTemporary: Bool = false) {
         
-        t1 = TensorDotLayer(
+        tensordot = TensorDotLayer(
             kernelSize: kernelSize,
             channelsIn: channelsIn,
             channelsOut: channelsOut,
             w: w)
-        
+        // TODO: inputSize, outputRowWidth params are set to 0 so we can compile until we know how to populate them
+        col2im = Col2ImLayer(channelsOut: UInt32(channelsOut),
+                             kernelSize: UInt32(kernelSize),
+                             inputSize: 0,
+                             outputRowWidth: 0,
+                             stride: UInt32(stride),
+                             padding: UInt32(padding))
     }
     
     func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
-        t1.chain(input)
+        col2im.chain(tensordot.chain(input), input)
         return AnyCommandEncoder<MPSImage>(self)
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
-        // TODO: This "as!" is to force compilation for testing purposes.
-        return t1.forward(commandBuffer: commandBuffer) as! MPSImage
+        return col2im.forward(commandBuffer: commandBuffer)
     }
     
-    // private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
-    //     let inHeight = sourceImage.height
-    //     let inWidth = sourceImage.width
-
-    //     let stride = self.stride
-    //     
-    //     let outHeight = stride * (inHeight - 1) + kernelSize - 2 * padding
-    //     let outWidth = stride * (inWidth - 1) + kernelSize - 2 * padding
-
-    //     /* Assert the constraint on input size, kernel size, padding, stride. */
-    //     assert((outHeight + 2 * padding - kernelSize) % stride == 0,
-    //            "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the height dimension.")
-    //     assert((outWidth + 2 * padding - kernelSize) % stride == 0,
-    //            "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the width dimension.")
-    //     
-    //     let descriptor = MPSImageDescriptor(
-    //         channelFormat: textureFormat,
-    //         width: Int(outWidth),
-    //         height: Int(outHeight),
-    //         featureChannels: channelsOut)
-    //     
-    //     return descriptor
-    // }
+    func registerConsumer() {
+        col2im.registerConsumer()
+    }
 }
-
-
-

@@ -14,6 +14,7 @@ protocol CommandEncoder {
     associatedtype OutputType
     func forward(commandBuffer: MTLCommandBuffer) -> OutputType
     func registerConsumer()
+    typealias MTLCmomandEncoderHash = Int
 }
 
 protocol UnaryCommandEncoder: CommandEncoder {

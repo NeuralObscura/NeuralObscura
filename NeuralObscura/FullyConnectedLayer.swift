@@ -14,6 +14,8 @@ class FullyConnectedLayer: UnaryCommandEncoder {
     private let useTemporary: Bool
     private var consumerCount: Int = 0
     private var input: AnyCommandEncoder<MPSImage>!
+    private var outputMemoId: Int?
+    private var outputMemo: MPSImage?
     
     init(
         kernelSize: Int,
@@ -53,10 +55,16 @@ class FullyConnectedLayer: UnaryCommandEncoder {
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let sourceImage = input.forward(commandBuffer: commandBuffer)
-        let destinationImage = self.destinationImage(input: sourceImage, commandBuffer: commandBuffer)
-        fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-        return destinationImage
+        if outputMemoId != nil && outputMemoId! == commandBuffer.hash {
+            return outputMemo!
+        } else {
+            let sourceImage = input.forward(commandBuffer: commandBuffer)
+            let destinationImage = self.destinationImage(input: sourceImage, commandBuffer: commandBuffer)
+            fullyConnected.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+            outputMemoId = commandBuffer.hash
+            outputMemo = destinationImage
+            return outputMemo!
+        }
     }
     
     private func destinationImage(input: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {

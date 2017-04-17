@@ -24,8 +24,10 @@ class ImageFormatTests: CommandEncoderBaseTest {
                                              pixelFormat: .rgba8Unorm,
                                              values: mergedChannelsAlpha)
 
-        let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: imagePath)!
+        let debugImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug", withExtension: "png", subdirectory: "testdata")!
+        let debugImageData = try! Data(contentsOf: debugImageUrl)
+        let image = UIImage.init(data: debugImageData)!
         let inputMtlTexture = device.MakeMTLTexture(uiImage: image)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
@@ -43,8 +45,10 @@ class ImageFormatTests: CommandEncoderBaseTest {
                                              pixelFormat: .rgba8Unorm,
                                              values: debug2RawValues)
 
-        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let debug2ImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
+        let debug2ImageData = try! Data(contentsOf: debug2ImageUrl)
+        let image = UIImage.init(data: debug2ImageData)!
         let inputMtlTexture = device.MakeMTLTexture(uiImage: image)
         let outputImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 
@@ -63,8 +67,10 @@ class ImageFormatTests: CommandEncoderBaseTest {
                                              pixelFormat: .rgba16Float,
                                              values: mergedChannelsAlpha)
 
-        let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: imagePath)!
+        let debugImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug", withExtension: "png", subdirectory: "testdata")!
+        let debugImageData = try! Data(contentsOf: debugImageUrl)
+        let image = UIImage.init(data: debugImageData)!
         let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba16Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
@@ -82,8 +88,10 @@ class ImageFormatTests: CommandEncoderBaseTest {
                                              pixelFormat: .rgba16Float,
                                              values: debug2RawValues)
 
-        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let debugImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
+        let debugImageData = try! Data(contentsOf: debugImageUrl)
+        let image = UIImage.init(data: debugImageData)!
         let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba16Float)
         let outputImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
         
@@ -102,8 +110,10 @@ class ImageFormatTests: CommandEncoderBaseTest {
                                              pixelFormat: .rgba32Float,
                                              values: mergedChannelsAlpha)
 
-        let imagePath = Bundle.main.path(forResource: "debug", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: imagePath)!
+        let debugImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug", withExtension: "png", subdirectory: "testdata")!
+        let debugImageData = try! Data(contentsOf: debugImageUrl)
+        let image = UIImage.init(data: debugImageData)!
         let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
@@ -121,8 +131,10 @@ class ImageFormatTests: CommandEncoderBaseTest {
                                              pixelFormat: .rgba32Float,
                                              values: debug2RawValues)
 
-        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let debug2ImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
+        let debug2ImageData = try! Data(contentsOf: debug2ImageUrl)
+        let image = UIImage.init(data: debug2ImageData)!
         let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image, pixelFormat: .rgba32Float)
         let outputImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
 

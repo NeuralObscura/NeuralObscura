@@ -95,8 +95,6 @@ class FileParameterBuffer: ParameterBuffer {
         
         let hdr = mmap(nil, Int(fileSize), PROT_READ, MAP_FILE | MAP_SHARED, fd, 0)
         
-        print("Opened: \(path!) (\(fileSize))")
-        
         let floatCount = Int(fileSize) / MemoryLayout<Float>.size
         ptr = hdr!.bindMemory(to: Float.self, capacity: floatCount)
         

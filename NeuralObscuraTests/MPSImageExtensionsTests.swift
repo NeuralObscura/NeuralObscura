@@ -20,12 +20,14 @@ class MPSImageExtensionsTests: CommandEncoderBaseTest {
 
         let expImg = [1.1, 2.2, 3.3, 4.4] as [Float32]
 
-        XCTAssert(outputImg.isLossyEqual(expImg, precision: 2))
+        XCTAssert(outputImg.isLossyEqual(values: expImg, precision: 2))
     }
 
     func testFloat32ToString() {
-        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let debug2ImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
+        let debug2ImageData = try! Data(contentsOf: debug2ImageUrl)
+        let image = UIImage.init(data: debug2ImageData)!
         let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image,
                                                                         pixelFormat: .rgba32Float)
 
@@ -37,8 +39,10 @@ class MPSImageExtensionsTests: CommandEncoderBaseTest {
     }
 
     func testFloat16ToString() {
-        let debug2ImagePath = Bundle.main.path(forResource: "debug2", ofType: "png")!
-        let image = UIImage.init(contentsOfFile: debug2ImagePath)!
+        let debug2ImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
+        let debug2ImageData = try! Data(contentsOf: debug2ImageUrl)
+        let image = UIImage.init(data: debug2ImageData)!
         let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image,
                                                                         pixelFormat: .rgba16Float)
 

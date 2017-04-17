@@ -1,4 +1,4 @@
-#!/usr/local/bin/python
+#!/usr/bin/env python
 
 import os
 import sys
@@ -30,14 +30,16 @@ class ChainerDataReader(object):
         params = []
         def convert(data):
             if data.ndim == 4:
-                # Original VGG form (c_o, c_i, h, w) -> (c_o, h, w, c_i)
-                data = data.transpose((0, 2, 3, 1))
+                # Original VGG form (c_i, c_0, h, w) -> (c_o, h, w, c_i)
+                data = data.transpose((1, 2, 3, 0))
             return data
 
         s = ""
         for key, data in self.parameters:
             print(key)
+            print("old data shape: " + str(data.shape))
             data = convert(data)
+            print("new data shape: " + str(data.shape))
             s += ("  modelParams[\"%s\"] = StyleModelData(modelName: modelName, rawFileName: \"%s\")\n" % (key, key))
             s += ("  //%s shape = %s\n" % (key, data.shape))
 

@@ -15,6 +15,8 @@ class ConvolutionLayer: UnaryCommandEncoder {
     private let convolution: MPSCNNConvolution
     private let padding: Int
     private var input: AnyCommandEncoder<MPSImage>!
+    private var outputMemoId: Int?
+    private var outputMemo: MPSImage?
     
     init(
         kernelSize: Int,
@@ -72,10 +74,16 @@ class ConvolutionLayer: UnaryCommandEncoder {
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let sourceImage = input.forward(commandBuffer: commandBuffer)
-        let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
-        convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
-        return destinationImage
+        if outputMemoId != nil && outputMemoId! == commandBuffer.hash {
+            return outputMemo!
+        } else {
+            let sourceImage = input.forward(commandBuffer: commandBuffer)
+            let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
+            convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+            outputMemoId = commandBuffer.hash
+            outputMemo = destinationImage
+            return outputMemo!
+        }
     }
     
     private func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {

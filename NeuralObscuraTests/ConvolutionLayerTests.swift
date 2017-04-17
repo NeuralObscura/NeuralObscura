@@ -13,6 +13,64 @@ import MetalPerformanceShaders
 
 class ConvolutionLayerTests: CommandEncoderBaseTest {
     
+    func testGroundTruthConv() throws {
+        let testUrl = Bundle(for: type(of: self))
+            .url(forResource: "conv_input", withExtension: "npy", subdirectory: "testdata")!
+        let testImg = MPSImage.loadFromNumpy(testUrl)
+        
+        let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_W")
+        let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
+        
+        let conv = ConvolutionLayer(
+            kernelSize: 9,
+            channelsIn: 3,
+            channelsOut: 32,
+            w: w_pb,
+            b: b_pb,
+            relu: false,
+            padding: 4)
+        
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+        
+        let expUrl = Bundle(for: type(of: self))
+            .url(forResource: "conv_expected_output", withExtension: "npy", subdirectory: "testdata")!
+        let expImg = MPSImage.loadFromNumpy(expUrl)
+        
+        /* Verify the result */
+        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: -1))
+        print(outputImg)
+        print(expImg)
+    }
+    
+    func testGroundTruthConvRelu() {
+        let testUrl = Bundle(for: type(of: self))
+            .url(forResource: "conv_relu_input", withExtension: "npy", subdirectory: "testdata")!
+        let testImg = MPSImage.loadFromNumpy(testUrl)
+        
+        let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_W")
+        let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
+        
+        let conv = ConvolutionLayer(
+            kernelSize: 9,
+            channelsIn: 3,
+            channelsOut: 32,
+            w: w_pb,
+            b: b_pb,
+            relu: true,
+            padding: 4)
+        
+        let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+        
+        let expUrl = Bundle(for: type(of: self))
+            .url(forResource: "conv_relu_expected_output", withExtension: "npy", subdirectory: "testdata")!
+        let expImg = MPSImage.loadFromNumpy(expUrl)
+        
+        /* Verify the result */
+        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: -1))
+    }
+    
     func testIdentityNoPadding() {
         let testImg = device.MakeMPSImage(width: 4,
                                           height: 4,
@@ -233,14 +291,8 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         
         /* Run our test */
-<<<<<<< HEAD
         let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
-        
-        print(outputImg)
-=======
-        let outputImg = conv.execute(commandBuffer: commandBuffer, sourceImage: testImg)
->>>>>>> origin/deconv_pt2
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
