@@ -49,6 +49,8 @@ class AnyCommandEncoder<T>: CommandEncoder {
     
     func forward(commandBuffer: MTLCommandBuffer) -> OutputType {
         if let v = _value {
+            print("VALUE LOADED")
+            print(v)
             return v
         } else if let f = _forward {
             return f(commandBuffer)

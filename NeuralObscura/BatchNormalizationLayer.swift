@@ -34,11 +34,11 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
         self.useTemporary = useTemporary
         self.channelsIn = Int(channelsIn)
         self.testMode = testMode
-        self.beta = ShaderRegistry.getDevice().makeBuffer(bytes: beta.pointer(), length: beta.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        self.gamma = ShaderRegistry.getDevice().makeBuffer(bytes: gamma.pointer(), length: gamma.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        self.beta = ShaderRegistry.getDevice().makeBuffer(bytes: beta.pointer, length: beta.length, options: MTLResourceOptions.cpuCacheModeWriteCombined)
+        self.gamma = ShaderRegistry.getDevice().makeBuffer(bytes: gamma.pointer, length: gamma.length, options: MTLResourceOptions.cpuCacheModeWriteCombined)
         if self.testMode {
-            self.mean = ShaderRegistry.getDevice().makeBuffer(bytes: mean!.pointer(), length: mean!.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
-            self.stddev = ShaderRegistry.getDevice().makeBuffer(bytes: stddev!.pointer(), length: stddev!.lengthInBytes(), options: MTLResourceOptions.cpuCacheModeWriteCombined)
+            self.mean = ShaderRegistry.getDevice().makeBuffer(bytes: mean!.pointer, length: mean!.length, options: MTLResourceOptions.cpuCacheModeWriteCombined)
+            self.stddev = ShaderRegistry.getDevice().makeBuffer(bytes: stddev!.pointer, length: stddev!.length, options: MTLResourceOptions.cpuCacheModeWriteCombined)
         } else {
             self.mean = ShaderRegistry.getDevice().makeBuffer(length: channelsIn * MemoryLayout<Float32>.size, options: MTLResourceOptions.storageModePrivate)
             self.stddev = ShaderRegistry.getDevice().makeBuffer(length: channelsIn * MemoryLayout<Float32>.size, options: MTLResourceOptions.storageModePrivate)

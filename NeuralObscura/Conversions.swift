@@ -32,4 +32,8 @@ class Conversions {
         }
         return output
     }
+    
+    static func float32toUInt8(_ values: [Float32]) -> [UInt8] {
+        return values.map(UInt8.init)
+    }
 }

@@ -373,27 +373,24 @@ extension MPSImage {
         return outputString
     }
 
-    static func loadFromNumpy(_ url: URL,
-                              destinationPixelFormat: MTLPixelFormat = .rgba32Float
-        ) -> MPSImage {
-        // determine correct way of addressing file (string?)
-        // first open file for binary reading
-        let data = try! NSMutableData(contentsOf: url, options: Data.ReadingOptions.uncached)
-        let ptr = data.bytes
-
+    static func loadFromNumpy(_ url: URL) -> MPSImage {
+        let data = try! Data(contentsOf: url, options: Data.ReadingOptions.alwaysMapped)
+        let ptr = UnsafeMutableRawPointer.allocate(bytes: data.count, alignedTo: MemoryLayout<UInt8>.alignment)
+        let boundPtr = ptr.bindMemory(to: UInt8.self, capacity: data.count)
+        data.copyBytes(to: boundPtr, count: data.count)
+        
         // read header to determine shape, assume float
-        let magicStringPtr = ptr.bindMemory(to: UInt8.self, capacity: 8)
-        let magicStringBuf: UnsafeBufferPointer<UInt8> = UnsafeBufferPointer<UInt8>.init(start: magicStringPtr, count: 8)
+        let magicStringBuf: UnsafeBufferPointer<UInt8> = UnsafeBufferPointer<UInt8>.init(start: boundPtr, count: 8)
         let expectedMagicString: [UInt8] = [0x93, 0x4E, 0x55, 0x4D, 0x50, 0x59, 0x01, 0x00] /* 0x93NUMPY10 */
         assert(magicStringBuf.elementsEqual(expectedMagicString), "Invalid .npy file")
         let headerLen = Int((ptr + 8).bindMemory(to: UInt16.self, capacity: 1).pointee)
-        let headerData = data.subdata(with: NSMakeRange(10, headerLen))
+        let headerData = data.subdata(in: 10..<(headerLen + 10))
         let headerString = String(data: headerData, encoding: .ascii)!
         let cmpts = headerString.components(separatedBy: "'")
 
         // Parse numpy type description
         let descr = cmpts[3]
-        assert(descr == "<f4", "little-endian 32 bit floats (<f4) are the only numpy type currently supported")
+        assert(descr == "<f4", "little-endian 32 bit floats ('<f4') are the only numpy type currently supported")
 
         // Assume 'fortran_order': False
 
@@ -403,7 +400,7 @@ extension MPSImage {
         let shapeStart = shapeArea.index(shapeArea.startIndex, offsetBy: 3)
         let shapeEnd = shapeArea.index(shapeEndRange.upperBound, offsetBy: -4)
         let shapeString = String(shapeArea.substring(with: shapeStart ..< shapeEnd))!.components(separatedBy: ", ")
-        let shape = shapeString .map { (dim) -> Int in
+        let shape = shapeString.map { (dim) -> Int in
             Int(dim)!
         }
 
@@ -422,37 +419,42 @@ extension MPSImage {
          */
         let bodyData = (ptr + 10 + headerLen).bindMemory(to: Float32.self, capacity: bodyLen)
         let bodyBuff = UnsafeBufferPointer<Float32>.init(start: bodyData, count: bodyLen)
-
-        var values = [] as [Float32]
-
-        bodyBuff.forEach { (v) in
-            values.append(v)
-        }
-
-        var result: MPSImage
-
-        switch shape.count {
-        case 2:
-            let width = shape[0]
-            let height = shape[1]
-            result =  ShaderRegistry.getDevice().MakeMPSImage(width: width,
-                                                              height: height,
-                                                              pixelFormat: destinationPixelFormat,
-                                                              values: values)
-        case 3:
-            let channels = shape[0]
-            let height = shape[1]
-            let width = shape[2]
-            result = ShaderRegistry.getDevice().MakeMPSImage(width: width,
-                                                             height: height,
-                                                             featureChannels: channels,
-                                                             pixelFormat: destinationPixelFormat,
-                                                             values: values)
-
-        default:
-            fatalError("Unknown shape dimensions: \(shape)")
+        let values = Array(bodyBuff)
+        
+        guard shape.count == 3 else {
+            fatalError("Unsupported dimensions: \(shape), ndarray in .npy file must have 3 dimensions (channel, height, width).")
         }
         
+        let channels = shape[0]
+        let height = shape[1]
+        let width = shape[2]
+        let reorderedValues = convertNumpyOrderingToMTLTextureOrdering(values, shape: shape)
+        let result = ShaderRegistry.getDevice().MakeMPSImage(width: width,
+                                                         height: height,
+                                                         featureChannels: channels,
+                                                         values: reorderedValues)
         return result
+    }
+    
+    static func convertNumpyOrderingToMTLTextureOrdering(_ values: [Float32], shape: [Int]) -> [Float32] {
+        let nslices: Int = Int(ceil(Float(shape[0]) / 4))
+        let height = shape[1]
+        let width = shape[2]
+        var output = [Float32].init(repeating: 0.0, count: nslices * height * width * 4)
+        for slice in 0..<nslices {
+            for row in 0..<height {
+                for col in 0..<width {
+                    for pos in 0..<4 {
+                        let channel = slice * 4 + pos
+                        let lookupIndex = channel * (width * height) + row * width + col
+                        let placementIndex = slice * (height * width * 4) + row * (width * 4) + col * 4 + pos
+                        if lookupIndex < values.count {
+                            output[placementIndex] = values[lookupIndex]
+                        }
+                    }
+                }
+            }
+        }
+        return output
     }
 }

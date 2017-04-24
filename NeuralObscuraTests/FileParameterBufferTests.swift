@@ -28,7 +28,7 @@ class FileParameterBufferTests: CommandEncoderBaseTest {
 
         XCTAssertEqual(b_pb.length / MemoryLayout<Float32>.size, expectedBias.count)
 
-        let buffer = UnsafeBufferPointer<Float32>(start: b_pb.pointer(), count: b_pb.length / MemoryLayout<Float32>.size)
+        let buffer = UnsafeBufferPointer<Float32>(start: b_pb.pointer, count: b_pb.length / MemoryLayout<Float32>.size)
 
         buffer.enumerated().forEach { [unowned self] (idx, e) in
             let actual   = Int(e * self.precision)

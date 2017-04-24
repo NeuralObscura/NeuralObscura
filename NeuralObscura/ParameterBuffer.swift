@@ -10,66 +10,60 @@ import Foundation
 import MetalPerformanceShaders
 
 protocol ParameterBuffer {
-    func pointer() -> UnsafeMutablePointer<Float>
-    func lengthInBytes() -> Int
+    var pointer: UnsafeMutablePointer<Float> { get }
+    var length: Int { get }
+    var count: Int { get }
 }
 
 class MemoryParameterBuffer: ParameterBuffer {
-    private var ptr: UnsafeMutablePointer<Float>!
-    private var count: Int!
-    private let length: Int
+    var pointer: UnsafeMutablePointer<Float>
+    var count: Int
+    var length: Int
     
-    init( _ values: [Float]) {
+    init(_ values: [Float]) {
         self.count = values.count
         self.length = self.count * MemoryLayout<Float>.size
-        self.ptr = values.withUnsafeBufferPointer({ (buf) -> UnsafeMutablePointer<Float> in
-            let ptr = UnsafeMutablePointer<Float>.allocate(capacity: buf.count)
+        self.pointer = values.withUnsafeBufferPointer({ (buf) -> UnsafeMutablePointer<Float> in
+            let pointer = UnsafeMutablePointer<Float>.allocate(capacity: buf.count)
             for (i, e) in buf.enumerated() {
-                ptr[i] = e
+                pointer[i] = e
             }
-            return ptr
+            return pointer
         })
     }
     
-    init(_ value: Float) {
+    init(_ values: Float...) {
         self.count = 1
         self.length = self.count * MemoryLayout<Float>.size
-        self.ptr = UnsafeMutablePointer<Float>.allocate(capacity: 1)
-        self.ptr.pointee = value
+        self.pointer = UnsafeMutablePointer<Float>.allocate(capacity: 1)
+        for (i,e) in values.enumerated() {
+            pointer[i] = e
+        }
     }
     
     deinit {
-        ptr!.deallocate(capacity: count)
-    }
-    
-    func pointer() -> UnsafeMutablePointer<Float> {
-        return ptr
-    }
-
-    func lengthInBytes() -> Int {
-        return length
+        pointer.deallocate(capacity: count)
     }
 }
 
 
 class FileParameterBuffer: ParameterBuffer {
+    let rawFileName: String
+    let modelName: String
+    
+    var pointer: UnsafeMutablePointer<Float>
+    var count: Int
+    var length: Int
+    
     private var fd: CInt!
     private var hdr: UnsafeMutableRawPointer!
-    private var ptr: UnsafeMutablePointer<Float>!
     private var fileSize: UInt64 = 0
-    var length: Int
-    let modelName: String
-    let rawFileName: String
+    
     
     init(modelName: String, rawFileName: String) {
         self.modelName = modelName
         self.rawFileName = rawFileName
-        self.length = 0
         
-        loadRawFile(rawFileName: self.rawFileName)
-    }
-    
-    private func loadRawFile(rawFileName: String) {
         let path = Bundle.main.path(forResource: rawFileName, ofType: "dat", inDirectory: self.modelName + "_model_data")
         
         assert(path != nil, "Error: failed to find file \(rawFileName)")
@@ -78,27 +72,25 @@ class FileParameterBuffer: ParameterBuffer {
             let attr = try FileManager.default.attributesOfItem(atPath: path!)
             
             if let fsize = attr[FileAttributeKey.size] as? NSNumber {
-                fileSize = fsize.uint64Value
+                length = fsize.intValue
             } else {
                 fatalError("Failed to get a size attribute from path: \(path)")
             }
         } catch {
             fatalError("Error: \(error)")
         }
-
-        self.length = Int(fileSize)
         
         // open file descriptors in read-only mode to parameter files
         let fd = open( path!, O_RDONLY, S_IRUSR | S_IWUSR | S_IRGRP | S_IWGRP | S_IROTH | S_IWOTH)
         
         assert(fd != -1, "Error: failed to open file at \""+path!+"\"  errno = \(errno)\n")
         
-        let hdr = mmap(nil, Int(fileSize), PROT_READ, MAP_FILE | MAP_SHARED, fd, 0)
+        let hdr = mmap(nil, length, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0)
         
-        let floatCount = Int(fileSize) / MemoryLayout<Float>.size
-        ptr = hdr!.bindMemory(to: Float.self, capacity: floatCount)
+        count = length / MemoryLayout<Float>.size
+        pointer = hdr!.bindMemory(to: Float.self, capacity: count)
         
-        if ptr == UnsafeMutablePointer<Float>(bitPattern: -1) {
+        if pointer == UnsafeMutablePointer<Float>(bitPattern: -1) {
             fatalError("Error: mmap failed, errno = \(errno)")
         }
     }
@@ -114,13 +106,4 @@ class FileParameterBuffer: ParameterBuffer {
             close(fd)
         }
     }
-    
-    func pointer() -> UnsafeMutablePointer<Float> {
-        return ptr
-    }
-
-    func lengthInBytes() -> Int {
-        return length
-    }
-
 }

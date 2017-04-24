@@ -12,34 +12,46 @@ import UIKit
 
 extension MTLDevice {
     func MakeMPSImage(width: Int,
-                          height: Int,
-                          featureChannels: Int = 1,
-                          pixelFormat: MTLPixelFormat = .r32Float,
-                          textureType: MTLTextureType = .type2DArray,
-                          values: [[Float32]]) -> MPSImage {
-        // ravel the values
-        var ravelValues = [Float32]()
+                      height: Int,
+                      featureChannels: Int = 4,
+                      pixelFormat: MTLPixelFormat = .rgba16Float,
+                      textureType: MTLTextureType = .type2DArray,
+                      values: [[Float32]]) -> MPSImage {
+        
+        let nslices = pixelFormat.featureChannelsToSlices(featureChannels)
+        let allocatedFeatureChannels = pixelFormat.channelCount * nslices
+        var raveledValues = [Float32]()
         for pixel in values {
-            for channel in pixel {
-                ravelValues.append(channel)
+            let channelValue = { (channel: Int) -> Float32 in
+                if channel < pixel.count {
+                    return pixel[channel]
+                } else {
+                    return 0.0
+                }
+            }
+            for channel in 0..<allocatedFeatureChannels {
+                raveledValues.append(channelValue(channel))
             }
         }
-
+        print("raveled values: \(raveledValues)")
         return MakeMPSImage(width: width,
-                                height: height,
-                                featureChannels: featureChannels,
-                                pixelFormat: pixelFormat,
-                                textureType: textureType,
-                                values: ravelValues)
+                            height: height,
+                            featureChannels: featureChannels,
+                            values: raveledValues)
     }
 
     // values are expected to be raveled
     func MakeMPSImage(width: Int,
                       height: Int,
                       featureChannels: Int = 1,
-                      pixelFormat: MTLPixelFormat = .r32Float,
+                      pixelFormat: MTLPixelFormat = .rgba16Float,
                       textureType: MTLTextureType = .type2DArray,
                       values: [Float32]) -> MPSImage {
+        
+        guard textureType == .type2D || textureType == .type2DArray else {
+            fatalError("Unsupported MTLTextureType: \(textureType)")
+        }
+        
         let textureDesc = MTLTextureDescriptor()
         textureDesc.textureType = textureType
         textureDesc.width = width
@@ -47,45 +59,35 @@ extension MTLDevice {
         textureDesc.pixelFormat = pixelFormat
         textureDesc.arrayLength = pixelFormat.featureChannelsToSlices(featureChannels)
 
-
-        let texture = { () -> MTLTexture in 
-            switch textureType {
-            case .type2D, .type2DArray:
-                return self.createTexture2D(textureDesc: textureDesc, values: values)
-            default:
-                fatalError("Unknown MTLTextureType: \(textureType)")
-            }
-        }()
-
+        let texture = self.MakeMTLTexture(textureDesc: textureDesc, values: values)
+        print("texture.arrayLength: \(texture.arrayLength), featureChannels: \(featureChannels)")
         return MPSImage(texture: texture, featureChannels: featureChannels)
     }
 
-    private func createTexture2D(textureDesc: MTLTextureDescriptor,
-                                 values: [Float32]) -> MTLTexture {
-        let sliceWidth = textureDesc.width *
+    private func MakeMTLTexture(textureDesc: MTLTextureDescriptor,
+                                values: [Float32]) -> MTLTexture {
+        let texture = self.makeTexture(descriptor: textureDesc)
+        
+        let sliceWidth =
+            textureDesc.width *
             textureDesc.height *
             textureDesc.pixelFormat.channelCount
 
-        let valuesBySlice = stride(from: 0, to: values.count, by: sliceWidth).map {
-            Array(values[$0..<min($0 + sliceWidth, values.count)])
-        }
-        let texture = self.makeTexture(descriptor: textureDesc)
-
-        for slice in 0...textureDesc.arrayLength-1 {
+        for (index, sliceStart) in zip(0..<textureDesc.arrayLength, stride(from: 0, to: values.count, by: sliceWidth)) {
+            print("values.count: \(values.count), sliceStart: \(sliceStart), sliceWidth: \(sliceWidth)")
+            let slice = Array(values[sliceStart..<sliceStart + sliceWidth])
+            
             switch textureDesc.pixelFormat {
-            case .rgba16Float, .r16Float:
-                let sourceBytes = Conversions.float32toFloat16(valuesBySlice[slice])
-                texture.fill(sourceBytes, slice: slice)
-            case .rgba8Unorm, .r8Unorm:
-                var convertedValues = [UInt8]()
-                for v in valuesBySlice[slice] {
-                    convertedValues.append(UInt8(v))
-                }
-                texture.fill(convertedValues, slice: slice)
             case .rgba32Float, .r32Float:
-                texture.fill(values, slice: slice)
+                texture.fill(slice, slice: index)
+            case .rgba16Float, .r16Float:
+                let converted = Conversions.float32toFloat16(slice)
+                texture.fill(converted, slice: index)
+            case .rgba8Unorm, .r8Unorm:
+                let converted = Conversions.float32toUInt8(slice)
+                texture.fill(converted, slice: index)
             default:
-                fatalError("Unknown MTLPixelFormat: \(textureDesc.pixelFormat)")
+                fatalError("Unsupported MTLPixelFormat: \(textureDesc.pixelFormat)")
             }
         }
         return texture

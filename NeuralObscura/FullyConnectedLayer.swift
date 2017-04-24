@@ -38,8 +38,8 @@ class FullyConnectedLayer: UnaryCommandEncoder {
         // initialize the convolution layer by calling the parent's (MPSCNNFullyConnected's) initializer
         fullyConnected = MPSCNNFullyConnected.init(device: ShaderRegistry.getDevice(),
                    convolutionDescriptor: convDesc,
-                   kernelWeights: w.pointer(),
-                   biasTerms: b.pointer(),
+                   kernelWeights: w.pointer,
+                   biasTerms: b.pointer,
                    flags: MPSCNNConvolutionFlags.none)
         fullyConnected.destinationFeatureChannelOffset = destinationFeatureChannelOffset
     }

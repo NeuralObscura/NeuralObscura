@@ -18,6 +18,9 @@ class ConvolutionLayer: UnaryCommandEncoder {
     private var outputMemoId: Int?
     private var outputMemo: MPSImage?
     
+    private let w: ParameterBuffer
+    private let b: ParameterBuffer
+    
     init(
         kernelSize: Int,
         channelsIn: Int,
@@ -33,6 +36,8 @@ class ConvolutionLayer: UnaryCommandEncoder {
         
         self.useTemporary = useTemporary
         self.padding = padding
+        self.w = w
+        self.b = b
         
         var neuronFilter: MPSCNNNeuron?
         if relu {
@@ -55,8 +60,8 @@ class ConvolutionLayer: UnaryCommandEncoder {
         convolution = MPSCNNConvolution(
             device: ShaderRegistry.getDevice(),
             convolutionDescriptor: convDesc,
-            kernelWeights: w.pointer(),
-            biasTerms: b.pointer(),
+            kernelWeights: w.pointer,
+            biasTerms: b.pointer,
             flags: MPSCNNConvolutionFlags.none)
         convolution.destinationFeatureChannelOffset = Int(destinationFeatureChannelOffset)
         convolution.edgeMode = .zero
