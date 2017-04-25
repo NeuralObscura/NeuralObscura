@@ -125,13 +125,13 @@ kernel void deconvolution_interpixel_stride(texture2d_array<float, access::read>
  *
  * Formula: output = input1 + input2
  */
-kernel void add(texture2d_array<float, access::read> inTexture1 [[texture(0)]],
-                texture2d_array<float, access::read> inTexture2 [[texture(1)]],
-                texture2d_array<float, access::write> outTexture [[texture(2)]],
+kernel void add(texture2d_array<half, access::read> inTexture1 [[texture(0)]],
+                texture2d_array<half, access::read> inTexture2 [[texture(1)]],
+                texture2d_array<half, access::write> outTexture [[texture(2)]],
                 uint3 gid [[thread_position_in_grid]]) {
-    float4 input1 = inTexture1.read(gid.xy, gid.z);
-    float4 input2 = inTexture2.read(gid.xy, gid.z);
-    float4 output = input1 + input2;
+    half4 input1 = inTexture1.read(gid.xy, gid.z);
+    half4 input2 = inTexture2.read(gid.xy, gid.z);
+    half4 output = input1 + input2;
     outTexture.write(output, gid.xy, gid.z);
 }
 
@@ -140,11 +140,11 @@ kernel void add(texture2d_array<float, access::read> inTexture1 [[texture(0)]],
  *
  * Formula: output = (tanh(input)+1)*127.5
  */
-kernel void tanh_adjustment(texture2d<float, access::read> inTexture [[texture(0)]],
-                            texture2d<float, access::write> outTexture [[texture(1)]],
+kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[texture(0)]],
+                            texture2d_array<half, access::write> outTexture [[texture(1)]],
                             uint3 gid [[thread_position_in_grid]]) {
-    float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = (tanh(input) + 1) * 127.5;
+    half4 input = inTexture.read(gid.xy, gid.z);
+    half4 output = (tanh(input) + 1) * 127.5;
     outTexture.write(output, gid.xy, gid.z);
 }
 
@@ -152,11 +152,11 @@ kernel void tanh_adjustment(texture2d<float, access::read> inTexture [[texture(0
 /* RGBA -> BRGA
  *
  */
-kernel void rgba_to_brga(texture2d<float, access::read> inTexture [[texture(0)]],
-                        texture2d<float, access::write> outTexture [[texture(1)]],
-                        uint3 gid [[thread_position_in_grid]]) {
-    float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = float4(input[2], input[0], input[1], input[3]);
+kernel void rgba_to_brga(texture2d_array<half, access::read> inTexture [[texture(0)]],
+                         texture2d_array<half, access::write> outTexture [[texture(1)]],
+                         uint3 gid [[thread_position_in_grid]]) {
+    half4 input = inTexture.read(gid.xy, gid.z);
+    half4 output = half4(input[2], input[0], input[1], input[3]);
     outTexture.write(output, gid.xy, gid.z);
 }
 

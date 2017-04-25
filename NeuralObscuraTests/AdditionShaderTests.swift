@@ -45,8 +45,10 @@ class AdditionShaderTests: CommandEncoderBaseTest {
 
         let expImg = device.makeMPSImage(width: 2,
                                              height: 2,
-                                             values: [[2,4,6,8], [8,6,4,2],
-                                                      [6,8,4,2], [4,2,6,8]])
+                                             values: [[2,8,6,4],
+                                                      [4,6,8,2],
+                                                      [6,4,4,6],
+                                                      [8,2,2,8]])
 
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)

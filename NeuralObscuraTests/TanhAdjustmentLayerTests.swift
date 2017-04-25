@@ -23,7 +23,6 @@ class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
                                                     -25, -25],
                                                    [-25, -25,
                                                     -25, -25]])
-        print(testImg)
         let tanhAdj = TanhAdjustmentLayer()
         
         let outputImg = tanhAdj.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
