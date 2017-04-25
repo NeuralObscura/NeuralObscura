@@ -17,6 +17,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "batch_norm_input", withExtension: "npy", subdirectory: "testdata")!
         let testImg = MPSImage.loadFromNumpy(testUrl)
+        
         let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_W")
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
 
@@ -44,6 +45,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "batch_norm_expected_output", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.loadFromNumpy(expUrl)
+
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 2))
     }
 
@@ -97,11 +99,10 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
 
         let expImg = device.makeMPSImage(width: 2,
                                          height: 2,
-                                         values: [[4,4,7,11],
-                                                  [13,6,5,2],
-                                                  [10,8,5,2],
-                                                  [7,2,7,11]])
-
+                                         values: [[4,13,10,7],
+                                                  [4,6,8,2],
+                                                  [7,5,5,9],
+                                                  [11,2,2,11]])
 
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)

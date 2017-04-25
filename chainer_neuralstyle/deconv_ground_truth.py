@@ -59,10 +59,10 @@ class DeconvolutionNet(chainer.Chain):
     def __call__(self, x, test=False):
         td = x
         h = self.c1(x)
-        h = F.elu(h)
+        h = F.relu(h)
         gt = self.b1(h, test=test)
-        # h = self.b2(F.elu(self.c2(h)), test=test)
-        # h = self.b3(F.elu(self.c3(h)), test=test)
+        # h = self.b2(F.relu(self.c2(h)), test=test)
+        # h = self.b3(F.relu(self.c3(h)), test=test)
         # h = self.r1(h, test=test)
         # h = self.r2(h, test=test)
         # h = self.r3(h, test=test)
