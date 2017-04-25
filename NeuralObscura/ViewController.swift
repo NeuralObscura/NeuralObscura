@@ -100,7 +100,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         // note the configurable options
         let input = imageView.image!
 
-        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: input, pixelFormat: .rgba32Float)
+        let inputMtlTexture = ShaderRegistry.getDevice().makeMTLTexture(uiImage: input, pixelFormat: .rgba32Float)
         let output = model.execute(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
         print("done")
 

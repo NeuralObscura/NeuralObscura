@@ -13,30 +13,25 @@ import MetalPerformanceShaders
 
 class RGBAToBRGALayerTests: CommandEncoderBaseTest {
     func testRGBAToBRGALayer() {
-        let testImg = device.MakeMPSImage(width: 2,
-                                              height: 2,
-                                              featureChannels: 4,
-                                              pixelFormat: testTextureFormatRGBA,
-                                              textureType: .type2D,
-                                              values: [[1,2,3,4], [4,3,2,1],
-                                                       [4,3,2,1], [1,2,3,4]] as [[Float32]])
+        let testImg = device.makeMPSImage(width: 2,
+                                          height: 2,
+                                          values: [[1,4,3,2],
+                                                   [2,3,4,1],
+                                                   [3,2,2,3],
+                                                   [4,1,1,4]])
 
-        /* Create our CommandEncoder*/
         let tanhAdj = RGBAToBRGALayer()
 
-        /* Run our test */
         let outputImg = tanhAdj.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
 
-        let expImg = device.MakeMPSImage(width: 2,
-                                             height: 2,
-                                             featureChannels: 4,
-                                             pixelFormat: testTextureFormatRGBA,
-                                             textureType: .type2D,
-                                             values: [[3,1,2,4], [2,4,3,1],
-                                                      [2,4,3,1], [3,1,2,4]] as [[Float32]])
+        let expImg = device.makeMPSImage(width: 2,
+                                         height: 2,
+                                         values: [[3,2,2,3],
+                                                  [1,4,4,1],
+                                                  [2,3,3,2],
+                                                  [4,1,1,4]])
 
-        /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
     }
 }

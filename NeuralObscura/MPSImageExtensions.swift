@@ -404,6 +404,13 @@ extension MPSImage {
             Int(dim)!
         }
 
+        guard shape.count == 3 else {
+            fatalError("Unsupported dimensions: \(shape), ndarray in .npy file must have 3 dimensions (channel, height, width).")
+        }
+        
+        let channels = shape[0]
+        let height = shape[1]
+        let width = shape[2]
         let bodyLen = shape.reduce(1,*)
 
         /*
@@ -421,40 +428,19 @@ extension MPSImage {
         let bodyBuff = UnsafeBufferPointer<Float32>.init(start: bodyData, count: bodyLen)
         let values = Array(bodyBuff)
         
-        guard shape.count == 3 else {
-            fatalError("Unsupported dimensions: \(shape), ndarray in .npy file must have 3 dimensions (channel, height, width).")
-        }
+        // TODO: update makeMTLTexture so it won't accept any values with cardinality != to a multiple of 4 * width * height
+        var padded = [Float32]()
+        padded.append(contentsOf: values)
+        let channelsToPad = Int((channels + 3) / 4) * 4 - channels
+        padded.append(contentsOf: [Float32].init(repeating: 0.0, count: channelsToPad * width * height))
         
-        let channels = shape[0]
-        let height = shape[1]
-        let width = shape[2]
-        let reorderedValues = convertNumpyOrderingToMTLTextureOrdering(values, shape: shape)
-        let result = ShaderRegistry.getDevice().MakeMPSImage(width: width,
-                                                         height: height,
-                                                         featureChannels: channels,
-                                                         values: reorderedValues)
-        return result
-    }
-    
-    static func convertNumpyOrderingToMTLTextureOrdering(_ values: [Float32], shape: [Int]) -> [Float32] {
-        let nslices: Int = Int(ceil(Float(shape[0]) / 4))
-        let height = shape[1]
-        let width = shape[2]
-        var output = [Float32].init(repeating: 0.0, count: nslices * height * width * 4)
-        for slice in 0..<nslices {
-            for row in 0..<height {
-                for col in 0..<width {
-                    for pos in 0..<4 {
-                        let channel = slice * 4 + pos
-                        let lookupIndex = channel * (width * height) + row * width + col
-                        let placementIndex = slice * (height * width * 4) + row * (width * 4) + col * 4 + pos
-                        if lookupIndex < values.count {
-                            output[placementIndex] = values[lookupIndex]
-                        }
-                    }
-                }
-            }
-        }
-        return output
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.textureType = .type2DArray
+        textureDesc.width = width
+        textureDesc.height = height
+        textureDesc.pixelFormat = .rgba16Float
+        textureDesc.arrayLength = Int((channels + 3) / 4)
+        let texture = ShaderRegistry.getDevice().makeMTLTexture(textureDesc: textureDesc, values: padded)
+        return MPSImage(texture: texture, featureChannels: channels)
     }
 }

@@ -76,21 +76,32 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
 //    }
     
     func testInterpixelStride() {
-        let testImg1 = device.MakeMPSImage(width: 2,
+        let testImg1 = device.makeMPSImage(width: 2,
                                            height: 2,
-                                           featureChannels: 4,
-                                           pixelFormat: MTLPixelFormat.rgba32Float,
-                                           values: [[1,2,3,4], [4,3,2,1],
-                                                    [3,4,2,1], [2,1,3,4]])
+                                           values: [[1,4,3,2],
+                                                    [2,3,4,1],
+                                                    [3,2,2,3],
+                                                    [4,1,1,4]])
+
         
-        let outputImg = device.MakeMPSImage(width: 4,
+        let outputImg = device.makeMPSImage(width: 4,
                                             height: 4,
-                                            featureChannels: 4,
-                                            pixelFormat: MTLPixelFormat.rgba32Float,
-                                            values: [[0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
-                                                     [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
-                                                     [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
-                                                     [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]])
+                                            values: [[0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0],
+                                                     [0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0],
+                                                     [0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0],
+                                                     [0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0,
+                                                      0,0,0,0]])
         
         var s = UInt(2)
         let interpixelStride = ShaderRegistry.getDevice().makeBuffer(
@@ -113,14 +124,24 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
         
-        let expImg = device.MakeMPSImage(width: 4,
+        let expImg = device.makeMPSImage(width: 4,
                                          height: 4,
-                                         featureChannels: 4,
-                                         pixelFormat: MTLPixelFormat.rgba32Float,
-                                         values: [[1,2,3,4], [0,0,0,0], [4,3,2,1], [0,0,0,0],
-                                                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0],
-                                                  [3,4,2,1], [0,0,0,0], [2,1,3,4], [0,0,0,0],
-                                                  [0,0,0,0], [0,0,0,0], [0,0,0,0], [0,0,0,0]])
+                                         values: [[1,0,4,0,
+                                                   0,0,0,0,
+                                                   3,0,2,0,
+                                                   0,0,0,0],
+                                                  [2,0,3,0,
+                                                   0,0,0,0,
+                                                   4,0,1,0,
+                                                   0,0,0,0],
+                                                  [3,0,2,0,
+                                                   0,0,0,0,
+                                                   2,0,3,0,
+                                                   0,0,0,0],
+                                                  [4,0,1,0,
+                                                   0,0,0,0,
+                                                   1,0,4,0,
+                                                   0,0,0,0]])
         
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
@@ -136,16 +157,13 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         
         let inputBuffer = device.makeBuffer(bytes: bytes, length: bytes.count, options: MTLResourceOptions.storageModeShared)
         
-        let outputImg = device.MakeMPSImage(width: 5,
+        let outputImg = device.makeMPSImage(width: 5,
                                             height: 5,
-                                            featureChannels: 1,
-                                            pixelFormat: .r32Float,
-                                            textureType: .type2D,
                                             values: [0,0,0,0,0,
                                                      0,0,0,0,0,
                                                      0,0,0,0,0,
                                                      0,0,0,0,0,
-                                                     0,0,0,0,0] as [Float32])
+                                                     0,0,0,0,0])
         
         let encoder = commandBuffer.makeComputeCommandEncoder()
         let state = ShaderRegistry.getOrLoad(name: "col2im")

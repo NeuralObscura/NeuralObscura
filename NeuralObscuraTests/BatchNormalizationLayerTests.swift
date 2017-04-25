@@ -44,19 +44,11 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "batch_norm_expected_output", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.loadFromNumpy(expUrl)
-        print("hello")
-//        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 2))
+        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 2))
     }
 
     func testOneFeatureBatchNormalization() {
-        let testImg = device.MakeMPSImage(width: 2, height: 2, featureChannels: 4, values: [[1.0, 1.0,
-                                                                         1.0, 1.0],
-                                                                        [0.0, 0.0,
-                                                                         0.0, 0.0],
-                                                                        [0.0, 0.0,
-                                                                         0.0, 0.0],
-                                                                        [0.0, 0.0,
-                                                                         0.0, 0.0]]  as [[Float32]])
+        let testImg = device.makeMPSImage(width: 2, height: 2, values: [1.0, 1.0, 1.0, 1.0])
         /* Create our CommandEncoder */
         let gamma_pb = MemoryParameterBuffer([2])
         let beta_pb = MemoryParameterBuffer([1])
@@ -74,29 +66,17 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         execute()
 
 
-        let expImg = device.MakeMPSImage(width: 2,
-                                         height: 2,
-                                         featureChannels: 4,
-                                         values: [[3, 3,
-                                                  3, 3],
-                                                  [0, 0,
-                                                   0, 0],
-                                                  [0, 0,
-                                                   0, 0],
-                                                  [0, 0,
-                                                   0, 0]] as [[Float32]])
+        let expImg = device.makeMPSImage(width: 2, height: 2, values: [3, 3, 3, 3])
 
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
     }
 
     func testMultipleFeatureBatchNormalization() {
-        let testImg = device.MakeMPSImage(width: 2,
-                                          height: 2,
-                                          featureChannels: 4,
-                                          pixelFormat: testTextureFormatRGBA,
-                                          values: [[1,2,3,4], [4,3,2,1],
-                                                   [3,4,2,1], [2,1,3,4]] as [[Float32]])
+        let testImg = device.makeMPSImage(width: 2, height: 2, values: [[1,4,3,2],
+                                                                        [2,3,4,1],
+                                                                        [3,2,2,4],
+                                                                        [4,1,1,4]])
 
         /* Create our CommandEncoder*/
         let gamma_pb = MemoryParameterBuffer([3,2,2,3])
@@ -115,12 +95,12 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let outputImg = bn.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
 
-        let expImg = device.MakeMPSImage(width: 2,
+        let expImg = device.makeMPSImage(width: 2,
                                          height: 2,
-                                         featureChannels: 4,
-                                         pixelFormat: testTextureFormatRGBA,
-                                         values: [[4,4,7,11], [13,6,5,2],
-                                                  [10,8,5,2], [7,2,7,11]] as [[Float32]])
+                                         values: [[4,4,7,11],
+                                                  [13,6,5,2],
+                                                  [10,8,5,2],
+                                                  [7,2,7,11]])
 
 
         /* Verify the result */

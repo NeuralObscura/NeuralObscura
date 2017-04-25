@@ -13,22 +13,22 @@ import MetalPerformanceShaders
 
 class MPSImageExtensionsTests: CommandEncoderBaseTest {
 
-    func testLoadFromNumpy() {
-        let url = Bundle(for: type(of: self))
-            .url(forResource: "test_loadFromNumpy_data", withExtension: "npy", subdirectory: "testdata")!
-        let outputImg = MPSImage.loadFromNumpy(url)
-
-        let expImg = [1.1, 2.2, 3.3, 4.4] as [Float32]
-
-        XCTAssert(outputImg.isLossyEqual(values: expImg, precision: 2))
-    }
+//    func testLoadFromNumpy() {
+//        let url = Bundle(for: type(of: self))
+//            .url(forResource: "test_loadFromNumpy_data", withExtension: "npy", subdirectory: "testdata")!
+//        let outputImg = MPSImage.loadFromNumpy(url)
+//
+//        let expImg = [1.1, 2.2, 3.3, 4.4] as [Float32]
+//
+//        XCTAssert(outputImg.isLossyEqual(values: expImg, precision: 2))
+//    }
 
     func testFloat32ToString() {
         let debug2ImageUrl = Bundle(for: type(of: self))
             .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
         let debug2ImageData = try! Data(contentsOf: debug2ImageUrl)
         let image = UIImage.init(data: debug2ImageData)!
-        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image,
+        let inputMtlTexture = ShaderRegistry.getDevice().makeMTLTexture(uiImage: image,
                                                                         pixelFormat: .rgba32Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)
@@ -43,7 +43,7 @@ class MPSImageExtensionsTests: CommandEncoderBaseTest {
             .url(forResource: "debug2", withExtension: "png", subdirectory: "testdata")!
         let debug2ImageData = try! Data(contentsOf: debug2ImageUrl)
         let image = UIImage.init(data: debug2ImageData)!
-        let inputMtlTexture = ShaderRegistry.getDevice().MakeMTLTexture(uiImage: image,
+        let inputMtlTexture = ShaderRegistry.getDevice().makeMTLTexture(uiImage: image,
                                                                         pixelFormat: .rgba16Float)
 
         let testImg = MPSImage(texture: inputMtlTexture, featureChannels: 3)

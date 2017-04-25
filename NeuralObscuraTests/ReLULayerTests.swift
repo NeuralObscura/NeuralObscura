@@ -14,10 +14,7 @@ import MetalPerformanceShaders
 class ReLULayerTests: CommandEncoderBaseTest {
 
     func testReLULayer() {
-        let testImg = device.MakeMPSImage(width: 2,
-                                          height: 2,
-                                          values: [-9, -1,
-                                                   1, 2] as [Float32])
+        let testImg = device.makeMPSImage(width: 2, height: 2, values: [-9, -1, 1, 2])
         /* Create our CommandEncoder */
         let relu = ReLULayer().chain(MPSImageVariable(testImg))
 
@@ -25,11 +22,7 @@ class ReLULayerTests: CommandEncoderBaseTest {
         let outputImg = relu.forward(commandBuffer: commandBuffer)
         execute()
 
-        let expImg = device.MakeMPSImage(width: 2,
-                                         height: 2,
-                                         pixelFormat: testTextureFormatR,
-                                         values: [0, 0,
-                                                  1, 2] as [Float32])
+        let expImg = device.makeMPSImage(width: 2, height: 2, values: [0, 0, 1, 2])
 
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
