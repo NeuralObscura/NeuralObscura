@@ -37,14 +37,15 @@ kernel void batch_normalization(texture2d_array<float, access::read> inTexture [
                                 uint3 gid [[thread_position_in_grid]]) {
     uint buffer_idx = gid.z * 4;
     float4 input = inTexture.read(gid.xy, gid.z);
+    float no_zero_divide = 0.0000001;
     float4 output = float4(input.r - mean[buffer_idx],
                            input.g - mean[buffer_idx+1],
                            input.b - mean[buffer_idx+2],
                            input.a - mean[buffer_idx+3]);
-    output = float4(output.r / stddev[buffer_idx],
-                    output.g / stddev[buffer_idx+1],
-                    output.b / stddev[buffer_idx+2],
-                    output.a / stddev[buffer_idx+3]);
+    output = float4(output.r / (stddev[buffer_idx] + no_zero_divide),
+                    output.g / (stddev[buffer_idx+1] + no_zero_divide),
+                    output.b / (stddev[buffer_idx+2] + no_zero_divide),
+                    output.a / (stddev[buffer_idx+3] + no_zero_divide));
     output = float4(output.r * gamma[buffer_idx],
                     output.g * gamma[buffer_idx+1],
                     output.b * gamma[buffer_idx+2],
