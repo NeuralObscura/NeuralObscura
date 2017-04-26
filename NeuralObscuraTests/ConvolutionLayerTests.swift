@@ -17,10 +17,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "conv_input", withExtension: "npy", subdirectory: "testdata")!
         let testImg = MPSImage.loadFromNumpy(testUrl)
-        print("image loaded")
-        print(testImg)
         
-        print("expected")
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "conv_expected_output", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.loadFromNumpy(expUrl)
@@ -40,10 +37,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
         
-        
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: -1))
-        print(outputImg)
-//        print(expImg)
     }
     
     func testGroundTruthConvRelu() {
@@ -102,6 +96,10 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
         
+        print(outputImg.pixelFormat.channelCount)
+        print(outputImg.pixelFormat.sizeOfDataType)
+        print(expImg.pixelFormat.channelCount)
+        print(expImg.pixelFormat.sizeOfDataType)
         XCTAssertEqual(outputImg, expImg)
     }
     

@@ -51,8 +51,6 @@ class TanhAdjustmentLayer: UnaryCommandEncoder {
         } else {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
-            print(sourceImage)
-            print(sourceImage.texture.bufferDescription)
             let encoder = commandBuffer.makeComputeCommandEncoder()
             encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "tanh_adjustment"))
             encoder.setTexture(sourceImage.texture, at: 0)

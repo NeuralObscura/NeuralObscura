@@ -8,6 +8,7 @@
 import MetalPerformanceShaders
 
 extension MTLPixelFormat {
+    
     var channelCount: Int {
         switch self {
         case .rgba8Unorm:
