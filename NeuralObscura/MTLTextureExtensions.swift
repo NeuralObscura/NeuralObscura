@@ -38,5 +38,32 @@ extension MTLTexture {
             bytesPerRow: bytesPerRow,
             bytesPerImage: bytesPerImage)
     }
-
+    
+        /* description must be referenced directly until we can add protocol conformance
+           in an extension to another protocol. (CustomStringConvertible) */
+       var bufferDescription: String {
+        var desc = "MTLTexture \(self.hash) with width: \(self.width), height: \(self.height), arrayLength: \(self.arrayLength), pixelFormat raw value: \(self.pixelFormat.rawValue)\n"
+        let rowLength = self.pixelFormat.sizeOfDataType * self.width
+        let imageLength = rowLength * self.height
+        let imageCount = self.pixelFormat.channelCount * self.width * self.height
+        let ptr = UnsafeMutableRawPointer.allocate(bytes: imageLength, alignedTo: MemoryLayout<UInt16>.alignment)
+        let region = MTLRegionMake3D(0, 0, 0, self.width, self.height, 4)
+        for slice in 0 ..< self.arrayLength {
+            self.getBytes(ptr, bytesPerRow: rowLength, bytesPerImage: imageLength, from: region, mipmapLevel: 0, slice: slice)
+            let converted = Conversions.float16toFloat32(ptr, count: imageCount)
+            for row in 0 ..< self.height {
+                for col in 0 ..< self.width {
+                    for pos in 0 ..< 4 {
+                        let e = converted[row * (width * 4) + col * 4 + pos]
+                        print(e)
+                        desc += String(format: "%.2f ", e)
+                    }
+                    desc += "\t"
+                }
+                desc += "\n"
+            }
+            desc += "\n"
+        }
+        return desc
+    }
 }

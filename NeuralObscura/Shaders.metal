@@ -107,21 +107,6 @@ kernel void batch_normalization_nt(texture2d_array<float, access::read> inTextur
     }
 }
 
-
-/* Deconvolution Interpixel Stride
- *
- * Formula: output[i * stride][j * stride] = input[i][j]
- */
-kernel void deconvolution_interpixel_stride(texture2d_array<float, access::read> inTexture [[texture(0)]],
-                                texture2d_array<float, access::write> outTexture [[texture(1)]],
-                                const device uint* stride [[ buffer(2) ]],
-                                uint3 gid [[thread_position_in_grid]]) {
-    float4 outColor = inTexture.read(gid.xy, gid.z);
-    uint2 outLoc = uint2(gid.x * *stride, gid.y * *stride);
-    outTexture.write(outColor, outLoc, gid.z);
-}
-
-
 /* Add two matrices together
  *
  * Formula: output = input1 + input2
@@ -315,20 +300,6 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
         sum = t;
     }
     output[_5d_index_to_1d_index(outputShape, outputIndex)] = sum;
-   
-//    for (uint i = 0; i < nc_in; ++i) {
-//        _4d_index weightsIndex = { 0, 0, 0, i };
-//        uint idx = _4d_index_to_1d_index(weightsShape, weightsIndex);
-//        output[i] = weights[idx];
-//    }
- 
-//      for (uint i = 0; i < nslices; ++i) {
-//          float4 featureMapValues = featureMap.read(uint2(0, 0), i);
-//          for (uint j = 0; j < 4; ++j) {
-//              output[i * 4 + j] = featureMapValues[j];
-//          }
-//      }
-
 }
 
 kernel void col2im(const device float* input [[ buffer (0) ]],

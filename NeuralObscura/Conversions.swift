@@ -21,11 +21,10 @@ class Conversions {
         return output
     }
 
-    static func float16toFloat32(_ values: [UInt16]) -> [Float32] {
-        var input = values
-        var inputBuffer = vImage_Buffer(data: &input, height: 1, width: UInt(values.count), rowBytes: values.count * 2)
-        var output = [Float32](repeating: 0, count: values.count)
-        var outputBuffer = vImage_Buffer(data: &output, height: 1, width: UInt(values.count), rowBytes: values.count * 4)
+    static func float16toFloat32(_ values: UnsafeMutableRawPointer, count: Int) -> [Float32] {
+        var inputBuffer = vImage_Buffer(data: values, height: 1, width: UInt(count), rowBytes: count * 2)
+        var output = [Float32](repeating: 0, count: count)
+        var outputBuffer = vImage_Buffer(data: &output, height: 1, width: UInt(count), rowBytes: count * 4)
 
         if vImageConvert_Planar16FtoPlanarF(&inputBuffer, &outputBuffer, 0) != kvImageNoError {
             fatalError("Couldn't convert from float16 to float32")

@@ -164,14 +164,8 @@ extension MPSImage {
 
             switch lhs.pixelFormat {
             case .r16Float, .rgba16Float:
-                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhsPixelArea)
-                let rhsPtr = rhsRawPtr.bindMemory(to: UInt16.self, capacity: rhsPixelArea)
-
-                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
-                let rhsBufferPtr = UnsafeBufferPointer<UInt16>(start: rhsPtr, count: rhsPixelArea)
-                
-                let convertedLhs = Conversions.float16toFloat32(Array(lhsBufferPtr))
-                let convertedRhs = Conversions.float16toFloat32(Array(rhsBufferPtr))
+                let convertedLhs = Conversions.float16toFloat32(lhsRawPtr, count: lhsPixelArea)
+                let convertedRhs = Conversions.float16toFloat32(rhsRawPtr, count: rhsPixelArea)
 
                 for i in 0...(convertedRhs.count - 1) {
                     if (abs(convertedLhs[i] - convertedRhs[i]) > maxDifference) {
@@ -235,10 +229,7 @@ extension MPSImage {
                                 slice: i)
             switch lhs.pixelFormat {
             case .r16Float, .rgba16Float:
-                let lhsPtr = lhsRawPtr.bindMemory(to: UInt16.self, capacity: lhsPixelArea)
-                let lhsBufferPtr = UnsafeBufferPointer<UInt16>(start: lhsPtr, count: lhsPixelArea)
-                let lhsFloat16Values = lhsBufferPtr.enumerated().map { (idx, e) in e }
-                let lhsFloatValues = Conversions.float16toFloat32(lhsFloat16Values)
+                let lhsFloatValues = Conversions.float16toFloat32(lhsRawPtr, count: lhsPixelArea)
                 lhsFloats += lhsFloatValues.enumerated().map { (idx, e) in Float32(e) }
             case .r32Float, .rgba32Float:
                 let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhsPixelArea)
@@ -356,12 +347,7 @@ extension MPSImage {
                                   from: MTLRegionMake2D(0, 0, self.width, self.height),
                                   mipmapLevel: 0,
                                   slice: i)
-            let buffer = UnsafeBufferPointer<UInt16>(start: ptr, count: self.pixelFormat.typedSize(width: self.width,
-                                                                                                   height: self.height))
-
-
-            let convertedBuffer = Conversions.float16toFloat32(Array(buffer))
-
+            let convertedBuffer = Conversions.float16toFloat32(ptr, count: self.width * self.height * self.pixelFormat.channelCount)
             for channel in 0..<self.pixelFormat.channelCount {
                 for i in stride(from: channel, to: convertedBuffer.count, by: self.pixelFormat.channelCount) {
                     outputString += String(format: "%.2f ", convertedBuffer[i])
@@ -369,7 +355,6 @@ extension MPSImage {
                 outputString += "\n"
             }
         }
-
         return outputString
     }
 

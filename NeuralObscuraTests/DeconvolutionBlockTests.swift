@@ -75,78 +75,6 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
 //        XCTAssertEqual(outputImg, expImg)
 //    }
     
-    func testInterpixelStride() {
-        let testImg1 = device.makeMPSImage(width: 2,
-                                           height: 2,
-                                           values: [[1,4,3,2],
-                                                    [2,3,4,1],
-                                                    [3,2,2,3],
-                                                    [4,1,1,4]])
-
-        
-        let outputImg = device.makeMPSImage(width: 4,
-                                            height: 4,
-                                            values: [[0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0],
-                                                     [0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0],
-                                                     [0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0],
-                                                     [0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0,
-                                                      0,0,0,0]])
-        
-        var s = UInt(2)
-        let interpixelStride = ShaderRegistry.getDevice().makeBuffer(
-            bytes: &s,
-            length: MemoryLayout<UInt>.size,
-            options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        
-        /* Create our CommandEncoder*/
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "deconvolution_interpixel_stride"))
-        encoder.setTexture(testImg1.texture, at: 0)
-        encoder.setTexture(outputImg.texture, at: 1)
-        encoder.setBuffer(interpixelStride, offset: 0, at: 2)
-        let threadsPerGroup = MTLSizeMake(1, 1, 1)
-        let threadGroups = MTLSizeMake(outputImg.texture.width,
-                                       outputImg.texture.height, 1)
-        encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
-        encoder.endEncoding()
-        /* Run our test */
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-        
-        let expImg = device.makeMPSImage(width: 4,
-                                         height: 4,
-                                         values: [[1,0,4,0,
-                                                   0,0,0,0,
-                                                   3,0,2,0,
-                                                   0,0,0,0],
-                                                  [2,0,3,0,
-                                                   0,0,0,0,
-                                                   4,0,1,0,
-                                                   0,0,0,0],
-                                                  [3,0,2,0,
-                                                   0,0,0,0,
-                                                   2,0,3,0,
-                                                   0,0,0,0],
-                                                  [4,0,1,0,
-                                                   0,0,0,0,
-                                                   1,0,4,0,
-                                                   0,0,0,0]])
-        
-        /* Verify the result */
-        XCTAssertEqual(outputImg, expImg)
-    }
-    
     func testDeconvPart2Shader() {
         let bytes : [Float32] =
             [ -1,   0,   1,   2,  -2,   0,   2,   4,  -3,   0,   3,   6,  -4,   0,   4,
@@ -197,7 +125,6 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         commandBuffer.commit()
         commandBuffer.waitUntilCompleted()
     }
-    
     
     //         func testIdentityNoPadding() {
     //             let testImg = device.MakeMPSImage(width: 2, height: 2, values: [1, 0,
