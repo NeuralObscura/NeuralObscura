@@ -92,32 +92,33 @@ class ConvolutionLayer: UnaryCommandEncoder {
     }
     
     private func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let destDesc = destinationImageDescriptor(sourceImage: sourceImage)
-        if useTemporary {
-            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
-            img.readCount = consumerCount
-            return img
-        } else {
-            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-        }
-    }
-    
-    private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         let inHeight = sourceImage.height
         let inWidth = sourceImage.width
         
         let kernelSize = convolution.kernelWidth
         let stride = convolution.strideInPixelsX
         let channelsOut = convolution.outputFeatureChannels
+        let nslices = ((channelsOut + 3) / 4)
 
         let outHeight = ((inHeight + (2 * self.padding) - kernelSize) / stride) + 1
         let outWidth = ((inWidth + (2 * self.padding) - kernelSize) / stride) + 1
-        let descriptor = MPSImageDescriptor(
-            channelFormat: textureFormat,
-            width: outWidth,
-            height: outHeight,
-            featureChannels: channelsOut)
-
-        return descriptor
+        
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.arrayLength = nslices
+        textureDesc.height = outHeight
+        textureDesc.width = outWidth
+        textureDesc.textureType = .type2DArray
+        textureDesc.usage = MTLTextureUsage(rawValue:
+            MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        textureDesc.pixelFormat = .rgba16Float
+        
+        if useTemporary {
+            let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
+            return MPSImage.init(texture: texture, featureChannels: max(4, channelsOut))
+        }
     }
 }
