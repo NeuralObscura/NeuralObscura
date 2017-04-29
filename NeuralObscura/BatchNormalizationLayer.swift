@@ -68,25 +68,6 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
         }
     }
     
-    private func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let destDesc = destinationImageDescriptor(sourceImage: sourceImage)
-        if useTemporary {
-            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
-            img.readCount = consumerCount
-            return img
-        } else {
-            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-        }
-    }
-    
-    private func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
-        return MPSImageDescriptor(
-            channelFormat: textureFormat,
-            width: sourceImage.width,
-            height: sourceImage.height,
-            featureChannels: sourceImage.featureChannels)
-    }
-    
     private func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
         let encoder = commandBuffer.makeComputeCommandEncoder()
         if testMode {
@@ -118,6 +99,26 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
 
         if let image = sourceImage as? MPSTemporaryImage {
             image.readCount -= 1
+        }
+    }
+    
+    private func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.arrayLength = sourceImage.texture.arrayLength
+        textureDesc.height = sourceImage.height
+        textureDesc.width = sourceImage.width
+        textureDesc.textureType = .type2DArray
+        textureDesc.usage = MTLTextureUsage(rawValue:
+            MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        textureDesc.pixelFormat = .rgba16Float
+        
+        if useTemporary {
+            let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
+            return MPSImage.init(texture: texture, featureChannels: max(4, sourceImage.featureChannels))
         }
     }
 }

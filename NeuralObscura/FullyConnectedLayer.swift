@@ -68,17 +68,22 @@ class FullyConnectedLayer: UnaryCommandEncoder {
     }
     
     private func destinationImage(input: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let destDesc =  MPSImageDescriptor(
-            channelFormat: textureFormat,
-            width: 1,
-            height: 1,
-            featureChannels: fullyConnected.outputFeatureChannels)
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.arrayLength = ((fullyConnected.outputFeatureChannels + 3) / 4)
+        textureDesc.height = 1
+        textureDesc.width = 1
+        textureDesc.textureType = .type2DArray
+        textureDesc.usage = MTLTextureUsage(rawValue:
+            MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        textureDesc.pixelFormat = .rgba16Float
+        
         if useTemporary {
-            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)
             img.readCount = consumerCount
             return img
         } else {
-            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
+            return MPSImage.init(texture: texture, featureChannels: max(4, fullyConnected.outputFeatureChannels))
         }
     }
 }

@@ -103,17 +103,6 @@ class Col2ImLayer: BinaryCommandEncoder {
     }
     
     func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let destDesc = destinationImageDescriptor(sourceImage: sourceImage)
-        if useTemporary {
-            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
-            img.readCount = consumerCount
-            return img
-        } else {
-            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
-        }
-    }
-    
-    func destinationImageDescriptor(sourceImage: MPSImage) -> MPSImageDescriptor {
         let inHeight = UInt32(sourceImage.height)
         let inWidth = UInt32(sourceImage.width)
         
@@ -128,12 +117,22 @@ class Col2ImLayer: BinaryCommandEncoder {
         assert((outWidth + 2 * padding - kernelSize) % stride == 0,
                "Input size must be a multiple of i+2p-k in all dimensions. This constraint is failing in the width dimension.")
         
-        let descriptor = MPSImageDescriptor(
-            channelFormat: textureFormat,
-            width: Int(outWidth),
-            height: Int(outHeight),
-            featureChannels: Int(channelsOut))
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.arrayLength = (Int(channelsOut) + 3) / 4
+        textureDesc.height = Int(outHeight)
+        textureDesc.width = Int(outWidth)
+        textureDesc.textureType = .type2DArray
+        textureDesc.usage = MTLTextureUsage(rawValue:
+            MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        textureDesc.pixelFormat = .rgba16Float
         
-        return descriptor
+        if useTemporary {
+            let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)
+            img.readCount = consumerCount
+            return img
+        } else {
+            let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
+            return MPSImage.init(texture: texture, featureChannels: max(4, Int(channelsOut)))
+        }
     }
 }

@@ -32,18 +32,24 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
     
     
     func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
-        let destDesc =  MPSImageDescriptor(
-            channelFormat: textureFormat,
-            width: sourceImage.width,
-            height: sourceImage.height,
-            featureChannels: sourceImage.featureChannels)
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.arrayLength = sourceImage.texture.arrayLength
+        textureDesc.height = sourceImage.height
+        textureDesc.width = sourceImage.width
+        textureDesc.textureType = .type2DArray
+        textureDesc.usage = MTLTextureUsage(rawValue:
+            MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
+        textureDesc.pixelFormat = .rgba16Float
+        
         if useTemporary {
-            let img = MPSTemporaryImage(commandBuffer: commandBuffer, imageDescriptor: destDesc)
+            let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)
             img.readCount = consumerCount
             return img
         } else {
-            return MPSImage(device: ShaderRegistry.getDevice(), imageDescriptor: destDesc)
+            let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
+            return MPSImage.init(texture: texture, featureChannels: max(4, sourceImage.featureChannels))
         }
+
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
