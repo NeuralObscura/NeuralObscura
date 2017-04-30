@@ -60,7 +60,8 @@ class DeconvolutionNet(chainer.Chain):
         td = x
         h = self.c1(x)
         h = F.relu(h)
-        gt = self.b1(h, test=test)
+        gt = h
+        # gt = self.b1(h, test=test)
         # h = self.b2(F.relu(self.c2(h)), test=test)
         # h = self.b3(F.relu(self.c3(h)), test=test)
         # h = self.r1(h, test=test)

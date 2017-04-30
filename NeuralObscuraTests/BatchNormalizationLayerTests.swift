@@ -46,8 +46,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
             .url(forResource: "batch_norm_expected_output", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.loadFromNumpy(expUrl)
 
-        XCTAssertEqual(outputImg, expImg)
-//        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 2))
+        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: -2))
     }
 
     func testOneFeatureBatchNormalization() {

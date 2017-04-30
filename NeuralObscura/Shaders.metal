@@ -39,21 +39,21 @@ kernel void batch_normalization(texture2d_array<half, access::read> inTexture [[
     half4 input = inTexture.read(gid.xy, gid.z);
     float no_zero_divide = 0.0000001;
     half4 output = half4(input.r - mean[buffer_idx],
-                           input.g - mean[buffer_idx+1],
-                           input.b - mean[buffer_idx+2],
-                           input.a - mean[buffer_idx+3]);
+                         input.g - mean[buffer_idx+1],
+                         input.b - mean[buffer_idx+2],
+                         input.a - mean[buffer_idx+3]);
     output = half4(output.r / (stddev[buffer_idx] + no_zero_divide),
-                    output.g / (stddev[buffer_idx+1] + no_zero_divide),
-                    output.b / (stddev[buffer_idx+2] + no_zero_divide),
-                    output.a / (stddev[buffer_idx+3] + no_zero_divide));
+                   output.g / (stddev[buffer_idx+1] + no_zero_divide),
+                   output.b / (stddev[buffer_idx+2] + no_zero_divide),
+                   output.a / (stddev[buffer_idx+3] + no_zero_divide));
     output = half4(output.r * gamma[buffer_idx],
-                    output.g * gamma[buffer_idx+1],
-                    output.b * gamma[buffer_idx+2],
-                    output.a * gamma[buffer_idx+3]);
+                   output.g * gamma[buffer_idx+1],
+                   output.b * gamma[buffer_idx+2],
+                   output.a * gamma[buffer_idx+3]);
     output = half4(output.r + beta[buffer_idx],
-                    output.g + beta[buffer_idx+1],
-                    output.b + beta[buffer_idx+2],
-                    output.a + beta[buffer_idx+3]);
+                   output.g + beta[buffer_idx+1],
+                   output.b + beta[buffer_idx+2],
+                   output.a + beta[buffer_idx+3]);
     outTexture.write(output, gid.xy, gid.z);
 }
 
@@ -72,26 +72,35 @@ kernel void batch_normalization_nt(texture2d_array<float, access::read> inTextur
                                    uint3 gid [[thread_position_in_grid]]) {
     uint height = inTexture.get_height();
     uint width = inTexture.get_width();
-    float4 sum = float4(0.0, 0.0, 0.0, 0.0);
     uint slot = (gid.z * 4); // where in gamma & beta to read from
 
+    
+    float4 sum = float4(0.0, 0.0, 0.0, 0.0);
+    float4 error = float4(0.0, 0.0, 0.0, 0.0);
     for(uint j = 0; j < width; j++) {
         for(uint i = 0; i < height; i++) {
-            sum += inTexture.read(uint2(j, i), gid.z);
+            float4 y = inTexture.read(uint2(j, i), gid.z);
+            float4 t = sum + y;
+            error = (t - sum) - y;
+            sum = t;
         }
     }
 
     float4 mean = sum / float4(width*height);
     float4 vari = float4(0.0, 0.0, 0.0, 0.0);
+    error = float4(0.0, 0.0, 0.0, 0.0);
     for(uint j = 0; j < width; j++) {
         for(uint i = 0; i < height; i++) {
-            vari += (inTexture.read(uint2(j, i), gid.z) - mean) *
-            (inTexture.read(uint2(j, i), gid.z) - mean);
+            float4 y = (inTexture.read(uint2(j, i), gid.z) - mean) * (inTexture.read(uint2(j, i), gid.z) - mean);
+            float4 t = vari + y;
+            error = (t - vari) - y;
+            vari = t;
         }
     }
     vari /= (width*height);
     float4 stddev = sqrt(vari) + 0.0000001; // Prevent divide by 0 (chainer constant)
 
+    /* TODO: Implement numerical error correction here. */
     for(uint j = 0; j < width; j++) {
         for(uint i = 0; i < height; i++) {
             float4 x_hat = (inTexture.read(uint2(j, i), gid.z) - mean) / stddev;
@@ -260,7 +269,7 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
         return;
     }
     
-    _4d_shape weightsShape = { nc_out, nkh, nkw, nc_in };
+    _4d_shape weightsShape = { nc_in, nkh, nkw, nc_out };
     uint nslices = featureMap.get_array_size();
     
     /* position[0] is a 1d index into a 2d array with shape (nh, nw) */
@@ -285,11 +294,11 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
     float error = 0;
     for (uint slice = 0; slice < nslices; ++slice) {
         float4 weightValues;
-        _4d_index weightsIndex = { c_out, kh, kw, slice * 4 };
-        uint base = _4d_index_to_1d_index(weightsShape, weightsIndex);
+        uint c_in_base = slice * 4;
         for (uint c_in_offset = 0; c_in_offset < 4; c_in_offset++) {
-            /* TODO: Can we really just assume it knows the alignment? */
-            weightValues[c_in_offset] = weights[base + c_in_offset];
+            _4d_index weightsIndex = { c_in_base + c_in_offset, kh, kw, c_out };
+            uint index = _4d_index_to_1d_index(weightsShape, weightsIndex);
+            weightValues[c_in_offset] = weights[index];
         }
         float4 featureMapValues = featureMap.read(uint2(w, h), slice);
         float termGroup = dot(weightValues, featureMapValues);

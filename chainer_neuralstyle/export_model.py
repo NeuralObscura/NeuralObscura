@@ -31,7 +31,9 @@ class ChainerDataReader(object):
         def convert(data):
             if data.ndim == 4:
                 # Original VGG form (c_i, c_0, h, w) -> (c_o, h, w, c_i)
-                data = data.transpose((1, 2, 3, 0))
+                # data = data.transpose((1, 2, 3, 0))
+                # Original VGG form (c_i, c_0, h, w) -> (c_i, h, w, c_o)
+                data = data.transpose((0, 2, 3, 1))
             return data
 
         s = ""

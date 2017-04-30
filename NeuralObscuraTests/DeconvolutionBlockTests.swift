@@ -41,10 +41,12 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         let expBufTypedPtr = expBufPtr.bindMemory(to: Float32.self, capacity: expBufCount)
         let expBuffer = UnsafeMutableBufferPointer.init(start: expBufTypedPtr, count: expBufCount)
         expData.copyBytes(to: expBuffer)
-        for (i, (a,   b)) in zip(0..<outputBuffer.count, zip(outputBuffer, expBuffer)) {
+        var passing = true
+        for (a,   b) in zip(outputBuffer, expBuffer) {
             let diff = abs(a - b)
-            XCTAssertLessThan(diff, 0.01, "Index \(i) expected \(b) received \(a)")
+            passing = passing && diff < 0.01
         }
+        XCTAssert(passing)
     }
     
 //    func testGroundTruthDeconv() {

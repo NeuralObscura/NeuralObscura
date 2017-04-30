@@ -96,10 +96,6 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
         
-        print(outputImg.pixelFormat.channelCount)
-        print(outputImg.pixelFormat.sizeOfDataType)
-        print(expImg.pixelFormat.channelCount)
-        print(expImg.pixelFormat.sizeOfDataType)
         XCTAssertEqual(outputImg, expImg)
     }
     
@@ -280,60 +276,4 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         /* Verify the result */
         XCTAssertEqual(outputImg, expImg)
     }
-    
-    func testProofOfConcept() {
-        /* Create an input test image */
-        let testImg = device.makeMPSImage(width: 4,
-                                          height: 4,
-                                          values: [0, 0, 0, 0,
-                                                   0, 3, 3, 0,
-                                                   0, 6, 1, 0,
-                                                   0, 0, 0, 0])
-        /* Create our CommandEncoder */
-        let w: [Float] = [1, 1,
-                          1, 1]
-        let b: [Float] = [0]
-        let convDesc = MPSCNNConvolutionDescriptor(
-            kernelWidth: 2,
-            kernelHeight: 2,
-            inputFeatureChannels: 1,
-            outputFeatureChannels: 1,
-            neuronFilter: nil)
-        let conv = MPSCNNConvolution(
-            device: device,
-            convolutionDescriptor: convDesc,
-            kernelWeights: w,
-            biasTerms: b,
-            flags: MPSCNNConvolutionFlags.none)
-        conv.edgeMode = .zero
-        conv.offset = MPSOffset(x: 0, y: 0, z: 0)
-        conv.clipRect.size = MTLSizeMake(testImg.width + 1, testImg.height + 1, 1)
-        
-        /* Create an expected output image */
-        let expImg = device.makeMPSImage(width: 5,
-                                         height: 5,
-                                         values: [0, 0, 0, 0, 0,
-                                                  0, 3, 6, 3, 0,
-                                                  0, 9, 13, 4, 0,
-                                                  0, 6,  7, 1, 0,
-                                                  0, 0, 0, 0, 0] )
-
-        /*  Create an output image */
-        let outputImg = MPSImage(
-            device: device,
-            imageDescriptor: MPSImageDescriptor(
-                channelFormat: textureFormat,
-                width: 5,
-                height: 5,
-                featureChannels: 1))
-        
-        /* Run our test */
-        conv.encode(commandBuffer: commandBuffer, sourceImage: testImg, destinationImage: outputImg)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-        
-        /* Verify the result */
-        XCTAssertEqual(outputImg, expImg)
-    }
-    
 }

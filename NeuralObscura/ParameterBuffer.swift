@@ -96,7 +96,7 @@ class FileParameterBuffer: ParameterBuffer {
     }
     
     deinit {
-        print("deinit \(self) \(modelName) \(rawFileName)")
+//        print("deinit \(self) \(modelName) \(rawFileName)")
         
         if let hdr = hdr {
             let result = munmap(hdr, Int(fileSize))
