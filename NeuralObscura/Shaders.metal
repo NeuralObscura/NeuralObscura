@@ -254,9 +254,9 @@ _3d_index _1d_index_to_3d_index(_3d_shape shape, uint index) {
  */
 kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0)]],
                       device half* output [[buffer(1)]],
-                      const device float* weights [[ buffer(2) ]],
+                      const device half* weights [[ buffer(2) ]],
                       const device uint* weightsShapeParam [[ buffer(3) ]],
-                      uint2 pos [[thread_pos_in_grid]]) {
+                      uint2 pos [[thread_position_in_grid]]) {
     uint nc_out = weightsShapeParam[0];
     uint nkh = weightsShapeParam[1];
     uint nkw = weightsShapeParam[2];
@@ -300,8 +300,10 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
             uint index = _4d_index_to_1d_index(weightsShape, weightsIndex);
             weightValues[c_in_offset] = weights[index];
         }
-        float4 featureMapValues = featureMap.read(uint2(w, h), slice);
-        half termGroup = dot(weightValues, as_type<half4>(featureMapValues));
+        half4 featureMapValues = featureMap.read(uint2(w, h), slice);
+        /* have to weight numerical inaccuracy introduced here with potential speed improvements */
+        /* TODO: lookup how to take full advantage of only using half operations */
+        half termGroup = dot(weightValues, featureMapValues);
         /* https://en.wikipedia.org/wiki/Kahan_summation_algorithm */
         half y = termGroup - error;
         half t = sum + y;
@@ -316,7 +318,7 @@ kernel void col2im(const device float* input [[ buffer (0) ]],
                    const device uint* input_dim [[buffer(2)]],
                    uint3 gid [[thread_position_in_grid]]) {
 
-    if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
+    if (gid.x > outTexture.get_width() - 1 || gid.y > outTexture.get_height() - 1) {
         return;
     }
     
@@ -331,17 +333,17 @@ kernel void col2im(const device float* input [[ buffer (0) ]],
     _5d_shape inputShape = { nc_in, k, k, nh, nw };
     float val = 0;
     float error = 0;
-    for (int ky = 0; ky < k; ++ky) {
+    for (uint ky = 0; ky < k; ++ky) {
         int y = (gid.y + p - ky);
         if (0 > y || y >= nh * s) continue;
         if (y % s != 0) continue;
         y /= s;
-        for (int kx = 0; kx < k; ++kx) {
+        for (uint kx = 0; kx < k; ++kx) {
             int x = (gid.x + p - kx);
             if (0 > x || x >= nw * s) continue;
             if (x % s != 0) continue;
             x /= s;
-            _5d_index inputIndex = { gid.z, ky, kx, y, x };
+            _5d_index inputIndex = { gid.z, ky, kx, as_type<uint>(y), as_type<uint>(x) };
             float term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
             float y = term - error;
             float t = val + y;

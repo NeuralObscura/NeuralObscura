@@ -19,25 +19,42 @@ protocol HalfNumeric {}
 extension UInt16: HalfNumeric {}
 
 class MTLBufferUtil {
-    static public func toString<T: Numeric>(_ buffer : MTLBuffer, type: T.Type) -> String {
-        var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length)\n\n"
-        let buff = UnsafeBufferPointer<T>(start: buffer.contents().assumingMemoryBound(to: T.self), count: buffer.length)
+    public static func toString<T: Numeric>(_ buffer : MTLBuffer, type: T.Type) -> String {
+        let count = buffer.length / MemoryLayout<T>.size
+        var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
+        let buff = UnsafeBufferPointer<T>(start: buffer.contents().assumingMemoryBound(to: T.self), count: count)
 
-        for i in 0...buffer.length-1 {
+        for i in 0 ..< count {
             desc += String(format: "%.2f ", buff[i] as! CVarArg)
         }
 
         return desc
     }
 
-    static public func toString<UInt16>(_ buffer : MTLBuffer, type: UInt16) -> String {
-        var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length)\n\n"
-        let values = Conversions.float16toFloat32(buffer.contents(), count: buffer.length)
+    public static func toString<UInt16>(_ buffer : MTLBuffer, type: UInt16) -> String {
+        let count = buffer.length / 2
+        print("WEIRD BEHAVIOR: MemoryLayout<UInt16>.size: \(MemoryLayout<UInt16>.size)")
+        print("How much other stuff is this breaking?")
+        var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
+        let values = Conversions.float16toFloat32(buffer.contents(), count: count)
 
-        for i in 0...buffer.length-1 {
+        for i in 0 ..< count {
             desc += String(format: "%.2f ", values[i])
         }
 
         return desc
+    }
+    
+    public static func loadFromBinary(_ url: URL) -> MTLBuffer {
+        let data = try! Data.init(contentsOf: url)
+        let count = data.count / MemoryLayout<Float32>.size
+        return data.withUnsafeBytes { (pointer: UnsafePointer<Float32>) -> MTLBuffer in
+            let converted = Conversions.float32toFloat16(Array(
+                UnsafeBufferPointer<Float32>(start: pointer, count: count)))
+            return ShaderRegistry.getDevice().makeBuffer(
+                bytes: converted,
+                length: count * MemoryLayout<UInt16>.size,
+                options: MTLResourceOptions.storageModeShared)
+        }
     }
 }

@@ -36,6 +36,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "tensordot_expected_output", withExtension: "dat", subdirectory: "testdata")!
         let expData = try! Data.init(contentsOf: expUrl)
+        // TODO: Convert back to float 32 to do comparison
         let expBufCount = expData.count / MemoryLayout<Float32>.size
         let expBufPtr = UnsafeMutableRawPointer.allocate(bytes: expData.count, alignedTo: MemoryLayout<Float32>.alignment)
         let expBufTypedPtr = expBufPtr.bindMemory(to: Float32.self, capacity: expBufCount)
@@ -44,9 +45,12 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         var passing = true
         for (a,   b) in zip(outputBuffer, expBuffer) {
             let diff = abs(a - b)
-            passing = passing && diff < 0.01
+            passing = passing && diff < 1
         }
         XCTAssert(passing)
+//        print(MTLBufferUtil.toString(MTLBufferUtil.loadFromBinary(expUrl), type: UInt16.self))
+//        print()
+//        print(MTLBufferUtil.toString(outputBuf, type: UInt16.self))
     }
     
 //    func testGroundTruthDeconv() {
