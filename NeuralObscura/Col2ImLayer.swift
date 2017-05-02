@@ -19,24 +19,18 @@ class Col2ImLayer: BinaryCommandEncoder {
     
     private let channelsOut: UInt32
     private let kernelSize: UInt32
-    private let inputSize: UInt32
-    private let outputRowWidth: UInt32
     private let stride: UInt32
     private let padding: UInt32
     
     // TODO: Refactor this constructor
     init(channelsOut: UInt32,
          kernelSize: UInt32,
-         inputSize: UInt32,
-         outputRowWidth: UInt32,
          stride: UInt32,
          padding: UInt32,
          useTemporary: Bool = false) {
         self.useTemporary = useTemporary
         self.channelsOut = channelsOut
         self.kernelSize = kernelSize
-        self.inputSize = inputSize
-        self.outputRowWidth = outputRowWidth
         self.stride = stride
         self.padding = padding
     }
@@ -67,10 +61,8 @@ class Col2ImLayer: BinaryCommandEncoder {
                 channelsOut,
                 nh,
                 nw,
-                inputSize,
                 kernelSize,
                 kernelSize,
-                outputRowWidth,
                 stride,
                 padding] as [UInt32]
             
@@ -88,7 +80,7 @@ class Col2ImLayer: BinaryCommandEncoder {
             let threadsPerGroup = MTLSizeMake(1, 1, 1)
             // TODO: Set thread group size! Not sure how bytes figures into this
             // TODO: double check this
-            let threadGroups = MTLSizeMake(Int(inputSize), 1, 1)
+            let threadGroups = MTLSizeMake(1, 1, 1)
             encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
             encoder.endEncoding()
             

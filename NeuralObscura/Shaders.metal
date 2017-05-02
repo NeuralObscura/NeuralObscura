@@ -319,12 +319,10 @@ kernel void col2im(const device float* input [[ buffer (0) ]],
     //uint nc_out = input_dim[0];
     uint nh = input_dim[1];
     uint nw = input_dim[2];
-    //uint inputSize = input_dim[3];
-    uint nkh = input_dim[4];
-    uint nkw = input_dim[5];
-    uint destRowWidth = input_dim[6];
-    uint s = input_dim[7];
-    uint p = input_dim[8];
+    uint nkh = input_dim[3];
+    uint nkw = input_dim[4];
+    uint s = input_dim[5];
+    uint p = input_dim[6];
 
     int i = id.x;
     int sy = s;
@@ -359,8 +357,5 @@ kernel void col2im(const device float* input [[ buffer (0) ]],
             val = val + input[out_x + out_w * k];
         }
     }
-    uint dest_y = i / destRowWidth;
-    uint dest_x = i % destRowWidth;
-    uint2 idx = {dest_x, dest_y};
-    outTexture.write(val, idx, c0);
+    outTexture.write(val, id.xy, c0);
 }

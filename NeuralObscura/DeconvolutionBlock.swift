@@ -42,8 +42,6 @@ class DeconvolutionBlock: UnaryCommandEncoder {
         // TODO: inputSize, outputRowWidth params are set to 0 so we can compile until we know how to populate them
         col2im = Col2ImLayer(channelsOut: UInt32(channelsOut),
                              kernelSize: UInt32(kernelSize),
-                             inputSize: 0,
-                             outputRowWidth: 0,
                              stride: UInt32(stride),
                              padding: UInt32(padding))
     }

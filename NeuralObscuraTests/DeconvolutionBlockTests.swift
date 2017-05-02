@@ -105,10 +105,8 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
             UInt32(1),  // nc_out
             UInt32(2),  // nh
             UInt32(2),  // nw
-            UInt32(64), // inputSize
             UInt32(5),  // nkh
             UInt32(5),  // nkw
-            UInt32(5),  // output row width
             UInt32(1),  // stride
             UInt32(0),  //padding
             ] as [UInt32]
