@@ -252,11 +252,11 @@ _3d_index _1d_index_to_3d_index(_3d_shape shape, uint index) {
  *
  * output buffer has size c_out * kh * kw * h * w
  */
-kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> featureMap [[texture(0)]],
-                                       device float* output [[buffer(1)]],
-                                       const device float* weights [[ buffer(2) ]],
-                                       const device uint* weightsShapeParam [[ buffer(3) ]],
-                                       uint2 position [[thread_position_in_grid]]) {
+kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0)]],
+                      device half* output [[buffer(1)]],
+                      const device float* weights [[ buffer(2) ]],
+                      const device uint* weightsShapeParam [[ buffer(3) ]],
+                      uint2 pos [[thread_pos_in_grid]]) {
     uint nc_out = weightsShapeParam[0];
     uint nkh = weightsShapeParam[1];
     uint nkw = weightsShapeParam[2];
@@ -264,24 +264,24 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
     uint nh = featureMap.get_height();
     uint nw = featureMap.get_width();
     
-    /* Early return if thread position is outside output range. */
-    if (position.x > featureMap.get_height() * featureMap.get_width() - 1 || position.y > nc_out * nkh * nkw - 1) {
+    /* Early return if thread pos is outside output range. */
+    if (pos.x > featureMap.get_height() * featureMap.get_width() - 1 || pos.y > nc_out * nkh * nkw - 1) {
         return;
     }
     
     _4d_shape weightsShape = { nc_in, nkh, nkw, nc_out };
     uint nslices = featureMap.get_array_size();
     
-    /* position[0] is a 1d index into a 2d array with shape (nh, nw) */
+    /* pos[0] is a 1d index into a 2d array with shape (nh, nw) */
     _2d_shape locShape = { nh, nw };
-    _2d_index locIndex = _1d_index_to_2d_index(locShape, position[0]);
+    _2d_index locIndex = _1d_index_to_2d_index(locShape, pos[0]);
     /* locIndex has the form { x: h, y: w } */
     uint h = locIndex.x;
     uint w = locIndex.y;
 
-    /* position[1] is a 1d index into a 3d array with shape (nc_out, nkh, nkw) */
+    /* pos[1] is a 1d index into a 3d array with shape (nc_out, nkh, nkw) */
     _3d_shape rightKernelShape = { nc_out, nkh, nkw };
-    _3d_index rightKernelIndex = _1d_index_to_3d_index(rightKernelShape, position[1]);
+    _3d_index rightKernelIndex = _1d_index_to_3d_index(rightKernelShape, pos[1]);
     /* rightKernelIndex has the form { x: c_out, y: kh, z: kw } */
     uint c_out = rightKernelIndex.x;
     uint kh = rightKernelIndex.y;
@@ -290,10 +290,10 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
     _5d_shape outputShape = { nc_out, nkh, nkw, nh, nw };
     _5d_index outputIndex = { c_out, kh, kw, h, w };
     
-    float sum = 0;
-    float error = 0;
+    half sum = 0;
+    half error = 0;
     for (uint slice = 0; slice < nslices; ++slice) {
-        float4 weightValues;
+        half4 weightValues;
         uint c_in_base = slice * 4;
         for (uint c_in_offset = 0; c_in_offset < 4; c_in_offset++) {
             _4d_index weightsIndex = { c_in_base + c_in_offset, kh, kw, c_out };
@@ -301,10 +301,10 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
             weightValues[c_in_offset] = weights[index];
         }
         float4 featureMapValues = featureMap.read(uint2(w, h), slice);
-        float termGroup = dot(weightValues, featureMapValues);
+        half termGroup = dot(weightValues, as_type<half4>(featureMapValues));
         /* https://en.wikipedia.org/wiki/Kahan_summation_algorithm */
-        float y = termGroup - error;
-        float t = sum + y;
+        half y = termGroup - error;
+        half t = sum + y;
         error = (t - sum) - y;
         sum = t;
     }
@@ -314,48 +314,40 @@ kernel void deconvolution_v2_tensordot(texture2d_array<float, access::read> feat
 kernel void col2im(const device float* input [[ buffer (0) ]],
                    texture2d_array<float, access::write> outTexture [[texture(1)]],
                    const device uint* input_dim [[buffer(2)]],
-                   uint3 id [[thread_position_in_grid]]) {
+                   uint3 gid [[thread_position_in_grid]]) {
 
-    //uint nc_out = input_dim[0];
-    uint nh = input_dim[1];
-    uint nw = input_dim[2];
-    uint nkh = input_dim[3];
-    uint nkw = input_dim[4];
+    if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
+        return;
+    }
+    
+    uint nh = input_dim[0];
+    uint nw = input_dim[1];
+    uint nc_in = input_dim[2];
+    uint nc_out = input_dim[3];
+    uint k = input_dim[4];
     uint s = input_dim[5];
     uint p = input_dim[6];
 
-    int i = id.x;
-    int sy = s;
-    int sx = s;
-    int ph = p;
-    int pw = p;
-    int kh = nkh;
-    int kw = nkw;
-    int out_h = nh;
-    int out_w = nw;
-    int h = nh;
-    int w = nw;
-
-
-    int c0 = i / (h * w);
-    int y  = i / w % h;
-    int x  = i % w;
-
-
-    float val = 0.0;
-    for (int ky = 0; ky < kh; ++ky) {
-        int out_y = (y + ph - ky * 1);
-        if (0 > out_y || out_y >= out_h * sy) continue;
-        if (out_y % sy != 0) continue;
-        out_y /= sy;
-        for (int kx = 0; kx < kw; ++kx) {
-            int out_x = (x + pw - kx * 1);
-            if (0 > out_x || out_x >= out_w * sx) continue;
-            if (out_x % sx != 0) continue;
-            out_x /= sx;
-            int k = out_y + out_h * (kx + kw * (ky + kh * c0));
-            val = val + input[out_x + out_w * k];
+    _5d_shape inputShape = { nc_in, k, k, nh, nw };
+    float val = 0;
+    float error = 0;
+    for (int ky = 0; ky < k; ++ky) {
+        int y = (gid.y + p - ky);
+        if (0 > y || y >= nh * s) continue;
+        if (y % s != 0) continue;
+        y /= s;
+        for (int kx = 0; kx < k; ++kx) {
+            int x = (gid.x + p - kx);
+            if (0 > x || x >= nw * s) continue;
+            if (x % s != 0) continue;
+            x /= s;
+            _5d_index inputIndex = { gid.z, ky, kx, y, x };
+            float term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
+            float y = term - error;
+            float t = val + y;
+            error = (t - val) - y;
+            val = t;
         }
     }
-    outTexture.write(val, id.xy, c0);
+    outTexture.write(val, gid.xy, gid.z);
 }

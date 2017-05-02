@@ -69,9 +69,9 @@ class TensorDotLayer: UnaryCommandEncoder {
                 length: self.w.length,
                 options: MTLResourceOptions.storageModePrivate)
             let tensordot = ShaderRegistry.getDevice().makeBuffer(
-                length: MemoryLayout<Float32>.size * matrixWidth * matrixHeight,
+                length: MemoryLayout<UInt16>.size * matrixWidth * matrixHeight,
                 options: MTLResourceOptions.storageModeShared)
-            let tensordotPipelineState = ShaderRegistry.getOrLoad(name: "deconvolution_v2_tensordot")
+            let tensordotPipelineState = ShaderRegistry.getOrLoad(name: "tensordot")
             let encoder = commandBuffer.makeComputeCommandEncoder()
             encoder.setComputePipelineState(tensordotPipelineState)
             encoder.setTexture(sourceImage.texture, at: 0)

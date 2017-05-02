@@ -54,18 +54,18 @@ class Col2ImLayer: BinaryCommandEncoder {
             let destImage: MPSImage = destinationImage(sourceImage: originalImage, commandBuffer: commandBuffer)
             
             // TODO: Configure this with constructor parameters
-            let nh = UInt32(originalImage.height)
-            let nw = UInt32(originalImage.width)
+            let heightIn = UInt32(originalImage.height)
+            let widthIn = UInt32(originalImage.width)
+            let channelsIn = UInt32(originalImage.featureChannels)
 
             let params = [
+                heightIn,
+                widthIn,
+                channelsIn,
                 channelsOut,
-                nh,
-                nw,
-                kernelSize,
                 kernelSize,
                 stride,
                 padding] as [UInt32]
-            
             let paramsBuffer = ShaderRegistry.getDevice().makeBuffer(
                 bytes: params,
                 length: params.count * MemoryLayout<UInt32>.size,
@@ -77,11 +77,15 @@ class Col2ImLayer: BinaryCommandEncoder {
             encoder.setBuffer(sourceBuffer, offset: 0, at: 0)
             encoder.setTexture(destImage.texture, at: 1)
             encoder.setBuffer(paramsBuffer, offset:0, at: 2)
-            let threadsPerGroup = MTLSizeMake(1, 1, 1)
-            // TODO: Set thread group size! Not sure how bytes figures into this
-            // TODO: double check this
-            let threadGroups = MTLSizeMake(1, 1, 1)
-            encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
+            
+            let threadGroupWidth = state.threadExecutionWidth
+            let threadGroupHeight = state.maxTotalThreadsPerThreadgroup / threadGroupWidth
+            let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
+            let gridShape = MTLSize(
+                width: (destImage.width + threadGroupWidth - 1) / threadGroupWidth,
+                height: (destImage.height + threadGroupHeight - 1) / threadGroupHeight,
+                depth: Int(channelsOut))
+            encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
             encoder.endEncoding()
             
             outputMemoId = commandBuffer.hash
