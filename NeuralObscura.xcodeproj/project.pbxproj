@@ -39,6 +39,7 @@
 		DA0B0C661D8BAB4000ED7982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */; };
 		DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */; };
 		DA0B0C7F1D8BAB4000ED7982 /* NeuralObscuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */; };
+		DA445C531EB82516006FF8C3 /* MTLBufferExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA445C521EB82516006FF8C3 /* MTLBufferExtensions.swift */; };
 		DA6942651DEAAADE00285327 /* RGBAToBRGALayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */; };
 		DA6942671DEAAB2900285327 /* RGBAToBRGALayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */; };
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
@@ -112,6 +113,7 @@
 		DA0B0C7A1D8BAB4000ED7982 /* NeuralObscuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuralObscuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuralObscuraUITests.swift; sourceTree = "<group>"; };
 		DA0B0C801D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		DA445C521EB82516006FF8C3 /* MTLBufferExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLBufferExtensions.swift; sourceTree = "<group>"; };
 		DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBAToBRGALayerTests.swift; sourceTree = "<group>"; };
 		DA6942661DEAAB2900285327 /* RGBAToBRGALayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RGBAToBRGALayer.swift; sourceTree = "<group>"; };
 		DA6D1FAF1D92352C00CD3F49 /* composition_model_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = composition_model_data; sourceTree = "<group>"; };
@@ -198,6 +200,7 @@
 				078642B91DDAD892006A3AFB /* Globals.swift */,
 				078642B81DDAD892006A3AFB /* Errors.swift */,
 				07A30DAD1E74F909001077B1 /* Variables.swift */,
+				DA445C521EB82516006FF8C3 /* MTLBufferExtensions.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -439,6 +442,7 @@
 				078642C61DDAD892006A3AFB /* ReLULayer.swift in Sources */,
 				DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift in Sources */,
 				078642C41DDAD892006A3AFB /* Globals.swift in Sources */,
+				DA445C531EB82516006FF8C3 /* MTLBufferExtensions.swift in Sources */,
 				077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */,
 				0762E9791E157D31005EF3EB /* MPSImageExtensions.swift in Sources */,
 				DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */,
