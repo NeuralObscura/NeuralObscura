@@ -9,17 +9,8 @@
 import MetalPerformanceShaders
 import UIKit
 
-protocol Numeric { }
-
-extension Float: Numeric {}
-extension Double: Numeric {}
-extension Int: Numeric {}
-
-protocol HalfNumeric {}
-extension UInt16: HalfNumeric {}
-
 class MTLBufferUtil {
-    public static func toString<T: Numeric>(_ buffer : MTLBuffer, type: T.Type) -> String {
+    public static func toString<T: FloatingPoint>(_ buffer : MTLBuffer, type: T.Type) -> String {
         let count = buffer.length / MemoryLayout<T>.size
         var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
         let buff = UnsafeBufferPointer<T>(start: buffer.contents().assumingMemoryBound(to: T.self), count: count)
@@ -31,10 +22,20 @@ class MTLBufferUtil {
         return desc
     }
 
-    public static func toString<UInt16>(_ buffer : MTLBuffer, type: UInt16) -> String {
-        let count = buffer.length / 2
-        print("WEIRD BEHAVIOR: MemoryLayout<UInt16>.size: \(MemoryLayout<UInt16>.size)")
-        print("How much other stuff is this breaking?")
+    public static func toString<T: Integer>(_ buffer : MTLBuffer, type: T.Type) -> String {
+        let count = buffer.length / MemoryLayout<T>.size
+        var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
+        let buff = UnsafeBufferPointer<T>(start: buffer.contents().assumingMemoryBound(to: T.self), count: count)
+
+        for i in 0 ..< count {
+            desc += String(format: "%.2f ", buff[i] as! CVarArg)
+        }
+
+        return desc
+    }
+
+    public static func toString<UInt16>(_ buffer : MTLBuffer, type: UInt16.Type) -> String {
+        let count = buffer.length / ExpectedUInt16Size
         var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
         let values = Conversions.float16toFloat32(buffer.contents(), count: count)
 
@@ -53,8 +54,70 @@ class MTLBufferUtil {
                 UnsafeBufferPointer<Float32>(start: pointer, count: count)))
             return ShaderRegistry.getDevice().makeBuffer(
                 bytes: converted,
-                length: count * MemoryLayout<UInt16>.size,
+                length: count * ExpectedUInt16Size,
                 options: MTLResourceOptions.storageModeShared)
         }
+    }
+
+    public static func lossyEqual(lhs : MTLBuffer, rhs : MTLBuffer, precision: Int, type: Float.Type) -> Bool {
+        guard ( lhs.length == rhs.length ) else { return false }
+        let maxDifference = powf(10.0, Float(-precision))
+        let count = lhs.length / MemoryLayout<Float>.size
+
+        let lhsPtr = lhs.contents().bindMemory(to: Float.self, capacity: count)
+        let rhsPtr = rhs.contents().bindMemory(to: Float.self, capacity: count)
+
+        for (a, b) in zip(Array(UnsafeBufferPointer(start: lhsPtr, count: count)),
+                          Array(UnsafeBufferPointer(start: rhsPtr, count: count))) {
+            if abs(a - b) > maxDifference {
+                return false
+            }
+        }
+
+        return true
+    }
+
+    public static func lossyEqual<UInt16>(lhs : MTLBuffer, rhs : MTLBuffer, precision: Int, type: UInt16.Type) -> Bool {
+        guard ( lhs.length == rhs.length ) else { return false }
+        let maxDifference = powf(10.0, Float(-precision))
+        let count = lhs.length / ExpectedUInt16Size
+
+        let lhsPtr = lhs.contents().bindMemory(to: UInt16.self, capacity: count)
+        let rhsPtr = rhs.contents().bindMemory(to: UInt16.self, capacity: count)
+
+        let lhsFloat32 = Conversions.float16toFloat32(lhsPtr, count: count)
+        let rhsFloat32 = Conversions.float16toFloat32(rhsPtr, count: count)
+
+        for (a, b) in zip(Array(UnsafeBufferPointer(start: lhsFloat32, count: count)),
+                          Array(UnsafeBufferPointer(start: rhsFloat32, count: count))) {
+            if abs(a - b) > maxDifference {
+                return false
+            }
+        }
+        
+        return true
+    }
+
+    public static func lossyEqual(lhs : MTLBuffer, rhs : UnsafeMutableBufferPointer<Float32>, precision: Int) -> Bool {
+        let count = lhs.length / ExpectedUInt16Size
+        guard ( count == rhs.count ) else { return false }
+        let maxDifference = powf(10.0, Float(-precision))
+
+        let lhsPtr = lhs.contents().bindMemory(to: UInt16.self, capacity: count)
+
+        let lhsFloat32 = Conversions.float16toFloat32(lhsPtr, count: count)
+
+        for (a, b) in zip(Array(UnsafeBufferPointer(start: lhsFloat32, count: count)), Array(rhs)) {
+            print(a)
+            print(b)
+            print(abs(a-b))
+            print(maxDifference)
+            print("--------------")
+            if abs(a - b) > maxDifference {
+                return false
+            }
+        }
+        
+        return true
     }
 }

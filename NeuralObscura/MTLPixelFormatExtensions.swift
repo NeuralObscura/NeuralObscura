@@ -39,9 +39,9 @@ extension MTLPixelFormat {
         case .r32Float:
             return MemoryLayout<Float32>.size
         case .r16Float:
-            return MemoryLayout<UInt16>.size
+            return ExpectedUInt16Size
         case .rgba16Float:
-            return MemoryLayout<UInt16>.size
+            return ExpectedUInt16Size
         default:
             fatalError("Unknown MTLPixelFormat: \(self)")
         }

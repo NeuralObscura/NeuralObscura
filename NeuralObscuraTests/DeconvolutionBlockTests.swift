@@ -29,25 +29,17 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         
         let outputBuf = tensorDot.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
-        let outputBufCount = outputBuf.length / MemoryLayout<Float32>.size
-        let outputBufTypedPtr = outputBuf.contents().bindMemory(to: Float32.self, capacity: outputBufCount)
-        let outputBuffer = UnsafeBufferPointer.init(start: outputBufTypedPtr, count: outputBufCount)
         
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "tensordot_expected_output", withExtension: "dat", subdirectory: "testdata")!
         let expData = try! Data.init(contentsOf: expUrl)
-        // TODO: Convert back to float 32 to do comparison
         let expBufCount = expData.count / MemoryLayout<Float32>.size
         let expBufPtr = UnsafeMutableRawPointer.allocate(bytes: expData.count, alignedTo: MemoryLayout<Float32>.alignment)
         let expBufTypedPtr = expBufPtr.bindMemory(to: Float32.self, capacity: expBufCount)
         let expBuffer = UnsafeMutableBufferPointer.init(start: expBufTypedPtr, count: expBufCount)
         expData.copyBytes(to: expBuffer)
-        var passing = true
-        for (a,   b) in zip(outputBuffer, expBuffer) {
-            let diff = abs(a - b)
-            passing = passing && diff < 1
-        }
-        XCTAssert(passing)
+
+        XCTAssert(MTLBufferUtil.lossyEqual(lhs: outputBuf, rhs: expBuffer, precision: 0))
 //        print(MTLBufferUtil.toString(MTLBufferUtil.loadFromBinary(expUrl), type: UInt16.self))
 //        print()
 //        print(MTLBufferUtil.toString(outputBuf, type: UInt16.self))

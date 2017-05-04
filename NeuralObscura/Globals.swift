@@ -30,3 +30,4 @@ var testTextureFormatR: MTLPixelFormat {
 }
 
 let blockSize = 8192
+let ExpectedUInt16Size = 2  /// Not MemoryLayout<UInt16>.size
