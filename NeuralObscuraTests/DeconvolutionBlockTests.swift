@@ -40,9 +40,6 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         expData.copyBytes(to: expBuffer)
 
         XCTAssert(MTLBufferUtil.lossyEqual(lhs: outputBuf, rhs: expBuffer, precision: 0))
-//        print(MTLBufferUtil.toString(MTLBufferUtil.loadFromBinary(expUrl), type: UInt16.self))
-//        print()
-//        print(MTLBufferUtil.toString(outputBuf, type: UInt16.self))
     }
     
 //    func testGroundTruthDeconv() {
@@ -73,53 +70,27 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
 //        XCTAssertEqual(outputImg, expImg)
 //    }
     
-    func testDeconvPart2Shader() {
-        let bytes : [Float32] =
-            [ -1,   0,   1,   2,  -2,   0,   2,   4,  -3,   0,   3,   6,  -4,   0,   4,
-              8,  -5,   0,   5,  10,  -6,   0,   6,  12,  -7,   0,   7,  14,  -8,   0,
-              8,  16,  -9,   0,   9,  18, -10,   0,  10,  20, -11,   0,  11,  22, -12,
-              0,  12,  24, -13,   0,  13,  26, -14,   0,  14,  28, -15,   0,  15,  30,
-              -16,   0,  16,  32]
+    func testGroundTruthCol2Im() {
+        let inputImageUrl = Bundle(for: type(of: self))
+            .url(forResource: "tensordot_input", withExtension: "npy", subdirectory: "testdata")!
+        let inputImage = MPSImage.loadFromNumpy(inputImageUrl)
         
-        let inputBuffer = device.makeBuffer(bytes: bytes, length: bytes.count, options: MTLResourceOptions.storageModeShared)
+        let inputBufferUrl = Bundle(for: type(of: self))
+            .url(forResource: "col2im_input", withExtension: "dat", subdirectory: "testdata")!
+        let inputBuffer = MTLBufferUtil.loadFromBinary(inputBufferUrl)
         
-        let outputImg = device.makeMPSImage(width: 5,
-                                            height: 5,
-                                            values: [0,0,0,0,0,
-                                                     0,0,0,0,0,
-                                                     0,0,0,0,0,
-                                                     0,0,0,0,0,
-                                                     0,0,0,0,0])
+        let expectedOutputUrl = Bundle(for: type(of: self))
+            .url(forResource: "col2im_expected_output", withExtension: "npy", subdirectory: "testdata")!
+        let expectedOutput = MPSImage.loadFromNumpy(expectedOutputUrl)
         
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        let state = ShaderRegistry.getOrLoad(name: "col2im")
-        encoder.setComputePipelineState(state)
-        encoder.setBuffer(inputBuffer, offset: 0, at: 0)
-        encoder.setTexture(outputImg.texture, at: 1)
+        let col2Im = Col2ImLayer(channelsOut: 64, kernelSize: 4, stride: 2, padding: 1)
+        let output = col2Im.chain(MTLBufferVariable(inputBuffer), MPSImageVariable(inputImage)).forward(commandBuffer: commandBuffer)
+        execute()
         
-        let params = [
-            UInt32(1),  // nc_out
-            UInt32(2),  // nh
-            UInt32(2),  // nw
-            UInt32(5),  // nkh
-            UInt32(5),  // nkw
-            UInt32(1),  // stride
-            UInt32(0),  //padding
-            ] as [UInt32]
-        
-        let paramsBuffer = device.makeBuffer(bytes: params,
-                                             length: params.count * MemoryLayout<UInt32>.size,
-                                             options: .cpuCacheModeWriteCombined)
-        
-        encoder.setBuffer(paramsBuffer, offset:0, at: 2)
-        
-        let threadsPerGroup = MTLSizeMake(1, 1, 1)
-        let threadGroups = MTLSizeMake(bytes.count, 1, 1)
-        encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
-        encoder.endEncoding()
-        /* Run our test */
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
+        XCTAssert(output.isLossyEqual(image: expectedOutput, precision: -2))
+        print(output)
+        print()
+        print(expectedOutput)
     }
     
     //         func testIdentityNoPadding() {

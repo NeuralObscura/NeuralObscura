@@ -108,11 +108,11 @@ class MTLBufferUtil {
         let lhsFloat32 = Conversions.float16toFloat32(lhsPtr, count: count)
 
         for (a, b) in zip(Array(UnsafeBufferPointer(start: lhsFloat32, count: count)), Array(rhs)) {
-            print(a)
-            print(b)
-            print(abs(a-b))
-            print(maxDifference)
-            print("--------------")
+//            print(a)
+//            print(b)
+//            print(abs(a-b))
+//            print(maxDifference)
+//            print("--------------")
             if abs(a - b) > maxDifference {
                 return false
             }

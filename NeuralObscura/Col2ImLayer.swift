@@ -41,7 +41,7 @@ class Col2ImLayer: BinaryCommandEncoder {
         self.inputA = inputA
         self.inputB = inputB
         inputA.registerConsumer()
-        inputB.registerConsumer()
+        // We don't register input B as a consumer since we only read its metadata.
         return AnyCommandEncoder<MPSImage>(self)
     }
     
