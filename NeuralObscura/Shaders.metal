@@ -313,8 +313,8 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
     output[_5d_index_to_1d_index(outputShape, outputIndex)] = sum;
 }
 
-kernel void col2im(const device float* input [[ buffer (0) ]],
-                   texture2d_array<float, access::write> outTexture [[texture(1)]],
+kernel void col2im(const device half* input [[ buffer (0) ]],
+                   texture2d_array<half, access::write> outTexture [[texture(1)]],
                    const device uint* input_dim [[buffer(2)]],
                    uint3 gid [[thread_position_in_grid]]) {
 
@@ -329,10 +329,10 @@ kernel void col2im(const device float* input [[ buffer (0) ]],
     uint k = input_dim[4];
     uint s = input_dim[5];
     uint p = input_dim[6];
-
+    
     _5d_shape inputShape = { nc_in, k, k, nh, nw };
-    float val = 0;
-    float error = 0;
+    half4 vals = half4(0, 0, 0, 0);
+    half4 errors = half4(0, 0, 0, 0);
     for (uint ky = 0; ky < k; ++ky) {
         int y = (gid.y + p - ky);
         if (0 > y || y >= nh * s) continue;
@@ -343,13 +343,15 @@ kernel void col2im(const device float* input [[ buffer (0) ]],
             if (0 > x || x >= nw * s) continue;
             if (x % s != 0) continue;
             x /= s;
-            _5d_index inputIndex = { gid.z, ky, kx, as_type<uint>(y), as_type<uint>(x) };
-            float term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
-            float y = term - error;
-            float t = val + y;
-            error = (t - val) - y;
-            val = t;
+            for (uint c_offset = 0; c_offset < 4; c_offset++) {
+                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, as_type<uint>(y), as_type<uint>(x) };
+                half term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
+                half y = term - errors[c_offset];
+                half t = vals[c_offset] + y;
+                errors = (t - vals[c_offset]) - y;
+                vals[c_offset] = t;
+            }
         }
     }
-    outTexture.write(val, gid.xy, gid.z);
+    outTexture.write(vals, gid.xy, gid.z);
 }

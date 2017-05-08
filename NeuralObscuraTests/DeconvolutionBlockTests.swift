@@ -87,10 +87,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         let output = col2Im.chain(MTLBufferVariable(inputBuffer), MPSImageVariable(inputImage)).forward(commandBuffer: commandBuffer)
         execute()
         
-        XCTAssert(output.isLossyEqual(image: expectedOutput, precision: -2))
-        print(output)
-        print()
-        print(expectedOutput)
+        XCTAssert(output.isLossyEqual(image: expectedOutput, precision: 2))
     }
     
     //         func testIdentityNoPadding() {
