@@ -37,33 +37,33 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         XCTAssert(MTLBufferUtil.lossyEqual(lhs: outputBuf, rhs: expBuf, precision: 0, type: UInt16.self))
     }
     
-//    func testGroundTruthDeconv() {
-//        let testUrl = Bundle(for: type(of: self))
-//            .url(forResource: "deconv_input", withExtension: "npy", subdirectory: "testdata")!
-//        let testImg = MPSImage.loadFromNumpy(testUrl, destinationPixelFormat: testTextureFormatRGBA)
-//        
-//        let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_W")
-//        let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")
-//        
-//        let deconv = DeconvolutionBlock(
-//            kernelSize: 4,
-//            channelsIn: 128,
-//            channelsOut: 64,
-//            w: w_pb,
-//            b: b_pb,
-//            relu: false,
-//            padding: 1,
-//            stride: 2)
-//        
-//        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
-//        execute()
-//        
-//        let expUrl = Bundle(for: type(of: self))
-//            .url(forResource: "deconv_expected_output", withExtension: "npy", subdirectory: "testdata")!
-//        let expImg = MPSImage.loadFromNumpy(expUrl, destinationPixelFormat: testTextureFormatRGBA)
-//        
-//        XCTAssertEqual(outputImg, expImg)
-//    }
+    func testGroundTruthDeconv() {
+        let testUrl = Bundle(for: type(of: self))
+            .url(forResource: "deconv_input", withExtension: "npy", subdirectory: "testdata")!
+        let testImg = MPSImage.loadFromNumpy(testUrl)
+        
+        let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_W")
+        let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")
+        
+        let deconv = DeconvolutionBlock(
+            kernelSize: 4,
+            channelsIn: 128,
+            channelsOut: 64,
+            w: w_pb,
+            b: b_pb,
+            relu: false,
+            padding: 1,
+            stride: 2)
+        
+        let outputImg = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+        
+        let expUrl = Bundle(for: type(of: self))
+            .url(forResource: "deconv_expected_output", withExtension: "npy", subdirectory: "testdata")!
+        let expImg = MPSImage.loadFromNumpy(expUrl)
+        
+        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
+    }
     
     func testGroundTruthCol2Im() {
         let inputImageUrl = Bundle(for: type(of: self))

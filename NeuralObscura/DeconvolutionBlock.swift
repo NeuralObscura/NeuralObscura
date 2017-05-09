@@ -22,6 +22,7 @@ class DeconvolutionBlock: UnaryCommandEncoder {
  
     private let tensordot: TensorDotLayer
     private let col2im: Col2ImLayer
+    private let bias: BiasLayer
     
     init(
         kernelSize: Int,
@@ -44,18 +45,20 @@ class DeconvolutionBlock: UnaryCommandEncoder {
                              kernelSize: UInt32(kernelSize),
                              stride: UInt32(stride),
                              padding: UInt32(padding))
+        
+        bias = BiasLayer(biases: b)
     }
     
     func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
-        col2im.chain(tensordot.chain(input), input)
+        bias.chain(col2im.chain(tensordot.chain(input), input))
         return AnyCommandEncoder<MPSImage>(self)
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
-        return col2im.forward(commandBuffer: commandBuffer)
+        return bias.forward(commandBuffer: commandBuffer)
     }
     
     func registerConsumer() {
-        col2im.registerConsumer()
+        bias.registerConsumer()
     }
 }

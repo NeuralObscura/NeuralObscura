@@ -52,6 +52,7 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
     func testOneFeatureBatchNormalization() {
         let testImg = device.makeMPSImage(width: 2, height: 2, values: [1.0, 1.0,
                                                                         1.0, 1.0])
+        print(testImg)
         /* Create our CommandEncoder */
         let gamma_pb = MemoryParameterBuffer([2])
         let beta_pb = MemoryParameterBuffer([1])

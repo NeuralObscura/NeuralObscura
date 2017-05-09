@@ -147,10 +147,10 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
 /* RGBA -> BRGA
  *
  */
-kernel void rgba_to_brga(texture2d_array<half, access::read> inTexture [[texture(0)]],
+kernel void rgba_to_brga(texture2d<half, access::read> inTexture [[texture(0)]],
                          texture2d_array<half, access::write> outTexture [[texture(1)]],
                          uint3 gid [[thread_position_in_grid]]) {
-    half4 input = inTexture.read(gid.xy, gid.z);
+    half4 input = inTexture.read(gid.xy);
     half4 output = half4(input[2], input[0], input[1], input[3]);
     outTexture.write(output, gid.xy, gid.z);
 }
