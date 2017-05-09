@@ -84,6 +84,34 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         
         XCTAssert(output.isLossyEqual(image: expectedOutput, precision: 2))
     }
+
+    func testLargeDeconv() {
+        let testUrl = Bundle(for: type(of: self))
+            .url(forResource: "large_deconv_input", withExtension: "npy", subdirectory: "testdata")!
+        let testImg = MPSImage.loadFromNumpy(testUrl)
+
+        let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_W")
+        let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")
+
+        let deconv = DeconvolutionBlock(
+            kernelSize: 4,
+            channelsIn: 128,
+            channelsOut: 64,
+            w: w_pb,
+            b: b_pb,
+            relu: false,
+            padding: 1,
+            stride: 2)
+
+        _ = deconv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
+        execute()
+
+        if ((commandBuffer.error) != nil) {
+            XCTAssert(false, commandBuffer.error!.localizedDescription)
+        } else {
+            XCTAssert(true)
+        }
+    }
     
     //         func testIdentityNoPadding() {
     //             let testImg = device.MakeMPSImage(width: 2, height: 2, values: [1, 0,

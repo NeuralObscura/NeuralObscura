@@ -409,6 +409,8 @@ class NeuralStyleModel {
         autoreleasepool {
             let commandBuffer = commandQueue.makeCommandBuffer()
             outputImage = model.forward(commandBuffer: commandBuffer)
+            commandBuffer.commit()
+            commandBuffer.waitUntilCompleted()
         }
 
         return outputImage!

@@ -59,11 +59,7 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
             let encoder = commandBuffer.makeComputeCommandEncoder()
-            if (sourceImage.textureType == .type2D) {
-                encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga_single"))
-            } else {
-                encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga"))
-            }
+            encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga"))
             encoder.setTexture(sourceImage.texture, at: 0)
             encoder.setTexture(destinationImage.texture, at: 1)
             let threadsPerGroup = MTLSizeMake(1, 1, 1)

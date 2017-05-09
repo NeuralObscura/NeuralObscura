@@ -143,26 +143,14 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
     outTexture.write(output, gid.xy, gid.z);
 }
 
-
 /* RGBA -> BRGA
  *
  */
-kernel void rgba_to_brga(texture2d_array<float, access::read> inTexture [[texture(0)]],
-                         texture2d_array<float, access::write> outTexture [[texture(1)]],
+kernel void rgba_to_brga(texture2d<half, access::read> inTexture [[texture(0)]],
+                         texture2d<half, access::write> outTexture [[texture(1)]],
                          uint3 gid [[thread_position_in_grid]]) {
-    float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = float4(input[2], input[0], input[1], input[3]);
-    outTexture.write(output, gid.xy, gid.z);
-}
-
-/* RGBA -> BRGA
- *
- */
-kernel void rgba_to_brga_single(texture2d<float, access::read> inTexture [[texture(0)]],
-                                texture2d<float, access::write> outTexture [[texture(1)]],
-                                uint3 gid [[thread_position_in_grid]]) {
-    float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = float4(input[2], input[0], input[1], input[3]);
+    half4 input = inTexture.read(gid.xy, gid.z);
+    half4 output = half4(input[2], input[0], input[1], input[3]);
     outTexture.write(output, gid.xy, gid.z);
 }
 
@@ -345,23 +333,38 @@ kernel void col2im(const device half* input [[ buffer (0) ]],
     half4 vals = half4(0, 0, 0, 0);
     half4 errors = half4(0, 0, 0, 0);
     for (uint ky = 0; ky < k; ++ky) {
-        int y = (gid.y + p - ky);
-        if (0 > y || y >= nh * s) continue;
+        uint y = (gid.y + p - ky);
+        if (y >= nh * s) continue;
         if (y % s != 0) continue;
         y /= s;
         for (uint kx = 0; kx < k; ++kx) {
-            int x = (gid.x + p - kx);
-            if (0 > x || x >= nw * s) continue;
+            uint x = (gid.x + p - kx);
+            if (x >= nw * s) continue;
             if (x % s != 0) continue;
             x /= s;
-            for (uint c_offset = 0; c_offset < 4; c_offset++) {
-                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, as_type<uint>(y), as_type<uint>(x) };
-                half term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
-                half y = term - errors[c_offset];
-                half t = vals[c_offset] + y;
-                errors = (t - vals[c_offset]) - y;
-                vals[c_offset] = t;
-            }
+
+            _5d_index inputIndex0 = { gid.z * 4 + 0, ky, kx, y, x };
+            _5d_index inputIndex1 = { gid.z * 4 + 1, ky, kx, y, x };
+            _5d_index inputIndex2 = { gid.z * 4 + 2, ky, kx, y, x };
+            _5d_index inputIndex3 = { gid.z * 4 + 3, ky, kx, y, x };
+
+            half4 term = half4(input[_5d_index_to_1d_index(inputShape, inputIndex0)],
+                               input[_5d_index_to_1d_index(inputShape, inputIndex1)],
+                               input[_5d_index_to_1d_index(inputShape, inputIndex2)],
+                               input[_5d_index_to_1d_index(inputShape, inputIndex3)]);
+
+            half4 y = term - half4(errors[gid.z * 4 + 0],
+                                   errors[gid.z * 4 + 1],
+                                   errors[gid.z * 4 + 2],
+                                   errors[gid.z * 4 + 3]);
+
+            half4 t = y + half4(vals[gid.z * 4 + 0],
+                                vals[gid.z * 4 + 1],
+                                vals[gid.z * 4 + 2],
+                                vals[gid.z * 4 + 3]);
+
+            errors = (t - vals) - y;
+            vals = t;
         }
     }
     outTexture.write(vals, gid.xy, gid.z);
