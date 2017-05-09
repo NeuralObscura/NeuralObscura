@@ -329,14 +329,14 @@ class NeuralStyleModel {
             stddev: modelParams["b4_stddev"]!)
 
         // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
-         d2 = DeconvolutionBlock(
-             kernelSize: 4,
-             channelsIn: 64,
-             channelsOut: 32,
-             w: modelParams["d2_W"]!,
-             b: modelParams["d2_b"]!,
-             padding: 1,
-             stride: 2)
+        d2 = DeconvolutionBlock(
+            kernelSize: 4,
+            channelsIn: 64,
+            channelsOut: 32,
+            w: modelParams["d2_W"]!,
+            b: modelParams["d2_b"]!,
+            padding: 1,
+            stride: 2)
 
         // b5=L.BatchNormalization(32),
         b5 = BatchNormalizationLayer(
@@ -347,15 +347,15 @@ class NeuralStyleModel {
             stddev: modelParams["b5_stddev"]!)
 
         // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
-         d3 = DeconvolutionBlock(
-             kernelSize: 9,
-             channelsIn: 32,
-             channelsOut: 3,
-             w: modelParams["d3_W"]!,
-             b: modelParams["d3_b"]!,
-             relu: false,
-             padding: 4,
-             stride: 1)
+        d3 = DeconvolutionBlock(
+            kernelSize: 9,
+            channelsIn: 32,
+            channelsOut: 3,
+            w: modelParams["d3_W"]!,
+            b: modelParams["d3_b"]!,
+            relu: false,
+            padding: 4,
+            stride: 1)
 
         tanhAdj = TanhAdjustmentLayer()
 

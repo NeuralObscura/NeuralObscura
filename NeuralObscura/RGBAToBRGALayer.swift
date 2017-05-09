@@ -36,7 +36,7 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
         textureDesc.arrayLength = sourceImage.texture.arrayLength
         textureDesc.height = sourceImage.height
         textureDesc.width = sourceImage.width
-        textureDesc.textureType = .type2DArray
+        textureDesc.textureType = .type2D
         textureDesc.usage = MTLTextureUsage(rawValue:
             MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
         textureDesc.pixelFormat = .rgba16Float
@@ -59,7 +59,11 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
             let encoder = commandBuffer.makeComputeCommandEncoder()
-            encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga"))
+            if (sourceImage.textureType == .type2D) {
+                encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga_single"))
+            } else {
+                encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga"))
+            }
             encoder.setTexture(sourceImage.texture, at: 0)
             encoder.setTexture(destinationImage.texture, at: 1)
             let threadsPerGroup = MTLSizeMake(1, 1, 1)

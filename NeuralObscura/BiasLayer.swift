@@ -43,7 +43,7 @@ class BiasLayer: UnaryCommandEncoder {
             let biasesBuffer = ShaderRegistry.getDevice().makeBuffer(
                 bytes: biasesConverted,
                 length: biasesConverted.count * ExpectedUInt16Size,
-                options: MTLResourceOptions.storageModePrivate)
+                options: MTLResourceOptions.cpuCacheModeWriteCombined)
             encode(commandBuffer: commandBuffer, biases: biasesBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
             outputMemoId = commandBuffer.hash
             outputMemo = destinationImage
