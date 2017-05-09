@@ -355,3 +355,18 @@ kernel void col2im(const device half* input [[ buffer (0) ]],
     }
     outTexture.write(vals, gid.xy, gid.z);
 }
+
+kernel void add_bias(texture2d_array<half, access::read> inTexture [[texture(0)]],
+                     texture2d_array<half, access::write> outTexture [[texture(1)]],
+                     const device half* biases [[buffer(2)]],
+                     uint3 gid [[thread_position_in_grid]]) {
+    
+    if (gid.x > outTexture.get_width() - 1 || gid.y > outTexture.get_height() - 1) {
+        return;
+    }
+    
+    uint c_base = gid.z * 4;
+    half4 workingVals = inTexture.read(gid.xy, gid.z);
+    half4 workingBiases = half4(biases[c_base], biases[c_base + 1], biases[c_base + 2], biases[c_base + 3]);
+    outTexture.write(workingVals + workingBiases, gid.xy, gid.z);
+}
