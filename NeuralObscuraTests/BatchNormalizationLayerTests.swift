@@ -73,9 +73,6 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
 
         /* Verify the result */
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 1))
-        print(outputImg)
-        print()
-        print(expImg)
     }
 
     func testMultipleFeatureBatchNormalization() {
