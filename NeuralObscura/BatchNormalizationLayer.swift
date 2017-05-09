@@ -91,7 +91,7 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
             encoder.setBuffer(beta, offset: 0, at: 3)
             let threadsPerGroup = MTLSizeMake(1, 1, 1)
             let threadGroups = MTLSizeMake(1, 1,
-                                            channelsIn / sourceImage.texture.pixelFormat.channelCount)
+                                                channelsIn / sourceImage.texture.pixelFormat.channelCount)
             encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
 
         }

@@ -52,12 +52,11 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
     func testOneFeatureBatchNormalization() {
         let testImg = device.makeMPSImage(width: 2, height: 2, values: [1.0, 1.0,
                                                                         1.0, 1.0])
-        print(testImg)
         /* Create our CommandEncoder */
-        let gamma_pb = MemoryParameterBuffer([2])
-        let beta_pb = MemoryParameterBuffer([1])
-        let mean_pb = MemoryParameterBuffer([0])
-        let stddev_pb = MemoryParameterBuffer([1])
+        let gamma_pb = MemoryParameterBuffer([2,0,0,0])
+        let beta_pb = MemoryParameterBuffer([1,0,0,0])
+        let mean_pb = MemoryParameterBuffer([0,0,0,0])
+        let stddev_pb = MemoryParameterBuffer([1,0,0,0])
         let bn = BatchNormalizationLayer(channelsIn: 1,
                                          beta: beta_pb,
                                          gamma: gamma_pb,
@@ -68,7 +67,6 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         /* Run our test */
         let outputImg = bn.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
-
 
         let expImg = device.makeMPSImage(width: 2, height: 2, values: [3, 3, 3, 3])
 
