@@ -341,59 +341,33 @@ kernel void col2im(const device half* input [[ buffer (0) ]],
     
     uint nh = input_dim[0];
     uint nw = input_dim[1];
-    uint nc_in = input_dim[2];
-    uint nc_out = input_dim[3];
-    uint k = input_dim[4];
-    uint s = input_dim[5];
-    uint p = input_dim[6];
+    uint nc_out = input_dim[2];
+    uint k = input_dim[3];
+    uint s = input_dim[4];
+    uint p = input_dim[5];
     
-    _5d_shape inputShape = { nc_in, k, k, nh, nw };
+    _5d_shape inputShape = { nc_out, k, k, nh, nw };
     half4 vals = half4(0, 0, 0, 0);
     half4 errors = half4(0, 0, 0, 0);
     for (uint ky = 0; ky < k; ++ky) {
-        uint y = (gid.y + p - ky);
+        int y = (gid.y + p - ky);
         if (y >= nh * s) continue;
         if (y % s != 0) continue;
         y /= s;
         for (uint kx = 0; kx < k; ++kx) {
-            uint x = (gid.x + p - kx);
+            int x = (gid.x + p - kx);
             if (x >= nw * s) continue;
             if (x % s != 0) continue;
             x /= s;
 
-            _5d_index inputIndex0 = { gid.z * 4 + 0, ky, kx, y, x };
-            _5d_index inputIndex1 = { gid.z * 4 + 1, ky, kx, y, x };
-            _5d_index inputIndex2 = { gid.z * 4 + 2, ky, kx, y, x };
-            _5d_index inputIndex3 = { gid.z * 4 + 3, ky, kx, y, x };
-
-            half4 term = half4(input[_5d_index_to_1d_index(inputShape, inputIndex0)],
-                               input[_5d_index_to_1d_index(inputShape, inputIndex1)],
-                               input[_5d_index_to_1d_index(inputShape, inputIndex2)],
-                               input[_5d_index_to_1d_index(inputShape, inputIndex3)]);
-
-            half4 y = term - half4(errors[gid.z * 4 + 0],
-                                   errors[gid.z * 4 + 1],
-                                   errors[gid.z * 4 + 2],
-                                   errors[gid.z * 4 + 3]);
-
-            half4 t = y + half4(vals[gid.z * 4 + 0],
-                                vals[gid.z * 4 + 1],
-                                vals[gid.z * 4 + 2],
-                                vals[gid.z * 4 + 3]);
-
-            errors = (t - vals) - y;
-            vals = t;
-
-            /*
             for (uint c_offset = 0; c_offset < 4; ++c_offset) {
-                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, as_type<uint>(y), as_type<uint>(x) };
+                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, static_cast<uint>(y), static_cast<uint>(x) };
                 half term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
                 half y = term - errors[c_offset];
                 half t = vals[c_offset] + y;
                 errors[c_offset] = (t - vals[c_offset]) - y;
                 vals[c_offset] = t;
             }
-            */
         }
     }
     outTexture.write(vals, gid.xy, gid.z);

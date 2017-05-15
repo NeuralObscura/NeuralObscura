@@ -56,12 +56,10 @@ class Col2ImLayer: BinaryCommandEncoder {
             // TODO: Configure this with constructor parameters
             let heightIn = UInt32(originalImage.height)
             let widthIn = UInt32(originalImage.width)
-            let channelsIn = UInt32(originalImage.featureChannels)
 
             let params = [
                 heightIn,
                 widthIn,
-                channelsIn,
                 channelsOut,
                 kernelSize,
                 stride,
@@ -84,7 +82,7 @@ class Col2ImLayer: BinaryCommandEncoder {
             let gridShape = MTLSize(
                 width: (destImage.width + threadGroupWidth - 1) / threadGroupWidth,
                 height: (destImage.height + threadGroupHeight - 1) / threadGroupHeight,
-                depth: Int(channelsOut))
+                depth: Int((channelsOut + 3) / 4))
             encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
             encoder.endEncoding()
             
