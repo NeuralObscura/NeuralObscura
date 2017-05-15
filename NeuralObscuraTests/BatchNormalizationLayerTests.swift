@@ -21,12 +21,10 @@ class BatchNormalizationLayerTests: CommandEncoderBaseTest {
         let beta_pb = MemoryParameterBuffer([1,0,0,0])
         let mean_pb = MemoryParameterBuffer([0,0,0,0])
         let stddev_pb = MemoryParameterBuffer([1,0,0,0])
-        let bn = BatchNormalizationLayer(channelsIn: 1,
-                                         beta: beta_pb,
+        let bn = BatchNormalizationLayer(beta: beta_pb,
                                          gamma: gamma_pb,
                                          mean: mean_pb,
-                                         stddev: stddev_pb,
-                                         testMode: true)
+                                         stddev: stddev_pb)
 
         /* Run our test */
         let outputImg = bn.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
