@@ -16,7 +16,7 @@ class NeuralStyleModel {
     
     let src: MPSImageVariable
     let c1, c2, c3: ConvolutionLayer
-    let b1, b2, b3, b4, b5: BatchNormalizationLayer
+    let b1, b2, b3, b4, b5: BatchNormalizationNonTestLayer
     let r1, r2, r3, r4, r5: ResidualBlock
     let d1, d2, d3: DeconvolutionBlock
     let tanhAdj: TanhAdjustmentLayer
@@ -230,12 +230,9 @@ class NeuralStyleModel {
             stride: 1)
 
         // b1=L.BatchNormalization(32),
-        b1 = BatchNormalizationLayer(
-            channelsIn: 32,
+        b1 = BatchNormalizationNonTestLayer(
             beta: modelParams["b1_beta"]!,
-            gamma: modelParams["b1_gamma"]!,
-            mean: modelParams["b1_mean"]!,
-            stddev: modelParams["b1_stddev"]!)
+            gamma: modelParams["b1_gamma"]!)
 
         // c2=L.Convolution2D(32, 64, 4, stride=2, pad=1),
         c2 = ConvolutionLayer(
@@ -249,12 +246,9 @@ class NeuralStyleModel {
             stride: 2)
 
         // b2=L.BatchNormalization(64),
-        b2 = BatchNormalizationLayer(
-            channelsIn: 64,
+        b2 = BatchNormalizationNonTestLayer(
             beta: modelParams["b2_beta"]!,
-            gamma: modelParams["b2_gamma"]!,
-            mean: modelParams["b2_mean"]!,
-            stddev: modelParams["b2_stddev"]!)
+            gamma: modelParams["b2_gamma"]!)
 
         // c3=L.Convolution2D(64, 128, 4,stride=2, pad=1),
         c3 = ConvolutionLayer(
@@ -268,12 +262,9 @@ class NeuralStyleModel {
             stride: 2)
 
         // b3=L.BatchNormalization(128),
-        b3 = BatchNormalizationLayer(
-            channelsIn: 128,
+        b3 = BatchNormalizationNonTestLayer(
             beta: modelParams["b3_beta"]!,
-            gamma: modelParams["b3_gamma"]!,
-            mean: modelParams["b3_mean"]!,
-            stddev: modelParams["b3_stddev"]!)
+            gamma: modelParams["b3_gamma"]!)
 
         // r1=ResidualBlock(128, 128),
         r1 = ResidualBlock(
@@ -321,12 +312,9 @@ class NeuralStyleModel {
             stride: 2)
 
         // b4=L.BatchNormalization(64),
-        b4 = BatchNormalizationLayer(
-            channelsIn: 64,
+        b4 = BatchNormalizationNonTestLayer(
             beta: modelParams["b4_beta"]!,
-            gamma: modelParams["b4_gamma"]!,
-            mean: modelParams["b4_mean"]!,
-            stddev: modelParams["b4_stddev"]!)
+            gamma: modelParams["b4_gamma"]!)
 
         // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
         d2 = DeconvolutionBlock(
@@ -339,12 +327,9 @@ class NeuralStyleModel {
             stride: 2)
 
         // b5=L.BatchNormalization(32),
-        b5 = BatchNormalizationLayer(
-            channelsIn: 32,
+        b5 = BatchNormalizationNonTestLayer(
             beta: modelParams["b5_beta"]!,
-            gamma: modelParams["b5_gamma"]!,
-            mean: modelParams["b5_mean"]!,
-            stddev: modelParams["b5_stddev"]!)
+            gamma: modelParams["b5_gamma"]!)
 
         // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
         d3 = DeconvolutionBlock(

@@ -16,7 +16,7 @@ import MetalPerformanceShaders
  */
 class ResidualBlock: UnaryCommandEncoder {
     private let c1, c2: ConvolutionLayer
-    private let b1, b2: BatchNormalizationLayer
+    private let b1, b2: BatchNormalizationNonTestLayer
     private let r1: ReLULayer
     private let s1: SummationLayer
     
@@ -58,11 +58,7 @@ class ResidualBlock: UnaryCommandEncoder {
             stride: stride,
             useTemporary: useTemporary)
 
-        b1 = BatchNormalizationLayer(channelsIn: channelsOut,
-                                     beta: b1_beta,
-                                     gamma: b1_gamma,
-                                     mean: b1_mean,
-                                     stddev: b1_stddev)
+        b1 = BatchNormalizationNonTestLayer(beta: b1_beta, gamma: b1_gamma)
 
         r1 = ReLULayer()
         
@@ -77,12 +73,7 @@ class ResidualBlock: UnaryCommandEncoder {
             stride: stride,
             useTemporary: useTemporary)
         
-        b2 = BatchNormalizationLayer(channelsIn: channelsOut,
-                                     beta: b2_beta,
-                                     gamma: b2_gamma,
-                                     mean: b2_mean,
-                                     stddev: b2_stddev)
-        
+        b2 = BatchNormalizationNonTestLayer(beta: b2_beta, gamma: b2_gamma)
         s1 = SummationLayer()
     }
     

@@ -32,6 +32,8 @@
 		07CB823C1E7FA944007BD0BC /* Col2ImLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07CB823B1E7FA944007BD0BC /* Col2ImLayer.swift */; };
 		07E456DC1EC13F960070E9A0 /* BiasLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E456DB1EC13F960070E9A0 /* BiasLayer.swift */; };
 		07E456DE1EC141140070E9A0 /* BiasLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E456DD1EC141140070E9A0 /* BiasLayerTests.swift */; };
+		07E456E21EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E456E11EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift */; };
+		07E456E41EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E456E31EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift */; };
 		07F68DA11DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */; };
 		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
 		DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */; };
@@ -102,6 +104,8 @@
 		07CB823B1E7FA944007BD0BC /* Col2ImLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Col2ImLayer.swift; sourceTree = "<group>"; };
 		07E456DB1EC13F960070E9A0 /* BiasLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BiasLayer.swift; sourceTree = "<group>"; };
 		07E456DD1EC141140070E9A0 /* BiasLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BiasLayerTests.swift; sourceTree = "<group>"; };
+		07E456E11EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationNonTestLayerTests.swift; sourceTree = "<group>"; };
+		07E456E31EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationNonTestLayer.swift; sourceTree = "<group>"; };
 		07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionBlockTests.swift; sourceTree = "<group>"; };
 		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
 		DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = BatchNormalizationLayerTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -164,6 +168,7 @@
 		077BB3D31D9B05440022578C /* CommandEncoders */ = {
 			isa = PBXGroup;
 			children = (
+				07E456E31EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift */,
 				078642BB1DDAD892006A3AFB /* ReLULayer.swift */,
 				078642BC1DDAD892006A3AFB /* TanhAdjustmentLayer.swift */,
 				077BB3C91D98E0010022578C /* ConvolutionLayer.swift */,
@@ -217,6 +222,7 @@
 				07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */,
 				DA8A6C861DDD5F5800C6D125 /* ReLULayerTests.swift */,
 				DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */,
+				07E456E11EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift */,
 				DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */,
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
 				DA6942641DEAAADE00285327 /* RGBAToBRGALayerTests.swift */,
@@ -364,12 +370,12 @@
 				TargetAttributes = {
 					DA0B0C5A1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = DFVY326C5E;
+						DevelopmentTeam = FJQDM4N4ZQ;
 						ProvisioningStyle = Automatic;
 					};
 					DA0B0C6E1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = DFVY326C5E;
+						DevelopmentTeam = FJQDM4N4ZQ;
 						ProvisioningStyle = Automatic;
 						TestTargetID = DA0B0C5A1D8BAB4000ED7982;
 					};
@@ -465,6 +471,7 @@
 				078642C71DDAD892006A3AFB /* TanhAdjustmentLayer.swift in Sources */,
 				DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */,
 				DA9A565F1D9253C000E55916 /* Shaders.metal in Sources */,
+				07E456E41EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift in Sources */,
 				077BB3E71DA39D080022578C /* CommandEncoder.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -475,6 +482,7 @@
 			files = (
 				07030DE21EAD49B200847F26 /* MTLDeviceExtensionsTests.swift in Sources */,
 				07E456DE1EC141140070E9A0 /* BiasLayerTests.swift in Sources */,
+				07E456E21EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift in Sources */,
 				DA70CE2D1E308B310057D586 /* MPSImageExtensionsTests.swift in Sources */,
 				DA8A6C891DDD5F5800C6D125 /* FileParameterBufferTests.swift in Sources */,
 				DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */,
@@ -630,7 +638,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = DFVY326C5E;
+				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -645,7 +653,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = DFVY326C5E;
+				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -660,7 +668,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = DFVY326C5E;
+				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscuraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraTests;
@@ -675,7 +683,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = DFVY326C5E;
+				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
 				INFOPLIST_FILE = NeuralObscuraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraTests;

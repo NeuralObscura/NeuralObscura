@@ -9,11 +9,9 @@
 import Foundation
 import MetalPerformanceShaders
 
-class BatchNormalizationLayer: UnaryCommandEncoder {
+class BatchNormalizationNonTestLayer: UnaryCommandEncoder {
     private let beta: ParameterBuffer
     private let gamma: ParameterBuffer
-    private let mean: ParameterBuffer
-    private let stddev: ParameterBuffer
     private let useTemporary: Bool
     private var consumerCount: Int = 0
     private var input: AnyCommandEncoder<MPSImage>!
@@ -22,14 +20,10 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
     
     init(beta: ParameterBuffer,
          gamma: ParameterBuffer,
-         mean: ParameterBuffer,
-         stddev: ParameterBuffer,
          useTemporary: Bool = false) {
         self.useTemporary = useTemporary
         self.beta = beta
         self.gamma = gamma
-        self.mean = mean
-        self.stddev = stddev
     }
     
     func chain(_ input: AnyCommandEncoder<MPSImage>) -> AnyCommandEncoder<MPSImage> {
@@ -56,6 +50,22 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
     }
     
     private func encode(commandBuffer: MTLCommandBuffer, sourceImage: MPSImage, destinationImage: MPSImage) {
+        let meanBuf = ShaderRegistry.getDevice().makeBuffer(
+            length: MemoryLayout<Float32>.size * sourceImage.texture.arrayLength * 4,
+            options: MTLResourceOptions.storageModeShared)
+        let stddevBuf = ShaderRegistry.getDevice().makeBuffer(
+            length: MemoryLayout<Float32>.size * sourceImage.texture.arrayLength * 4,
+            options: MTLResourceOptions.storageModeShared)
+        let meanVarEnc = commandBuffer.makeComputeCommandEncoder()
+        meanVarEnc.setComputePipelineState(ShaderRegistry.getOrLoad(name: "mean_std_dev"))
+        meanVarEnc.setTexture(sourceImage.texture, at: 0)
+        meanVarEnc.setBuffer(meanBuf, offset: 0, at: 1)
+        meanVarEnc.setBuffer(stddevBuf, offset: 0, at: 2)
+        let threadsPerGroupMeanVar = MTLSizeMake(1, 1, 1)
+        let threadGroupsMeanVar = MTLSizeMake(1, 1, sourceImage.texture.arrayLength)
+        meanVarEnc.dispatchThreadgroups(threadGroupsMeanVar, threadsPerThreadgroup: threadsPerGroupMeanVar)
+        meanVarEnc.endEncoding()
+        
         let betaBuf = ShaderRegistry.getDevice()
             .makeBuffer(
                 bytes: beta.pointer,
@@ -66,32 +76,19 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
                 bytes: gamma.pointer,
                 length: gamma.length,
                 options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        let meanBuf = ShaderRegistry.getDevice()
-            .makeBuffer(
-                bytes: mean.pointer,
-                length: mean.length,
-                options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        let stddevBuf = ShaderRegistry.getDevice()
-            .makeBuffer(
-                bytes: stddev.pointer,
-                length: stddev.length,
-                options: MTLResourceOptions.cpuCacheModeWriteCombined)
-        
-        let encoder = commandBuffer.makeComputeCommandEncoder()
-        encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "batch_normalization"))
-        encoder.setTexture(sourceImage.texture, at: 0)
-        encoder.setTexture(destinationImage.texture, at: 1)
-        encoder.setBuffer(gammaBuf, offset: 0, at: 2)
-        encoder.setBuffer(betaBuf, offset: 0, at: 3)
-        encoder.setBuffer(meanBuf, offset: 0, at: 4)
-        encoder.setBuffer(stddevBuf, offset: 0, at: 5)
+        let bnEnc = commandBuffer.makeComputeCommandEncoder()
+        bnEnc.setComputePipelineState(ShaderRegistry.getOrLoad(name: "batch_normalization_nt"))
+        bnEnc.setTexture(sourceImage.texture, at: 0)
+        bnEnc.setTexture(destinationImage.texture, at: 1)
+        bnEnc.setBuffer(gammaBuf, offset: 0, at: 2)
+        bnEnc.setBuffer(betaBuf, offset: 0, at: 3)
+        bnEnc.setBuffer(meanBuf, offset: 0, at: 4)
+        bnEnc.setBuffer(stddevBuf, offset: 0, at: 5)
         let threadsPerGroup = MTLSizeMake(1, 1, 1)
-        let threadGroups = MTLSizeMake(sourceImage.texture.width,
-                                       sourceImage.texture.height,
-                                       sourceImage.texture.arrayLength)
-        encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
-        encoder.endEncoding()
-
+        let threadGroups = MTLSizeMake(1, 1, sourceImage.texture.arrayLength)
+        bnEnc.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
+        bnEnc.endEncoding()
+        
         if let image = sourceImage as? MPSTemporaryImage {
             image.readCount -= 1
         }
@@ -117,3 +114,4 @@ class BatchNormalizationLayer: UnaryCommandEncoder {
         }
     }
 }
+

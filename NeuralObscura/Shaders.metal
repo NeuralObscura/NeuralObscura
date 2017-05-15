@@ -61,58 +61,76 @@ kernel void batch_normalization(texture2d_array<half, access::read> inTexture [[
 /* Batch Normalization (Non-test Mode)
  *
  * Formula: output = (gamma * ((input - mean) / stddev)) + beta
- * Thread Group configuration:
- *         let threadsPerGroup = MTLSizeMake(1, 1, channelsIn / sourceImage.texture.pixelFormat.pixelCount)
- *         let threadGroups = MTLSizeMake(1, 1, 1)
  */
 kernel void batch_normalization_nt(texture2d_array<float, access::read> inTexture [[texture(0)]],
                                    texture2d_array<float, access::write> outTexture [[texture(1)]],
-                                   const device float* gamma [[ buffer(2) ]],
-                                   const device float* beta [[ buffer(3) ]],
+                                   const device float* gammas [[ buffer(2) ]],
+                                   const device float* betas [[ buffer(3) ]],
+                                   const device float* means [[ buffer(4) ]],
+                                   const device float* stddevs [[ buffer(5) ]],
                                    uint3 gid [[thread_position_in_grid]]) {
     uint height = inTexture.get_height();
     uint width = inTexture.get_width();
-    uint slot = (gid.z * 4); // where in gamma & beta to read from
-
+    uint slot = (gid.z * 4);
     
-    float4 sum = float4(0.0, 0.0, 0.0, 0.0);
-    float4 error = float4(0.0, 0.0, 0.0, 0.0);
-    for(uint j = 0; j < width; j++) {
-        for(uint i = 0; i < height; i++) {
-            float4 y = inTexture.read(uint2(j, i), gid.z);
+    float4 working_means = float4(means[slot], means[slot+1], means[slot+2], means[slot+3]);
+    float4 working_stddevs = float4(stddevs[slot], stddevs[slot+1], stddevs[slot+2], stddevs[slot+3]);
+    float4 working_betas = float4(betas[slot], betas[slot+1], betas[slot+2], betas[slot+3]);
+    float4 working_gammas = float4(gammas[slot], gammas[slot+1], gammas[slot+2], gammas[slot+3]);
+    
+    /* TODO: Implement numerical error correction here. */
+    for(uint j = 0; j < width; ++j) {
+        for(uint i = 0; i < height; ++i) {
+            float4 x_hat = (inTexture.read(uint2(j, i), gid.z) - working_means) / working_stddevs;
+            float4 y = working_gammas * x_hat + working_betas;
+            outTexture.write(y, uint2(j, i), gid.z);
+        }
+    }
+}
+
+/* Produces two buffers one containing channel-wide mean, the other with channel-wide stddev. */
+/* TODO: This runs on a single GPU core... not optimal. */
+kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[texture(0)]],
+                         device float* means [[buffer(1)]],
+                         device float* stddevs [[buffer(2)]],
+                         uint3 gid [[thread_position_in_grid]]) {
+    uint height = inTexture.get_height();
+    uint width = inTexture.get_width();
+    int count = width * height;
+    
+    float4 sum = float4(0,0,0,0);
+    float4 error = float4(0,0,0,0);
+    for(uint j = 0; j < width; ++j) {
+        for(uint i = 0; i < height; ++i) {
+            float4 y = inTexture.read(uint2(j, i), gid.z) - error;
             float4 t = sum + y;
             error = (t - sum) - y;
             sum = t;
         }
     }
-
-    float4 mean = sum / float4(width*height);
+    float4 mean = sum / count;
+    
     float4 vari = float4(0.0, 0.0, 0.0, 0.0);
     error = float4(0.0, 0.0, 0.0, 0.0);
-    for(uint j = 0; j < width; j++) {
-        for(uint i = 0; i < height; i++) {
-            float4 y = (inTexture.read(uint2(j, i), gid.z) - mean) * (inTexture.read(uint2(j, i), gid.z) - mean);
+    for(uint j = 0; j < width; ++j) {
+        for(uint i = 0; i < height; ++i) {
+            float4 y = pow(inTexture.read(uint2(j, i), gid.z) - mean, 2) - error;
             float4 t = vari + y;
             error = (t - vari) - y;
             vari = t;
         }
     }
-    vari /= (width*height);
-    float4 stddev = sqrt(vari) + 0.0000001; // Prevent divide by 0 (chainer constant)
-
-    /* TODO: Implement numerical error correction here. */
-    for(uint j = 0; j < width; j++) {
-        for(uint i = 0; i < height; i++) {
-            float4 x_hat = (inTexture.read(uint2(j, i), gid.z) - mean) / stddev;
-            float4 y = stddev;
-
-            y[0] = (gamma[slot] * x_hat[0]) + beta[slot];
-            y[1] = (gamma[slot+1] * x_hat[1]) + beta[slot+1];
-            y[2] = (gamma[slot+2] * x_hat[2]) + beta[slot+2];
-            y[3] = (gamma[slot+3] * x_hat[3]) + beta[slot+3];
-
-            outTexture.write(y, uint2(j, i), gid.z);
-        }
+    vari /= (count - 1);
+    float4 stddev = sqrt(vari);
+    if (stddev[0] == 0) { stddev[0] = 1; }
+    if (stddev[1] == 0) { stddev[1] = 1; }
+    if (stddev[2] == 0) { stddev[2] = 1; }
+    if (stddev[3] == 0) { stddev[3] = 1; }
+    
+    uint c_base = gid.z * 4;
+    for (uint c_offset = 0; c_offset < 4; ++c_offset) {
+        means[c_base + c_offset] = mean[c_offset];
+        stddevs[c_base + c_offset] = stddev[c_offset];
     }
 }
 
@@ -294,7 +312,7 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
     for (uint slice = 0; slice < nslices; ++slice) {
         half4 weightValues;
         uint c_in_base = slice * 4;
-        for (uint c_in_offset = 0; c_in_offset < 4; c_in_offset++) {
+        for (uint c_in_offset = 0; c_in_offset < 4; ++c_in_offset) {
             _4d_index weightsIndex = { c_in_base + c_in_offset, kh, kw, c_out };
             uint index = _4d_index_to_1d_index(weightsShape, weightsIndex);
             weightValues[c_in_offset] = weights[index];
@@ -365,6 +383,17 @@ kernel void col2im(const device half* input [[ buffer (0) ]],
 
             errors = (t - vals) - y;
             vals = t;
+
+            /*
+            for (uint c_offset = 0; c_offset < 4; ++c_offset) {
+                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, as_type<uint>(y), as_type<uint>(x) };
+                half term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
+                half y = term - errors[c_offset];
+                half t = vals[c_offset] + y;
+                errors[c_offset] = (t - vals[c_offset]) - y;
+                vals[c_offset] = t;
+            }
+            */
         }
     }
     outTexture.write(vals, gid.xy, gid.z);

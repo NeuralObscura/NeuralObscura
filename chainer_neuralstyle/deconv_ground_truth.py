@@ -57,15 +57,18 @@ class DeconvolutionNet(chainer.Chain):
         )
 
     def __call__(self, x, test=False):
-        h = self.b1(F.relu(self.c1(x)), test=test)
-        h = self.b2(F.relu(self.c2(h)), test=test)
-        h = self.b3(F.relu(self.c3(h)), test=test)
-        h = self.r1(h, test=test)
-        h = self.r2(h, test=test)
-        h = self.r3(h, test=test)
-        h = self.r4(h, test=test)
-        td = self.r5(h, test=test)
-        gt = self.d1(td)
+        h = F.relu(self.c1(x))
+        td = h
+        h = self.b1(h, test=test)
+        gt = h
+        # h = self.b2(F.relu(self.c2(h)), test=test)
+        # h = self.b3(F.relu(self.c3(h)), test=test)
+        # h = self.r1(h, test=test)
+        # h = self.r2(h, test=test)
+        # h = self.r3(h, test=test)
+        # h = self.r4(h, test=test)
+        # td = self.r5(h, test=test)
+        # gt = self.d1(td)
         return (td, gt)
 
 parser = argparse.ArgumentParser(description='Generate input and ground truth data for iOS ML framework tests')
