@@ -350,18 +350,22 @@ kernel void col2im(const device half* input [[ buffer (0) ]],
     half4 vals = half4(0, 0, 0, 0);
     half4 errors = half4(0, 0, 0, 0);
     for (uint ky = 0; ky < k; ++ky) {
-        int y = (gid.y + p - ky);
+        /* This can/will result in underflow, but we keep it because it reduces
+         conversions needed, and we catch underflow in the next condition. */
+        uint y = (gid.y + p - ky); 
         if (y >= nh * s) continue;
         if (y % s != 0) continue;
         y /= s;
         for (uint kx = 0; kx < k; ++kx) {
-            int x = (gid.x + p - kx);
+            /* This can/will result in underflow, but we keep it because it reduces
+             conversions needed, and we catch underflow in the next condition. */
+            uint x = (gid.x + p - kx);
             if (x >= nw * s) continue;
             if (x % s != 0) continue;
             x /= s;
 
             for (uint c_offset = 0; c_offset < 4; ++c_offset) {
-                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, static_cast<uint>(y), static_cast<uint>(x) };
+                _5d_index inputIndex = { gid.z * 4 + c_offset, ky, kx, y, x };
                 half term = input[_5d_index_to_1d_index(inputShape, inputIndex)];
                 half y = term - errors[c_offset];
                 half t = vals[c_offset] + y;
