@@ -17,7 +17,7 @@ class BiasLayerTests: CommandEncoderBaseTest {
     func testBiasGroundTruth() throws {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv_bias_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
         
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")
         
@@ -29,7 +29,7 @@ class BiasLayerTests: CommandEncoderBaseTest {
         
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv_bias_expected_output", withExtension: "npy", subdirectory: "testdata")!
-        let expImg = MPSImage.loadFromNumpy(expUrl)
+        let expImg = MPSImage.fromNumpy(expUrl)
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 1))
     }

@@ -37,7 +37,7 @@ class MTLDeviceExtensionsTests: CommandEncoderBaseTest {
         textureDesc.pixelFormat = .rgba16Float
         textureDesc.arrayLength = 1
         let texture = device.makeTexture(descriptor: textureDesc)
-        texture.fill(valuesConverted, slice: 0)
+        texture.fillSlice(valuesConverted, slice: 0)
         let expImg = MPSImage(texture: texture, featureChannels: 4)
         
         XCTAssertEqual(img, expImg)

@@ -17,7 +17,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
     func testGroundTruthTensorDot() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
         
         let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_W")
         
@@ -40,7 +40,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
     func testGroundTruthDeconv() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
         
         let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_W")
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")
@@ -60,7 +60,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv_expected_output", withExtension: "npy", subdirectory: "testdata")!
-        let expImg = MPSImage.loadFromNumpy(expUrl)
+        let expImg = MPSImage.fromNumpy(expUrl)
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
     }
@@ -68,7 +68,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
     func testGroundTruthCol2Im() {
         let inputImageUrl = Bundle(for: type(of: self))
             .url(forResource: "tensordot_input", withExtension: "npy", subdirectory: "testdata")!
-        let inputImage = MPSImage.loadFromNumpy(inputImageUrl)
+        let inputImage = MPSImage.fromNumpy(inputImageUrl)
         
         let inputBufferUrl = Bundle(for: type(of: self))
             .url(forResource: "col2im_input", withExtension: "dat", subdirectory: "testdata")!
@@ -76,7 +76,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
         
         let expectedOutputUrl = Bundle(for: type(of: self))
             .url(forResource: "col2im_expected_output", withExtension: "npy", subdirectory: "testdata")!
-        let expectedOutput = MPSImage.loadFromNumpy(expectedOutputUrl)
+        let expectedOutput = MPSImage.fromNumpy(expectedOutputUrl)
         
         let col2Im = Col2ImLayer(channelsOut: 64, kernelSize: 4, stride: 2, padding: 1)
         let output = col2Im.chain(MTLBufferVariable(inputBuffer), MPSImageVariable(inputImage)).forward(commandBuffer: commandBuffer)
@@ -88,7 +88,7 @@ class DeconvolutionBlockTests: CommandEncoderBaseTest {
     func testLargeDeconv() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "large_deconv_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
 
         let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_W")
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "d1_b")

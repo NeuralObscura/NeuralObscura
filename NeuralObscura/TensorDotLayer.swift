@@ -67,10 +67,10 @@ class TensorDotLayer: UnaryCommandEncoder {
             let weightsConverted = Conversions.float32toFloat16(Array(UnsafeMutableBufferPointer<Float>(start: self.w.pointer, count: self.w.count)))
             let weightsBuffer = ShaderRegistry.getDevice().makeBuffer(
                 bytes: weightsConverted,
-                length: weightsConverted.count * ExpectedUInt16Size,
+                length: weightsConverted.count * ExpectedFloat16Size,
                 options: MTLResourceOptions.cpuCacheModeWriteCombined)
             let tensordot = ShaderRegistry.getDevice().makeBuffer(
-                length: ExpectedUInt16Size * matrixWidth * matrixHeight,
+                length: ExpectedFloat16Size * matrixWidth * matrixHeight,
                 options: MTLResourceOptions.cpuCacheModeWriteCombined)
             let tensordotPipelineState = ShaderRegistry.getOrLoad(name: "tensordot")
             let encoder = commandBuffer.makeComputeCommandEncoder()

@@ -16,11 +16,11 @@ class BatchNormalizationNonTestLayerTests: CommandEncoderBaseTest {
     func testGroundTruthBatchNormNonTest() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "batch_norm_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
         
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "batch_norm_expected_output", withExtension: "npy", subdirectory: "testdata")!
-        let expImg = MPSImage.loadFromNumpy(expUrl)
+        let expImg = MPSImage.fromNumpy(expUrl)
 
         /* Create our CommandEncoder*/
         let gamma = FileParameterBuffer(modelName: "composition", rawFileName: "b1_gamma")
@@ -33,5 +33,7 @@ class BatchNormalizationNonTestLayerTests: CommandEncoderBaseTest {
         execute()
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
+        print(outputImg)
+        print(expImg)
     }
 }

@@ -72,7 +72,7 @@ kernel void batch_normalization_nt(texture2d_array<float, access::read> inTextur
     uint height = inTexture.get_height();
     uint width = inTexture.get_width();
     uint slot = (gid.z * 4);
-    
+
     float4 working_means = float4(means[slot], means[slot+1], means[slot+2], means[slot+3]);
     float4 working_stddevs = float4(stddevs[slot], stddevs[slot+1], stddevs[slot+2], stddevs[slot+3]);
     float4 working_betas = float4(betas[slot], betas[slot+1], betas[slot+2], betas[slot+3]);
@@ -89,10 +89,10 @@ kernel void batch_normalization_nt(texture2d_array<float, access::read> inTextur
 }
 
 /* Produces two buffers one containing channel-wide mean, the other with channel-wide stddev. */
-/* TODO: This runs on a single GPU core... not optimal. */
+/* TODO: This runs on a single GPU core per slice... not optimal. */
 kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[texture(0)]],
-                         device float* means [[buffer(1)]],
-                         device float* stddevs [[buffer(2)]],
+                         device packed_float4* means [[buffer(1)]],
+                         device packed_float4* stddevs [[buffer(2)]],
                          uint3 gid [[thread_position_in_grid]]) {
     uint height = inTexture.get_height();
     uint width = inTexture.get_width();
@@ -126,12 +126,9 @@ kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[textur
     if (stddev[1] == 0) { stddev[1] = 1; }
     if (stddev[2] == 0) { stddev[2] = 1; }
     if (stddev[3] == 0) { stddev[3] = 1; }
-    
-    uint c_base = gid.z * 4;
-    for (uint c_offset = 0; c_offset < 4; ++c_offset) {
-        means[c_base + c_offset] = mean[c_offset];
-        stddevs[c_base + c_offset] = stddev[c_offset];
-    }
+
+    means[gid.z] = packed_float4(mean);
+    stddevs[gid.z] = packed_float4(stddev);
 }
 
 /* Add two matrices together
@@ -161,15 +158,20 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
     outTexture.write(output, gid.xy, gid.z);
 }
 
-/* RGBA -> BRGA
+/* BGRA -> BRGA
  *
  */
-kernel void rgba_to_brga(texture2d<half, access::read> inTexture [[texture(0)]],
+kernel void bgra_to_brga(texture2d<ushort, access::read> inTexture [[texture(0)]],
                          texture2d<half, access::write> outTexture [[texture(1)]],
-                         uint3 gid [[thread_position_in_grid]]) {
-    half4 input = inTexture.read(gid.xy, gid.z);
-    half4 output = half4(input[2], input[0], input[1], input[3]);
-    outTexture.write(output, gid.xy, gid.z);
+                         uint3 pos [[thread_position_in_grid]]) {
+    
+    if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
+        return;
+    }
+    
+    half4 input = static_cast<half4>(inTexture.read(pos.xy, pos.z));
+    half4 output = half4(input[0], input[2], input[1], input[3]);
+    outTexture.write(output, pos.xy, pos.z);
 }
 
 struct _2d_shape {

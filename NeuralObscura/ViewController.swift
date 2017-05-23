@@ -12,8 +12,6 @@ import MetalPerformanceShaders
 
 class ViewController: UIViewController, UINavigationControllerDelegate, UIImagePickerControllerDelegate {
     @IBOutlet weak var imageView: UIImageView!
-    private var ciContext : CIContext!
-    private var textureLoader : MTKTextureLoader!
     private var commandQueue: MTLCommandQueue!
     private var model: NeuralStyleModel!
     private var debugImagePaths: [String] = []
@@ -21,15 +19,7 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
 
     override func viewDidLoad() {
         super.viewDidLoad()
-
-        ciContext = CIContext.init(mtlDevice: ShaderRegistry.getDevice())
-
-        textureLoader = MTKTextureLoader(device: ShaderRegistry.getDevice())
-
         commandQueue = ShaderRegistry.getDevice().makeCommandQueue()
-
-        // This is computationally expensive, should optimize
-        // by initializing on a background thread.
         model = NeuralStyleModel(modelName: "composition", debug: true)
 
         debugImagePaths = [
@@ -37,7 +27,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
             Bundle.main.path(forResource: "tubingen", ofType: "jpg")!]
 
         imageView.isUserInteractionEnabled = true
-
         loadNextDebugImage()
     }
 
@@ -77,12 +66,6 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
         dismiss(animated: true, completion: nil)
     }
 
-    private func image(from texture: MTLTexture) -> MPSImage {
-        // We set featureChannels to 3 because the neural network is only trained
-        // on RGB data (the first 3 channels), not alpha (the 4th channel).
-        return MPSImage(texture: texture, featureChannels: 3)
-    }
-
     @IBAction func imageViewTapDetected(_ sender: AnyObject) {
         loadNextDebugImage()
     }
@@ -97,18 +80,10 @@ class ViewController: UIViewController, UINavigationControllerDelegate, UIImageP
     }
 
     @IBAction func doStyling(_ sender: AnyObject) {
-        // note the configurable options
-        let input = imageView.image!
-
-        let inputMtlTexture = ShaderRegistry.getDevice().makeMTLTexture(uiImage: input, pixelFormat: .rgba16Float)
-        let output = model.execute(commandQueue: commandQueue, sourceImage: image(from: inputMtlTexture))
+        let input = imageView.image!.toMPSImage(device: ShaderRegistry.getDevice())
+        let output = model.execute(commandQueue: commandQueue, sourceImage: input)
+        imageView.image! = output.toUIImage()
         print("done")
-
-        if(Int(input.size.width) == inputMtlTexture.width) {
-            imageView.image! = output.toUIImage(orientation: UIImageOrientation.up)
-        } else {
-            imageView.image! = output.toUIImage(orientation: UIImageOrientation.right)
-        }
     }
 }
 

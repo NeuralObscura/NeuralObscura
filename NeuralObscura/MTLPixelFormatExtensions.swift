@@ -23,8 +23,10 @@ extension MTLPixelFormat {
             return 1
         case .r16Float:
             return 1
+        case .bgra8Unorm_srgb:
+            return 4
         default:
-            fatalError("Unknown MTLPixelFormat: \(self)")
+            fatalError("Unknown MTLPixelFormat: \(self.rawValue)")
         }
     }
 
@@ -39,9 +41,11 @@ extension MTLPixelFormat {
         case .r32Float:
             return MemoryLayout<Float32>.size
         case .r16Float:
-            return ExpectedUInt16Size
+            return ExpectedFloat16Size
         case .rgba16Float:
-            return ExpectedUInt16Size
+            return ExpectedFloat16Size
+        case .bgra8Unorm_srgb:
+            return MemoryLayout<UInt8>.size
         default:
             fatalError("Unknown MTLPixelFormat: \(self)")
         }
@@ -57,9 +61,5 @@ extension MTLPixelFormat {
 
     func featureChannels(_ arrayLength: Int) -> Int {
         return arrayLength * self.channelCount
-    }
-
-    func bytesPerRow(_ width: Int) -> Int {
-        return width * self.channelCount * self.sizeOfDataType
     }
 }

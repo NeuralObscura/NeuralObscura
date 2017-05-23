@@ -11,6 +11,7 @@ import Metal
 import UIKit
 
 extension MTLTexture {
+
     func toUIImage(texture: MTLTexture, orientation: UIImageOrientation) -> UIImage {
         let bytesPerPixel = 4
         let bytesPerRow = bytesPerPixel * texture.width
@@ -25,10 +26,9 @@ extension MTLTexture {
         return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
     }
 
-    func fill(_ sourceBytes: UnsafeRawPointer,
-              slice: Int = 0) {
-        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
-        let bytesPerImage = bytesPerRow * self.height
+    func fillSlice(_ sourceBytes: UnsafeRawPointer, slice: Int = 0) {
+        let bytesPerRow = self.width * self.pixelFormat.channelCount * self.pixelFormat.sizeOfDataType
+        let bytesPerSlice = bytesPerRow * self.height
 
         self.replace(
             region: MTLRegionMake2D(0, 0, self.width, self.height),
@@ -36,7 +36,7 @@ extension MTLTexture {
             slice: slice,
             withBytes: sourceBytes,
             bytesPerRow: bytesPerRow,
-            bytesPerImage: bytesPerImage)
+            bytesPerImage: bytesPerSlice)
     }
     
 //    /* description must be referenced directly until we can add protocol conformance

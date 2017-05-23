@@ -10,15 +10,12 @@ import MetalPerformanceShaders
 import UIKit
 
 extension MPSImage {
-
-    func toUIImage(orientation: UIImageOrientation) -> UIImage {
+    func toUIImage() -> UIImage {
         let texture = self.texture
-        let bytesPerPixel = self.pixelSize
-        let bytesPerRow = bytesPerPixel * texture.width
-        var imageBytes = [UInt8](repeating: 0, count: texture.width * texture.height * bytesPerPixel)
+        let bytesPerRow = self.pixelSize * texture.width
+        var imageBytes = [UInt8](repeating: 0, count: texture.width * texture.height * self.pixelSize)
         let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
         texture.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
-
         let providerRef = CGDataProvider(
             data: NSData(
                 bytes: &imageBytes,
@@ -29,7 +26,7 @@ extension MPSImage {
             width: texture.width,
             height: texture.height,
             bitsPerComponent: 8,
-            bitsPerPixel: bytesPerPixel * 8,
+            bitsPerPixel: self.pixelSize * 8,
             bytesPerRow: bytesPerRow,
             space: CGColorSpaceCreateDeviceRGB(),
             bitmapInfo: bitmapInfo,
@@ -37,7 +34,78 @@ extension MPSImage {
             decode: nil,
             shouldInterpolate: false,
             intent: .defaultIntent)!
-        return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
+        return UIImage(cgImage: imageRef, scale: 0, orientation: .up)
+    }
+
+    static func fromNumpy(_ url: URL) -> MPSImage {
+        let data = try! Data(contentsOf: url, options: Data.ReadingOptions.alwaysMapped)
+        let ptr = UnsafeMutableRawPointer.allocate(bytes: data.count, alignedTo: MemoryLayout<UInt8>.alignment)
+        let boundPtr = ptr.bindMemory(to: UInt8.self, capacity: data.count)
+        data.copyBytes(to: boundPtr, count: data.count)
+
+        // read header to determine shape, assume float
+        let magicStringBuf: UnsafeBufferPointer<UInt8> = UnsafeBufferPointer<UInt8>.init(start: boundPtr, count: 8)
+        let expectedMagicString: [UInt8] = [0x93, 0x4E, 0x55, 0x4D, 0x50, 0x59, 0x01, 0x00] /* 0x93NUMPY10 */
+        assert(magicStringBuf.elementsEqual(expectedMagicString), "Invalid .npy file")
+        let headerLen = Int((ptr + 8).bindMemory(to: UInt16.self, capacity: 1).pointee)
+        let headerData = data.subdata(in: 10..<(headerLen + 10))
+        let headerString = String(data: headerData, encoding: .ascii)!
+        let cmpts = headerString.components(separatedBy: "'")
+
+        // Parse numpy type description
+        let descr = cmpts[3]
+        assert(descr == "<f4", "little-endian 32 bit floats ('<f4') are the only numpy type currently supported")
+
+        // Assume 'fortran_order': False
+
+        // Parse shape
+        let shapeArea = cmpts[8]
+        let shapeEndRange = shapeArea.range(of: "}")!
+        let shapeStart = shapeArea.index(shapeArea.startIndex, offsetBy: 3)
+        let shapeEnd = shapeArea.index(shapeEndRange.upperBound, offsetBy: -4)
+        let shapeString = String(shapeArea.substring(with: shapeStart ..< shapeEnd))!.components(separatedBy: ", ")
+        let shape = shapeString.map { (dim) -> Int in
+            Int(dim)!
+        }
+
+        guard shape.count == 3 else {
+            fatalError("Unsupported dimensions: \(shape), ndarray in .npy file must have 3 dimensions (channel, height, width).")
+        }
+
+        let channels = shape[0]
+        let height = shape[1]
+        let width = shape[2]
+        let bodyLen = shape.reduce(1,*)
+
+        /*
+         The first 6 bytes are a magic string: exactly “x93NUMPY”.
+         The next 1 byte is an unsigned byte: the major version number of the
+         file format, e.g. x01.
+         The next 1 byte is an unsigned byte: the minor version number of the
+         file format, e.g. x00. Note: the version of the file format is not
+         tied to the version of the numpy package.
+         The next 2 bytes form a little-endian unsigned short int: the length
+         of the header data HEADER_LEN.
+         6 + 1 + 1 + 2 + headerLen
+         */
+        let bodyData = (ptr + 10 + headerLen).bindMemory(to: Float32.self, capacity: bodyLen)
+        let bodyBuff = UnsafeBufferPointer<Float32>.init(start: bodyData, count: bodyLen)
+        let values = Array(bodyBuff)
+
+        // TODO: update makeMTLTexture so it won't accept any values with cardinality != to a multiple of 4 * width * height
+        var padded = [Float32]()
+        padded.append(contentsOf: values)
+        let channelsToPad = Int((channels + 3) / 4) * 4 - channels
+        padded.append(contentsOf: [Float32].init(repeating: 0.0, count: channelsToPad * width * height))
+
+        let textureDesc = MTLTextureDescriptor()
+        textureDesc.textureType = .type2DArray
+        textureDesc.width = width
+        textureDesc.height = height
+        textureDesc.pixelFormat = .rgba16Float
+        textureDesc.arrayLength = Int((channels + 3) / 4)
+        let texture = ShaderRegistry.getDevice().makeMTLTexture(textureDesc: textureDesc, values: padded)
+        return MPSImage(texture: texture, featureChannels: channels)
     }
 
     override open func isEqual(_ rawRhs: Any?) -> Bool {
@@ -53,10 +121,10 @@ extension MPSImage {
             lhs.pixelFormat == rhs.pixelFormat &&
             lhs.featureChannels == rhs.featureChannels) else { return false }
         
-        let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
+        let lhsRowSize: Int = lhs.width * lhs.pixelFormat.channelCount * lhs.pixelFormat.sizeOfDataType
         let lhsImageSize = lhs.height * lhsRowSize
         let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.channelCount
-        let rhsRowSize: Int = rhs.pixelFormat.bytesPerRow(rhs.width)
+        let rhsRowSize: Int = rhs.width * rhs.pixelFormat.channelCount * rhs.pixelFormat.sizeOfDataType
         let rhsImageSize = rhs.height * rhsRowSize
         let rhsPixelArea = rhs.width * rhs.height * rhs.pixelFormat.channelCount
 
@@ -133,10 +201,10 @@ extension MPSImage {
             lhs.pixelFormat == rhs.pixelFormat &&
             lhs.featureChannels == rhs.featureChannels) else { return false }
         
-        let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
+        let lhsRowSize: Int = lhs.width * lhs.pixelFormat.channelCount * lhs.pixelFormat.sizeOfDataType
         let lhsImageSize = lhs.height * lhsRowSize
         let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.channelCount
-        let rhsRowSize: Int = rhs.pixelFormat.bytesPerRow(rhs.width)
+        let rhsRowSize: Int = rhs.width * rhs.pixelFormat.channelCount * rhs.pixelFormat.sizeOfDataType
         let rhsImageSize = rhs.height * rhsRowSize
         let rhsPixelArea = rhs.width * rhs.height * rhs.pixelFormat.channelCount
 
@@ -209,7 +277,7 @@ extension MPSImage {
 
         guard ( lhs.width * lhs.height * lhs.featureChannels == rhs.count ) else { return false }
 
-        let lhsRowSize: Int = lhs.pixelFormat.bytesPerRow(lhs.width)
+        let lhsRowSize: Int = lhs.width * lhs.pixelFormat.channelCount * lhs.pixelFormat.sizeOfDataType
         let lhsImageSize = lhs.height * lhsRowSize
         let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.channelCount
 
@@ -267,7 +335,7 @@ extension MPSImage {
     }
 
     func UnormToString() -> String {
-        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
+        let bytesPerRow = self.width * self.pixelFormat.channelCount * self.pixelFormat.sizeOfDataType
         let bytesPerImage = self.height * bytesPerRow
         let ptr = UnsafeMutablePointer<UInt8>.allocate(capacity: self.pixelFormat.typedSize(width: self.width,
                                                                                             height: self.height))
@@ -301,7 +369,7 @@ extension MPSImage {
     }
 
     func Float32ToString() -> String {
-        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
+        let bytesPerRow = self.width * self.pixelFormat.channelCount * self.pixelFormat.sizeOfDataType
         let bytesPerImage = self.height * bytesPerRow
 
         let ptr = UnsafeMutablePointer<Float32>.allocate(capacity: self.pixelFormat.typedSize(width: self.width,
@@ -331,7 +399,7 @@ extension MPSImage {
     }
 
     func Float16ToString() -> String {
-        let bytesPerRow = self.pixelFormat.bytesPerRow(self.width)
+        let bytesPerRow = self.width * self.pixelFormat.channelCount * self.pixelFormat.sizeOfDataType
         let bytesPerImage = self.height * bytesPerRow
 
         let ptr = UnsafeMutablePointer<UInt16>.allocate(capacity: self.pixelFormat.typedSize(width: self.width,
@@ -356,76 +424,5 @@ extension MPSImage {
             }
         }
         return outputString
-    }
-
-    static func loadFromNumpy(_ url: URL) -> MPSImage {
-        let data = try! Data(contentsOf: url, options: Data.ReadingOptions.alwaysMapped)
-        let ptr = UnsafeMutableRawPointer.allocate(bytes: data.count, alignedTo: MemoryLayout<UInt8>.alignment)
-        let boundPtr = ptr.bindMemory(to: UInt8.self, capacity: data.count)
-        data.copyBytes(to: boundPtr, count: data.count)
-        
-        // read header to determine shape, assume float
-        let magicStringBuf: UnsafeBufferPointer<UInt8> = UnsafeBufferPointer<UInt8>.init(start: boundPtr, count: 8)
-        let expectedMagicString: [UInt8] = [0x93, 0x4E, 0x55, 0x4D, 0x50, 0x59, 0x01, 0x00] /* 0x93NUMPY10 */
-        assert(magicStringBuf.elementsEqual(expectedMagicString), "Invalid .npy file")
-        let headerLen = Int((ptr + 8).bindMemory(to: UInt16.self, capacity: 1).pointee)
-        let headerData = data.subdata(in: 10..<(headerLen + 10))
-        let headerString = String(data: headerData, encoding: .ascii)!
-        let cmpts = headerString.components(separatedBy: "'")
-
-        // Parse numpy type description
-        let descr = cmpts[3]
-        assert(descr == "<f4", "little-endian 32 bit floats ('<f4') are the only numpy type currently supported")
-
-        // Assume 'fortran_order': False
-
-        // Parse shape
-        let shapeArea = cmpts[8]
-        let shapeEndRange = shapeArea.range(of: "}")!
-        let shapeStart = shapeArea.index(shapeArea.startIndex, offsetBy: 3)
-        let shapeEnd = shapeArea.index(shapeEndRange.upperBound, offsetBy: -4)
-        let shapeString = String(shapeArea.substring(with: shapeStart ..< shapeEnd))!.components(separatedBy: ", ")
-        let shape = shapeString.map { (dim) -> Int in
-            Int(dim)!
-        }
-
-        guard shape.count == 3 else {
-            fatalError("Unsupported dimensions: \(shape), ndarray in .npy file must have 3 dimensions (channel, height, width).")
-        }
-        
-        let channels = shape[0]
-        let height = shape[1]
-        let width = shape[2]
-        let bodyLen = shape.reduce(1,*)
-
-        /*
-         The first 6 bytes are a magic string: exactly “x93NUMPY”.
-         The next 1 byte is an unsigned byte: the major version number of the
-         file format, e.g. x01.
-         The next 1 byte is an unsigned byte: the minor version number of the
-         file format, e.g. x00. Note: the version of the file format is not
-         tied to the version of the numpy package.
-         The next 2 bytes form a little-endian unsigned short int: the length
-         of the header data HEADER_LEN.
-         6 + 1 + 1 + 2 + headerLen
-         */
-        let bodyData = (ptr + 10 + headerLen).bindMemory(to: Float32.self, capacity: bodyLen)
-        let bodyBuff = UnsafeBufferPointer<Float32>.init(start: bodyData, count: bodyLen)
-        let values = Array(bodyBuff)
-        
-        // TODO: update makeMTLTexture so it won't accept any values with cardinality != to a multiple of 4 * width * height
-        var padded = [Float32]()
-        padded.append(contentsOf: values)
-        let channelsToPad = Int((channels + 3) / 4) * 4 - channels
-        padded.append(contentsOf: [Float32].init(repeating: 0.0, count: channelsToPad * width * height))
-        
-        let textureDesc = MTLTextureDescriptor()
-        textureDesc.textureType = .type2DArray
-        textureDesc.width = width
-        textureDesc.height = height
-        textureDesc.pixelFormat = .rgba16Float
-        textureDesc.arrayLength = Int((channels + 3) / 4)
-        let texture = ShaderRegistry.getDevice().makeMTLTexture(textureDesc: textureDesc, values: padded)
-        return MPSImage(texture: texture, featureChannels: channels)
     }
 }

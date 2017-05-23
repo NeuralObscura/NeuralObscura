@@ -16,11 +16,11 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
     func testGroundTruthConv() throws {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "conv_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
         
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "conv_expected_output", withExtension: "npy", subdirectory: "testdata")!
-        let expImg = MPSImage.loadFromNumpy(expUrl)
+        let expImg = MPSImage.fromNumpy(expUrl)
         
         let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_W")
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
@@ -43,7 +43,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
     func testGroundTruthConvRelu() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "conv_relu_input", withExtension: "npy", subdirectory: "testdata")!
-        let testImg = MPSImage.loadFromNumpy(testUrl)
+        let testImg = MPSImage.fromNumpy(testUrl)
         
         let w_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_W")
         let b_pb = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
@@ -62,7 +62,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
         
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "conv_relu_expected_output", withExtension: "npy", subdirectory: "testdata")!
-        let expImg = MPSImage.loadFromNumpy(expUrl)
+        let expImg = MPSImage.fromNumpy(expUrl)
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: -1))
     }

@@ -1,5 +1,5 @@
 //
-//  RGBAToBRGALayer.swift
+//  BGRAToBRGALayer.swift
 //  NeuralObscura
 //
 //  Created by Paul Bergeron on 11/26/16.
@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class RGBAToBRGALayer: UnaryCommandEncoder {
+class BGRAToBRGALayer: UnaryCommandEncoder {
     private let useTemporary: Bool
     private var consumerCount: Int = 0
     var input: AnyCommandEncoder<MPSImage>!
@@ -33,7 +33,6 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
     
     func destinationImage(sourceImage: MPSImage, commandBuffer: MTLCommandBuffer) -> MPSImage {
         let textureDesc = MTLTextureDescriptor()
-        textureDesc.arrayLength = sourceImage.texture.arrayLength
         textureDesc.height = sourceImage.height
         textureDesc.width = sourceImage.width
         textureDesc.textureType = .type2D
@@ -59,14 +58,20 @@ class RGBAToBRGALayer: UnaryCommandEncoder {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
             let encoder = commandBuffer.makeComputeCommandEncoder()
-            encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "rgba_to_brga"))
+            let pipelineState = ShaderRegistry.getOrLoad(name: "bgra_to_brga")
+            encoder.setComputePipelineState(pipelineState)
             encoder.setTexture(sourceImage.texture, at: 0)
             encoder.setTexture(destinationImage.texture, at: 1)
-            let threadsPerGroup = MTLSizeMake(1, 1, 1)
-            let threadGroups = MTLSizeMake(destinationImage.texture.width,
-                                           destinationImage.texture.height,
-                                           destinationImage.texture.arrayLength)
-            encoder.dispatchThreadgroups(threadGroups, threadsPerThreadgroup: threadsPerGroup)
+            
+            let threadGroupWidth = pipelineState.threadExecutionWidth
+            let threadGroupHeight = pipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
+            let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
+            let gridShape = MTLSize(
+                width: (destinationImage.width + threadGroupWidth - 1) / threadGroupWidth,
+                height: (destinationImage.height + threadGroupHeight - 1) / threadGroupHeight,
+                depth: destinationImage.texture.arrayLength)
+            
+            encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
             encoder.endEncoding()
             
             if sourceImage is MPSTemporaryImage {

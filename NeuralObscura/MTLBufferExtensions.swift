@@ -35,7 +35,7 @@ class MTLBufferUtil {
     }
 
     public static func toString<UInt16>(_ buffer : MTLBuffer, type: UInt16.Type) -> String {
-        let count = buffer.length / ExpectedUInt16Size
+        let count = buffer.length / ExpectedFloat16Size
         var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
         let values = Conversions.float16toFloat32(buffer.contents(), count: count)
 
@@ -54,7 +54,7 @@ class MTLBufferUtil {
                 UnsafeBufferPointer<Float32>(start: pointer, count: count)))
             return ShaderRegistry.getDevice().makeBuffer(
                 bytes: converted,
-                length: count * ExpectedUInt16Size,
+                length: count * ExpectedFloat16Size,
                 options: MTLResourceOptions.storageModeShared)
         }
     }
@@ -80,7 +80,7 @@ class MTLBufferUtil {
     public static func lossyEqual<UInt16>(lhs : MTLBuffer, rhs : MTLBuffer, precision: Int, type: UInt16.Type) -> Bool {
         guard ( lhs.length == rhs.length ) else { return false }
         let maxDifference = powf(10.0, Float(-precision))
-        let count = lhs.length / ExpectedUInt16Size
+        let count = lhs.length / ExpectedFloat16Size
 
         let lhsPtr = lhs.contents().bindMemory(to: UInt16.self, capacity: count)
         let rhsPtr = rhs.contents().bindMemory(to: UInt16.self, capacity: count)
