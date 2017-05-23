@@ -161,7 +161,7 @@ extension MPSImage {
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
-            case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm, .bgra8Unorm_srgb:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
                 let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
 
@@ -240,7 +240,7 @@ extension MPSImage {
                         return false
                     }
                 }
-            case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm, .bgra8Unorm_srgb:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
                 let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
 
@@ -274,8 +274,6 @@ extension MPSImage {
     func isLossyEqual(values rhs: [Float32], precision: Int) -> Bool {
         let maxDifference = powf(10.0, Float(-precision))
         let lhs = self
-        print(lhs.width * lhs.height * lhs.featureChannels)
-        print(rhs.count)
 
         guard ( lhs.width * lhs.height * lhs.featureChannels == rhs.count ) else { return false }
 
@@ -298,7 +296,7 @@ extension MPSImage {
                                 mipmapLevel: 0,
                                 slice: i)
             switch lhs.pixelFormat {
-            case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm, .bgra8Unorm_srgb:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
                 let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsPixelArea)
                 let lhsFloatValues = lhsBufferPtr.enumerated().map { (idx, e) in e }
@@ -319,11 +317,6 @@ extension MPSImage {
 
         for i in 0...(rhs.count - 1) {
             if abs(lhsFloats[i] - rhs[i]) > maxDifference {
-                print(i)
-                print(lhsFloats[i])
-                print(rhs[i])
-                print(lhsFloats)
-                print(rhs)
                 return false
             }
         }
@@ -334,7 +327,7 @@ extension MPSImage {
     override open var description: String {
         var desc = "MPSImage \(self.hash) with width: \(self.width), height: \(self.height), feature channels: \(self.featureChannels), pixelFormat raw value: \(self.pixelFormat.rawValue)\n\n"
         switch self.pixelFormat {
-        case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
+        case .r8Unorm, .rgba8Unorm, .bgra8Unorm, .bgra8Unorm_srgb:
             desc += UnormToString()
         case .r32Float, .rgba32Float:
             desc += Float32ToString()

@@ -23,7 +23,6 @@ extension UIImage {
         let ciContext = CIContext.init(mtlDevice: device)
         var options: [String : NSObject] = [
             MTKTextureLoaderOptionTextureUsage:         MTLTextureUsage.shaderRead.rawValue as NSObject,
-            MTKTextureLoaderOptionSRGB:                 0 as NSObject,
             MTKTextureLoaderOptionOrigin:               MTKTextureLoaderOriginTopLeft as NSObject,
         ]
 

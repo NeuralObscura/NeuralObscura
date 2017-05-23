@@ -46,10 +46,6 @@ class BGRAToBRGALayerTests: CommandEncoderBaseTest {
               1, 1, 1, 1,
               1, 1, 1, 1]])
 
-        print(testImg)
-        print(outputImg)
-        print(expImg)
-        print("-----------------------------")
         XCTAssertEqual(outputImg, expImg)
     }
 }
