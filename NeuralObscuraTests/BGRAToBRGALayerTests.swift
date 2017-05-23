@@ -12,12 +12,7 @@ import MetalPerformanceShaders
 @testable import NeuralObscura
 
 class BGRAToBRGALayerTests: CommandEncoderBaseTest {
-    func testRGBAToBRGALayer() {
-        let textureDesc = MTLTextureDescriptor()
-        textureDesc.textureType = .type2D
-        textureDesc.width = 2
-        textureDesc.height = 2
-        textureDesc.pixelFormat = .rgba16Float
+    func testBGRAToBRGALayer() {
 
         let testUrl = Bundle(for: type(of: self))
                 .url(forResource: "debug", withExtension: "png", subdirectory: "testdata")!
@@ -28,14 +23,22 @@ class BGRAToBRGALayerTests: CommandEncoderBaseTest {
         let outputImg = bgraToBRGA.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
 
-        let expImg = MPSImage(texture:
-            device.makeMTLTexture(
-                    textureDesc: textureDesc,
-                    values: [1.0,3.0,4.0,2.0,
-                             2.0,4.0,3.0,1.0,
-                             3.0,2.0,2.0,3.0,
-                             4.0,1.0,1.0,4.0]),
-                    featureChannels: 4)
+        let expImg = device.makeMPSImage(
+                width: 4,
+                height: 4,
+                values:
+                [[255,   0,   0, 255,
+                    0,   0,   0,   0,
+                    0,   0,   0,   0,
+                  255,   0,   0, 255],
+                 [  0, 255,   0,   0,
+                  255,   0, 255,   0,
+                    0, 255,   0, 255,
+                    0,   0, 255,   0],
+                 [  0,   0, 255,   0,
+                    0, 255,   0, 255,
+                  255,   0, 255,   0,
+                    0, 255,   0,   0]])
 
         XCTAssertEqual(outputImg, expImg)
     }
