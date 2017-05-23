@@ -12,8 +12,26 @@ import MetalPerformanceShaders
 extension UIImage {
 
     func toMPSImage(device: MTLDevice) -> MPSImage {
-        let colorSpace = CGColorSpaceCreateDeviceRGB()
+        return MPSImage(texture: self.toMTLTexture(device: device, debug: false), featureChannels: 3)
+    }
+
+    func toMTLTexture(device: MTLDevice) -> MTLTexture {
+        return self.toMTLTexture(device: device, debug: true)
+    }
+
+    func toMTLTexture(device: MTLDevice, debug: Bool) -> MTLTexture {
         let ciContext = CIContext.init(mtlDevice: device)
+        var options: [String : NSObject] = [
+            MTKTextureLoaderOptionTextureUsage:         MTLTextureUsage.shaderRead.rawValue as NSObject,
+            MTKTextureLoaderOptionSRGB:                 0 as NSObject,
+            MTKTextureLoaderOptionOrigin:               MTKTextureLoaderOriginTopLeft as NSObject,
+        ]
+
+        if (debug) {
+            options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.shared.rawValue as NSObject
+        } else {
+            options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.private.rawValue as NSObject
+        }
 
         let cgImage: CGImage
         if let img = self.cgImage {
@@ -22,9 +40,9 @@ extension UIImage {
             let ciImage = CIImage(image: self)
             cgImage = ciContext.createCGImage(ciImage!, from: ciImage!.extent)!
         }
+
         let textureLoader = MTKTextureLoader(device: device)
-        let texture = try! textureLoader.newTexture(with: cgImage)
-        return MPSImage(texture: texture, featureChannels: 3)
+        return try! textureLoader.newTexture(with: cgImage, options: options)
     }
 
 }

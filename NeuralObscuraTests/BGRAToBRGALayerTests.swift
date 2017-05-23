@@ -16,7 +16,9 @@ class BGRAToBRGALayerTests: CommandEncoderBaseTest {
 
         let testUrl = Bundle(for: type(of: self))
                 .url(forResource: "debug", withExtension: "png", subdirectory: "testdata")!
-        let testTex = try! textureLoader.newTexture(withContentsOf: testUrl)
+        let debugImageData = try! Data(contentsOf: testUrl)
+        let image = UIImage.init(data: debugImageData)!
+        let testTex = image.toMTLTexture(device: device)
         let testImg = MPSImage(texture: testTex, featureChannels: 4)
 
         let bgraToBRGA = BGRAToBRGALayer()
@@ -27,19 +29,27 @@ class BGRAToBRGALayerTests: CommandEncoderBaseTest {
                 width: 4,
                 height: 4,
                 values:
-                [[255,   0,   0, 255,
-                    0,   0,   0,   0,
-                    0,   0,   0,   0,
-                  255,   0,   0, 255],
-                 [  0, 255,   0,   0,
-                  255,   0, 255,   0,
-                    0, 255,   0, 255,
-                    0,   0, 255,   0],
-                 [  0,   0, 255,   0,
-                    0, 255,   0, 255,
-                  255,   0, 255,   0,
-                    0, 255,   0,   0]])
+            [[1, 0, 0, 1,
+              0, 0, 0, 0,
+              0, 0, 0, 0,
+              1, 0, 0, 1],
+             [0, 0, 1, 0,
+              0, 1, 0, 1,
+              1, 0, 1, 0,
+              0, 1, 0, 0],
+             [0, 1, 0, 0,
+              1, 0, 1, 0,
+              0, 1, 0, 1,
+              0, 0, 1, 0],
+             [1, 1, 1, 1,
+              1, 1, 1, 1,
+              1, 1, 1, 1,
+              1, 1, 1, 1]])
 
+        print(testImg)
+        print(outputImg)
+        print(expImg)
+        print("-----------------------------")
         XCTAssertEqual(outputImg, expImg)
     }
 }

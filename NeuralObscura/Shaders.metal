@@ -161,15 +161,15 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
 /* BGRA -> BRGA
  *
  */
-kernel void bgra_to_brga(texture2d<ushort, access::read> inTexture [[texture(0)]],
+kernel void bgra_to_brga(texture2d<half, access::read> inTexture [[texture(0)]],
                          texture2d<half, access::write> outTexture [[texture(1)]],
                          uint3 pos [[thread_position_in_grid]]) {
     
     if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
         return;
     }
-    
-    half4 input = static_cast<half4>(inTexture.read(pos.xy, pos.z));
+
+    half4 input = inTexture.read(pos.xy, pos.z);
     half4 output = half4(input[0], input[2], input[1], input[3]);
     outTexture.write(output, pos.xy, pos.z);
 }

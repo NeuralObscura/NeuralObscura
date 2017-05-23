@@ -25,6 +25,8 @@ extension MTLPixelFormat {
             return 1
         case .bgra8Unorm_srgb:
             return 4
+        case .bgra8Unorm:
+            return 4
         default:
             fatalError("Unknown MTLPixelFormat: \(self)")
         }
@@ -45,6 +47,8 @@ extension MTLPixelFormat {
         case .rgba16Float:
             return ExpectedFloat16Size
         case .bgra8Unorm_srgb:
+            return MemoryLayout<UInt8>.size
+        case .bgra8Unorm:
             return MemoryLayout<UInt8>.size
         default:
             fatalError("Unknown MTLPixelFormat: \(self)")

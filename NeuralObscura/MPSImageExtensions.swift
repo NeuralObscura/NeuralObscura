@@ -161,7 +161,7 @@ extension MPSImage {
                 if lhsBufferPtr.elementsEqual(rhsBufferPtr) == false {
                     return false
                 }
-            case .r8Unorm, .rgba8Unorm:
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
                 let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
 
@@ -240,7 +240,7 @@ extension MPSImage {
                         return false
                     }
                 }
-            case .r8Unorm, .rgba8Unorm:
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
                 let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
                 let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
 
@@ -274,6 +274,8 @@ extension MPSImage {
     func isLossyEqual(values rhs: [Float32], precision: Int) -> Bool {
         let maxDifference = powf(10.0, Float(-precision))
         let lhs = self
+        print(lhs.width * lhs.height * lhs.featureChannels)
+        print(rhs.count)
 
         guard ( lhs.width * lhs.height * lhs.featureChannels == rhs.count ) else { return false }
 
@@ -296,6 +298,11 @@ extension MPSImage {
                                 mipmapLevel: 0,
                                 slice: i)
             switch lhs.pixelFormat {
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
+                let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsPixelArea)
+                let lhsFloatValues = lhsBufferPtr.enumerated().map { (idx, e) in e }
+                lhsFloats += lhsFloatValues.enumerated().map { (idx, e) in Float32(e) }
             case .r16Float, .rgba16Float:
                 let lhsFloatValues = Conversions.float16toFloat32(lhsRawPtr, count: lhsPixelArea)
                 lhsFloats += lhsFloatValues.enumerated().map { (idx, e) in Float32(e) }
@@ -312,6 +319,11 @@ extension MPSImage {
 
         for i in 0...(rhs.count - 1) {
             if abs(lhsFloats[i] - rhs[i]) > maxDifference {
+                print(i)
+                print(lhsFloats[i])
+                print(rhs[i])
+                print(lhsFloats)
+                print(rhs)
                 return false
             }
         }
@@ -322,7 +334,7 @@ extension MPSImage {
     override open var description: String {
         var desc = "MPSImage \(self.hash) with width: \(self.width), height: \(self.height), feature channels: \(self.featureChannels), pixelFormat raw value: \(self.pixelFormat.rawValue)\n\n"
         switch self.pixelFormat {
-        case .r8Unorm, .rgba8Unorm:
+        case .r8Unorm, .rgba8Unorm, .bgra8Unorm:
             desc += UnormToString()
         case .r32Float, .rgba32Float:
             desc += Float32ToString()
@@ -352,16 +364,11 @@ extension MPSImage {
                                   slice: i)
             let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: self.pixelFormat.typedSize(width: self.width,
                                                                                                   height: self.height))
-            var channels = Array(repeating: "", count: self.pixelFormat.channelCount)
-            buffer.enumerated().forEach { [unowned self] (idx, e) in
-                if idx % (self.width * self.pixelFormat.channelCount) == 0 {
-                    channels[idx % self.pixelFormat.channelCount] += String(format: "\n ", e)
-                } else {
-                    channels[idx % self.pixelFormat.channelCount] += String(format: "%.2f ", e)
+            for channel in 0..<self.pixelFormat.channelCount {
+                for i in stride(from: channel, to: buffer.count, by: self.pixelFormat.channelCount) {
+                    outputString += String(format: "%3d ", buffer[i])
                 }
-            }
-            for c in channels {
-                outputString += c + "\n"
+                outputString += "\n"
             }
         }
 
