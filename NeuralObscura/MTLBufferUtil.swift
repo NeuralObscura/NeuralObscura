@@ -37,7 +37,7 @@ class MTLBufferUtil {
     public static func toString<UInt16>(_ buffer : MTLBuffer, type: UInt16.Type) -> String {
         let count = buffer.length / ExpectedFloat16Size
         var desc = "MTLBuffer \(buffer.hash) with length: \(buffer.length) and count: \(count)\n\n"
-        let values = Conversions.float16toFloat32(buffer.contents(), count: count)
+        let values = Conversions.float16toFloat32(pointer: buffer.contents(), count: count)
 
         for i in 0 ..< count {
             desc += String(format: "%.2f ", values[i])
@@ -50,7 +50,7 @@ class MTLBufferUtil {
         let data = try! Data.init(contentsOf: url)
         let count = data.count / MemoryLayout<Float32>.size
         return data.withUnsafeBytes { (pointer: UnsafePointer<Float32>) -> MTLBuffer in
-            let converted = Conversions.float32toFloat16(Array(
+            let converted = Conversions.float32toFloat16(values: Array(
                 UnsafeBufferPointer<Float32>(start: pointer, count: count)))
             return ShaderRegistry.getDevice().makeBuffer(
                 bytes: converted,
@@ -85,8 +85,8 @@ class MTLBufferUtil {
         let lhsPtr = lhs.contents().bindMemory(to: UInt16.self, capacity: count)
         let rhsPtr = rhs.contents().bindMemory(to: UInt16.self, capacity: count)
 
-        let lhsFloat32 = Conversions.float16toFloat32(lhsPtr, count: count)
-        let rhsFloat32 = Conversions.float16toFloat32(rhsPtr, count: count)
+        let lhsFloat32 = Conversions.float16toFloat32(pointer: lhsPtr, count: count)
+        let rhsFloat32 = Conversions.float16toFloat32(pointer: rhsPtr, count: count)
 
         for (a, b) in zip(Array(UnsafeBufferPointer(start: lhsFloat32, count: count)),
                           Array(UnsafeBufferPointer(start: rhsFloat32, count: count))) {

@@ -64,7 +64,9 @@ class TensorDotLayer: UnaryCommandEncoder {
                 bytes: &weightsShape,
                 length: MemoryLayout<UInt32>.size * weightsShape.count,
                 options: MTLResourceOptions.cpuCacheModeWriteCombined)
-            let weightsConverted = Conversions.float32toFloat16(Array(UnsafeMutableBufferPointer<Float>(start: self.w.pointer, count: self.w.count)))
+            let weightsConverted = Conversions.float32toFloat16(
+                pointer: UnsafeMutableRawPointer(mutating: self.w.pointer),
+                count: self.w.count)
             let weightsBuffer = ShaderRegistry.getDevice().makeBuffer(
                 bytes: weightsConverted,
                 length: weightsConverted.count * ExpectedFloat16Size,

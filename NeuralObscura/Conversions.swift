@@ -9,7 +9,7 @@
 import Accelerate
 
 class Conversions {
-    static func float32toFloat16(_ values: [Float32]) -> [UInt16] {
+    static func float32toFloat16(values: [Float32]) -> [UInt16] {
         var input = values
         var inputBuffer = vImage_Buffer(data: &input, height: 1, width: UInt(values.count), rowBytes: values.count * 4)
         var output = [UInt16](repeating: 0, count: values.count)
@@ -20,9 +20,20 @@ class Conversions {
         }
         return output
     }
+    
+    static func float32toFloat16(pointer: UnsafeMutableRawPointer, count: Int) -> [UInt16] {
+        var inputBuffer = vImage_Buffer(data: pointer, height: 1, width: UInt(count), rowBytes: count * 4)
+        var output = [UInt16](repeating: 0, count: count)
+        var outputBuffer = vImage_Buffer(data: &output, height: 1, width: UInt(count), rowBytes: count * 2)
 
-    static func float16toFloat32(_ values: UnsafeMutableRawPointer, count: Int) -> [Float32] {
-        var inputBuffer = vImage_Buffer(data: values, height: 1, width: UInt(count), rowBytes: count * 2)
+        if vImageConvert_PlanarFtoPlanar16F(&inputBuffer, &outputBuffer, 0) != kvImageNoError {
+            fatalError("Couldn't convert from float32 to float16")
+        }
+        return output
+    }
+
+    static func float16toFloat32(pointer: UnsafeMutableRawPointer, count: Int) -> [Float32] {
+        var inputBuffer = vImage_Buffer(data: pointer, height: 1, width: UInt(count), rowBytes: count * 2)
         var output = [Float32](repeating: 0, count: count)
         var outputBuffer = vImage_Buffer(data: &output, height: 1, width: UInt(count), rowBytes: count * 4)
 

@@ -27,7 +27,7 @@ class MTLDeviceExtensionsTests: CommandEncoderBaseTest {
                             2,0,0,0,
                             3,0,0,0,
                             4,0,0,0]
-        let valuesConverted = Conversions.float32toFloat16(valuesPadded.map { (val) -> Float32 in
+        let valuesConverted = Conversions.float32toFloat16(values: valuesPadded.map { (val) -> Float32 in
             Float32(val)
         })
         let textureDesc = MTLTextureDescriptor()

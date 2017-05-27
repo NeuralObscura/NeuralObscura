@@ -26,6 +26,7 @@
 		078642C71DDAD892006A3AFB /* TanhAdjustmentLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642BC1DDAD892006A3AFB /* TanhAdjustmentLayer.swift */; };
 		078642C81DDAD892006A3AFB /* Weak.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642BD1DDAD892006A3AFB /* Weak.swift */; };
 		078642CE1DDAE596006A3AFB /* SummationLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078642CD1DDAE596006A3AFB /* SummationLayer.swift */; };
+		078969351ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 078969341ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift */; };
 		07A0E56C1ED26933007E1A67 /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A0E56B1ED26933007E1A67 /* UIImageExtensions.swift */; };
 		07A30DAE1E74F909001077B1 /* Variables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07A30DAD1E74F909001077B1 /* Variables.swift */; };
 		07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */; };
@@ -36,6 +37,7 @@
 		07E456E21EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E456E11EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift */; };
 		07E456E41EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07E456E31EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift */; };
 		07F68DA11DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */; };
+		5C194BDD1F3B21FF96217CEA /* DeconvolutionLayerV2.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5C1945CEF15867AEEDDFA6DF /* DeconvolutionLayerV2.swift */; };
 		DA0638161DCD0AD100BC496D /* ShaderRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */; };
 		DA0638181DCD17D500BC496D /* BatchNormalizationLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */; };
 		DA0B0C5F1D8BAB4000ED7982 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C5E1D8BAB4000ED7982 /* AppDelegate.swift */; };
@@ -44,7 +46,7 @@
 		DA0B0C661D8BAB4000ED7982 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */; };
 		DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */; };
 		DA0B0C7F1D8BAB4000ED7982 /* NeuralObscuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */; };
-		DA445C531EB82516006FF8C3 /* MTLBufferExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA445C521EB82516006FF8C3 /* MTLBufferExtensions.swift */; };
+		DA445C531EB82516006FF8C3 /* MTLBufferUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA445C521EB82516006FF8C3 /* MTLBufferUtil.swift */; };
 		DA6942651DEAAADE00285327 /* BGRAToBRGALayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942641DEAAADE00285327 /* BGRAToBRGALayerTests.swift */; };
 		DA6942671DEAAB2900285327 /* BGRAToBRGALayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942661DEAAB2900285327 /* BGRAToBRGALayer.swift */; };
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
@@ -99,6 +101,7 @@
 		078642BC1DDAD892006A3AFB /* TanhAdjustmentLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TanhAdjustmentLayer.swift; sourceTree = "<group>"; };
 		078642BD1DDAD892006A3AFB /* Weak.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Weak.swift; sourceTree = "<group>"; };
 		078642CD1DDAE596006A3AFB /* SummationLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SummationLayer.swift; sourceTree = "<group>"; };
+		078969341ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionLayerV2Tests.swift; sourceTree = "<group>"; };
 		07A0E56B1ED26933007E1A67 /* UIImageExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		07A30DAD1E74F909001077B1 /* Variables.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Variables.swift; sourceTree = "<group>"; };
 		07C8C0781DADAB7900C49827 /* CommandEncoderBaseTest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CommandEncoderBaseTest.swift; sourceTree = "<group>"; };
@@ -109,6 +112,7 @@
 		07E456E11EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationNonTestLayerTests.swift; sourceTree = "<group>"; };
 		07E456E31EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BatchNormalizationNonTestLayer.swift; sourceTree = "<group>"; };
 		07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionBlockTests.swift; sourceTree = "<group>"; };
+		5C1945CEF15867AEEDDFA6DF /* DeconvolutionLayerV2.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeconvolutionLayerV2.swift; sourceTree = "<group>"; };
 		DA0638151DCD0AD100BC496D /* ShaderRegistry.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ShaderRegistry.swift; sourceTree = "<group>"; };
 		DA0638171DCD17D500BC496D /* BatchNormalizationLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = BatchNormalizationLayerTests.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
 		DA0B0C5B1D8BAB4000ED7982 /* NeuralObscura.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = NeuralObscura.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -123,7 +127,7 @@
 		DA0B0C7A1D8BAB4000ED7982 /* NeuralObscuraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = NeuralObscuraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuralObscuraUITests.swift; sourceTree = "<group>"; };
 		DA0B0C801D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		DA445C521EB82516006FF8C3 /* MTLBufferExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLBufferExtensions.swift; sourceTree = "<group>"; };
+		DA445C521EB82516006FF8C3 /* MTLBufferUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLBufferUtil.swift; sourceTree = "<group>"; };
 		DA6942641DEAAADE00285327 /* BGRAToBRGALayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BGRAToBRGALayerTests.swift; sourceTree = "<group>"; };
 		DA6942661DEAAB2900285327 /* BGRAToBRGALayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BGRAToBRGALayer.swift; sourceTree = "<group>"; };
 		DA6D1FAF1D92352C00CD3F49 /* composition_model_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = composition_model_data; sourceTree = "<group>"; };
@@ -174,12 +178,13 @@
 				078642BB1DDAD892006A3AFB /* ReLULayer.swift */,
 				078642BC1DDAD892006A3AFB /* TanhAdjustmentLayer.swift */,
 				077BB3C91D98E0010022578C /* ConvolutionLayer.swift */,
+				0782F4A91E5BAB64005A6FBD /* DeconvolutionBlock.swift */,
+				5C1945CEF15867AEEDDFA6DF /* DeconvolutionLayerV2.swift */,
 				077BB3CD1D98E0E50022578C /* ResidualBlock.swift */,
 				077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */,
 				077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */,
 				078642CD1DDAE596006A3AFB /* SummationLayer.swift */,
 				DA6942661DEAAB2900285327 /* BGRAToBRGALayer.swift */,
-				0782F4A91E5BAB64005A6FBD /* DeconvolutionBlock.swift */,
 				0782F4A71E5BA961005A6FBD /* TensorDotLayer.swift */,
 				07CB823B1E7FA944007BD0BC /* Col2ImLayer.swift */,
 				07E456DB1EC13F960070E9A0 /* BiasLayer.swift */,
@@ -213,7 +218,7 @@
 				078642B91DDAD892006A3AFB /* Globals.swift */,
 				078642B81DDAD892006A3AFB /* Errors.swift */,
 				07A30DAD1E74F909001077B1 /* Variables.swift */,
-				DA445C521EB82516006FF8C3 /* MTLBufferExtensions.swift */,
+				DA445C521EB82516006FF8C3 /* MTLBufferUtil.swift */,
 			);
 			name = Utilities;
 			sourceTree = "<group>";
@@ -230,6 +235,7 @@
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
 				DA6942641DEAAADE00285327 /* BGRAToBRGALayerTests.swift */,
 				07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */,
+				078969341ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift */,
 				07E456DD1EC141140070E9A0 /* BiasLayerTests.swift */,
 			);
 			name = CommandEncoderTests;
@@ -263,8 +269,8 @@
 				DA0B0C601D8BAB4000ED7982 /* ViewController.swift */,
 				DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */,
 				077BB3DF1DA191E60022578C /* Model */,
-				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
 				DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */,
+				DA0B0C621D8BAB4000ED7982 /* Main.storyboard */,
 				DA0B0C6A1D8BAB4000ED7982 /* Info.plist */,
 				DA6D1FAF1D92352C00CD3F49 /* composition_model_data */,
 				DA0B0C651D8BAB4000ED7982 /* Assets.xcassets */,
@@ -458,7 +464,7 @@
 				078642C61DDAD892006A3AFB /* ReLULayer.swift in Sources */,
 				DA8A6C5A1DD0F88E00C6D125 /* MTLPixelFormatExtensions.swift in Sources */,
 				078642C41DDAD892006A3AFB /* Globals.swift in Sources */,
-				DA445C531EB82516006FF8C3 /* MTLBufferExtensions.swift in Sources */,
+				DA445C531EB82516006FF8C3 /* MTLBufferUtil.swift in Sources */,
 				077BB3CA1D98E0010022578C /* ConvolutionLayer.swift in Sources */,
 				0762E9791E157D31005EF3EB /* MPSImageExtensions.swift in Sources */,
 				DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */,
@@ -477,6 +483,7 @@
 				07E456E41EC171360070E9A0 /* BatchNormalizationNonTestLayer.swift in Sources */,
 				077BB3E71DA39D080022578C /* CommandEncoder.swift in Sources */,
 				07A0E56C1ED26933007E1A67 /* UIImageExtensions.swift in Sources */,
+				5C194BDD1F3B21FF96217CEA /* DeconvolutionLayerV2.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -486,6 +493,7 @@
 			files = (
 				07030DE21EAD49B200847F26 /* MTLDeviceExtensionsTests.swift in Sources */,
 				07E456DE1EC141140070E9A0 /* BiasLayerTests.swift in Sources */,
+				078969351ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift in Sources */,
 				07E456E21EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift in Sources */,
 				DA70CE2D1E308B310057D586 /* MPSImageExtensionsTests.swift in Sources */,
 				DA8A6C891DDD5F5800C6D125 /* FileParameterBufferTests.swift in Sources */,

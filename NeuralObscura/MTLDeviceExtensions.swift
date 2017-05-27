@@ -90,7 +90,7 @@ extension MTLDevice {
                     }
                 }
             }
-            let converted = Conversions.float32toFloat16(sliceValues)
+            let converted = Conversions.float32toFloat16(values: sliceValues)
             texture.fillSlice(converted, slice: slice)
         }
         

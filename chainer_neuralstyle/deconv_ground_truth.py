@@ -53,23 +53,27 @@ class DeconvolutionNet(chainer.Chain):
             d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
             b1=L.BatchNormalization(32),
             b2=L.BatchNormalization(64),
-            b3=L.BatchNormalization(128)
+            b3=L.BatchNormalization(128),
+            b4=L.BatchNormalization(64),
+            b5=L.BatchNormalization(32),
         )
 
     def __call__(self, x, test=False):
-        h = F.relu(self.c1(x))
+        h = self.b1(F.elu(self.c1(x)), test=test)
+        h = self.b2(F.elu(self.c2(h)), test=test)
+        h = self.b3(F.elu(self.c3(h)), test=test)
+        h = self.r1(h, test=test)
+        h = self.r2(h, test=test)
+        h = self.r3(h, test=test)
+        h = self.r4(h, test=test)
+        h = self.r5(h, test=test)
+        h = self.b4(F.elu(self.d1(h)), test=test)
+        h = self.b5(F.elu(self.d2(h)), test=test)
         td = h
-        h = self.b1(h, test=test)
-        gt = h
-        # h = self.b2(F.relu(self.c2(h)), test=test)
-        # h = self.b3(F.relu(self.c3(h)), test=test)
-        # h = self.r1(h, test=test)
-        # h = self.r2(h, test=test)
-        # h = self.r3(h, test=test)
-        # h = self.r4(h, test=test)
-        # td = self.r5(h, test=test)
-        # gt = self.d1(td)
+        y = self.d3(h)
+        gt = y
         return (td, gt)
+        # return (F.tanh(y)+1)*127.5
 
 parser = argparse.ArgumentParser(description='Generate input and ground truth data for iOS ML framework tests')
 parser.add_argument('input')

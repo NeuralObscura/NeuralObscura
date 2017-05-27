@@ -39,7 +39,7 @@ class BiasLayer: UnaryCommandEncoder {
         } else {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
-            let biasesConverted = Conversions.float32toFloat16(Array(UnsafeMutableBufferPointer<Float>(start: self.biases.pointer, count: self.biases.count)))
+            let biasesConverted = Conversions.float32toFloat16(pointer: UnsafeMutableRawPointer(mutating: self.biases.pointer), count: self.biases.count)
             let biasesBuffer = ShaderRegistry.getDevice().makeBuffer(
                 bytes: biasesConverted,
                 length: biasesConverted.count * ExpectedFloat16Size,

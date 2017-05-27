@@ -276,6 +276,7 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
                       const device half* weights [[ buffer(2) ]],
                       const device uint* weightsShapeParam [[ buffer(3) ]],
                       uint2 pos [[thread_position_in_grid]]) {
+    /* TODO: Structify these parameters */
     uint nc_out = weightsShapeParam[0];
     uint nkh = weightsShapeParam[1];
     uint nkw = weightsShapeParam[2];
@@ -320,8 +321,6 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
             weightValues[c_in_offset] = weights[index];
         }
         half4 featureMapValues = featureMap.read(uint2(w, h), slice);
-        /* have to weight numerical inaccuracy introduced here with potential speed improvements */
-        /* TODO: lookup how to take full advantage of only using half operations */
         half termGroup = dot(weightValues, featureMapValues);
         /* https://en.wikipedia.org/wiki/Kahan_summation_algorithm */
         half y = termGroup - error;
@@ -392,4 +391,13 @@ kernel void add_bias(texture2d_array<half, access::read> inTexture [[texture(0)]
     half4 workingVals = inTexture.read(gid.xy, gid.z);
     half4 workingBiases = half4(biases[c_base], biases[c_base + 1], biases[c_base + 2], biases[c_base + 3]);
     outTexture.write(workingVals + workingBiases, gid.xy, gid.z);
+}
+
+kernel void deconvolution_interpixel_stride(texture2d_array<half, access::read> inTexture [[texture(0)]],
+                                            texture2d_array<half, access::write> outTexture [[texture(1)]],
+                                            const device uint* stride [[ buffer(2) ]],
+                                            uint3 pos [[thread_position_in_grid]]) {
+    half4 outColor = inTexture.read(pos.xy, pos.z);
+    uint2 outLoc = uint2(pos.x * *stride, pos.y * *stride);
+    outTexture.write(outColor, outLoc, pos.z);
 }

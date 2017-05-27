@@ -10,39 +10,48 @@ import Foundation
 import MetalPerformanceShaders
 
 protocol ParameterBuffer {
-    var pointer: UnsafeMutablePointer<Float> { get }
+    var pointer: UnsafePointer<Float> { get }
     var length: Int { get }
     var count: Int { get }
 }
 
+/* TODO: Consider leveraging Data object? */
 class MemoryParameterBuffer: ParameterBuffer {
-    var pointer: UnsafeMutablePointer<Float>
+    var pointer: UnsafePointer<Float>
     var count: Int
     var length: Int
     
+    init(buffer: UnsafeBufferPointer<Float>) {
+        self.count = buffer.count
+        self.length = self.count * MemoryLayout<Float>.stride
+        self.pointer = buffer.baseAddress!
+    }
+    
     init(_ values: [Float]) {
         self.count = values.count
-        self.length = self.count * MemoryLayout<Float>.size
-        self.pointer = values.withUnsafeBufferPointer({ (buf) -> UnsafeMutablePointer<Float> in
+        self.length = self.count * MemoryLayout<Float>.stride
+        let mutPtr: UnsafeMutablePointer<Float> = values.withUnsafeBufferPointer({ (buf) -> UnsafeMutablePointer<Float> in
             let pointer = UnsafeMutablePointer<Float>.allocate(capacity: buf.count)
             for (i, e) in buf.enumerated() {
                 pointer[i] = e
             }
             return pointer
         })
+        self.pointer = UnsafePointer<Float>(mutPtr)
     }
     
     init(_ values: Float...) {
         self.count = 1
-        self.length = self.count * MemoryLayout<Float>.size
-        self.pointer = UnsafeMutablePointer<Float>.allocate(capacity: 1)
+        self.length = self.count * MemoryLayout<Float>.stride
+        let mutPtr = UnsafeMutablePointer<Float>.allocate(capacity: 1)
         for (i,e) in values.enumerated() {
-            pointer[i] = e
+            mutPtr[i] = e
         }
+        self.pointer = UnsafePointer<Float>(mutPtr)
     }
     
     deinit {
-        pointer.deallocate(capacity: count)
+        UnsafeMutablePointer<Float>(mutating: pointer).deallocate(capacity: count)
     }
 }
 
@@ -51,7 +60,7 @@ class FileParameterBuffer: ParameterBuffer {
     let rawFileName: String
     let modelName: String
     
-    var pointer: UnsafeMutablePointer<Float>
+    var pointer: UnsafePointer<Float>
     var count: Int
     var length: Int
     
@@ -87,10 +96,10 @@ class FileParameterBuffer: ParameterBuffer {
         
         let hdr = mmap(nil, length, PROT_READ, MAP_FILE | MAP_SHARED, fd, 0)
         
-        count = length / MemoryLayout<Float>.size
-        pointer = hdr!.bindMemory(to: Float.self, capacity: count)
+        count = length / MemoryLayout<Float>.stride
+        pointer = UnsafePointer<Float>(hdr!.bindMemory(to: Float.self, capacity: count))
         
-        if pointer == UnsafeMutablePointer<Float>(bitPattern: -1) {
+        if pointer == UnsafePointer<Float>(bitPattern: -1) {
             fatalError("Error: mmap failed, errno = \(errno)")
         }
     }

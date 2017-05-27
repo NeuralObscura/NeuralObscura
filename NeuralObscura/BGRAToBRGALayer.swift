@@ -46,7 +46,7 @@ class BGRAToBRGALayer: UnaryCommandEncoder {
             return img
         } else {
             let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
-            return MPSImage.init(texture: texture, featureChannels: max(4, sourceImage.featureChannels))
+            return MPSImage(texture: texture, featureChannels: max(4, sourceImage.featureChannels))
         }
 
     }
