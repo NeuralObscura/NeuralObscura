@@ -18,7 +18,7 @@ class NeuralStyleModel {
     let c1, c2, c3: ConvolutionLayer
     let b1, b2, b3, b4, b5: BatchNormalizationNonTestLayer
     let r1, r2, r3, r4, r5: ResidualBlock
-    let d1, d2, d3: DeconvolutionBlock
+    let d1, d2, d3: DeconvolutionLayerV2
     let tanhAdj: TanhAdjustmentLayer
     let bgra_to_brga: BGRAToBRGALayer
     let model: AnyCommandEncoder<MPSImage>
@@ -302,7 +302,7 @@ class NeuralStyleModel {
             channelsOut: 128)
 
         // d1=L.Deconvolution2D(128, 64, 4, stride=2, pad=1),
-        d1 = DeconvolutionBlock(
+        d1 = DeconvolutionLayerV2(
             kernelSize: 4,
             channelsIn: 128,
             channelsOut: 64,
@@ -317,7 +317,7 @@ class NeuralStyleModel {
             gamma: modelParams["b4_gamma"]!)
 
         // d2=L.Deconvolution2D(64, 32, 4, stride=2, pad=1),
-        d2 = DeconvolutionBlock(
+        d2 = DeconvolutionLayerV2(
             kernelSize: 4,
             channelsIn: 64,
             channelsOut: 32,
@@ -332,7 +332,7 @@ class NeuralStyleModel {
             gamma: modelParams["b5_gamma"]!)
 
         // d3=L.Deconvolution2D(32, 3, 9, stride=1, pad=4),
-        d3 = DeconvolutionBlock(
+        d3 = DeconvolutionLayerV2(
             kernelSize: 9,
             channelsIn: 32,
             channelsOut: 3,

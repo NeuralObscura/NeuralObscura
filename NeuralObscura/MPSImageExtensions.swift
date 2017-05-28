@@ -19,7 +19,7 @@ extension MPSImage {
         let providerRef = CGDataProvider(
             data: NSData(
                 bytes: &imageBytes,
-                length: imageBytes.count * MemoryLayout<UInt8>.size))
+                length: imageBytes.count * MemoryLayout<UInt8>.stride))
         let bitmapInfo =
             CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
         let imageRef = CGImage(

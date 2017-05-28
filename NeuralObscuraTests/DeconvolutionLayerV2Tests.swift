@@ -26,8 +26,8 @@ class DeconvolutionLayerV2Tests: CommandEncoderBaseTest {
             kernelSize: 4,
             channelsIn: 128,
             channelsOut: 64,
-            weights: w_pb,
-            biases: b_pb,
+            w: w_pb,
+            b: b_pb,
             relu: false,
             padding: 1,
             stride: 2)
@@ -54,8 +54,8 @@ class DeconvolutionLayerV2Tests: CommandEncoderBaseTest {
             kernelSize: 9,
             channelsIn: 32,
             channelsOut: 3,
-            weights: w_pb,
-            biases: b_pb,
+            w: w_pb,
+            b: b_pb,
             relu: false,
             padding: 4,
             stride: 1)
@@ -82,8 +82,8 @@ class DeconvolutionLayerV2Tests: CommandEncoderBaseTest {
             kernelSize: 4,
             channelsIn: 128,
             channelsOut: 64,
-            weights: w_pb,
-            biases: b_pb,
+            w: w_pb,
+            b: b_pb,
             relu: false,
             padding: 1,
             stride: 2)
