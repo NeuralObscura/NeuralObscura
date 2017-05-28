@@ -31,7 +31,6 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
     
     private let transposedWeights: ParameterBuffer
     private let transposedPadding: Int
-    private let stridedKernelSize: Int
     
     private let convolution: MPSCNNConvolution!
     
@@ -55,13 +54,11 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
         self.stride = stride
         
         self.transposedPadding = kernelSize - padding - 1
-        self.stridedKernelSize = ((kernelSize - 1) * stride) + 1
         self.transposedWeights = DeconvolutionLayerV2.transformWeights(
             weights: weights,
             channelsOut: channelsOut,
             kernelSize: kernelSize,
-            channelsIn: channelsIn,
-            stride: stride)
+            channelsIn: channelsIn)
         
         var neuronFilter: MPSCNNNeuron?
         if relu {
@@ -70,8 +67,8 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
         
         // create appropriate convolution descriptor with appropriate stride
         let convDesc = MPSCNNConvolutionDescriptor(
-            kernelWidth: stridedKernelSize,
-            kernelHeight: stridedKernelSize,
+            kernelWidth: kernelSize,
+            kernelHeight: kernelSize,
             inputFeatureChannels: channelsIn,
             outputFeatureChannels: channelsOut,
             neuronFilter: neuronFilter)
@@ -89,8 +86,8 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
         self.convolution.destinationFeatureChannelOffset = 0
         self.convolution.edgeMode = .zero
         self.convolution.offset = MPSOffset(
-            x: (stridedKernelSize / 2) - transposedPadding,
-            y: (stridedKernelSize / 2) - transposedPadding,
+            x: (kernelSize / 2) - transposedPadding,
+            y: (kernelSize / 2) - transposedPadding,
             z: 0)
     }
     
@@ -109,8 +106,42 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
             return outputMemo!
         } else {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
+            var intermediateImage = sourceImage
+            
+            if stride > 1 {
+                let textureDesc = MTLTextureDescriptor()
+                textureDesc.textureType = .type2DArray
+                textureDesc.width = (sourceImage.width - 1) * stride + 1
+                textureDesc.height = (sourceImage.height - 1) * stride + 1
+                textureDesc.pixelFormat = .rgba16Float
+                textureDesc.arrayLength = sourceImage.texture.arrayLength
+                let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
+                let intermediateImage = MPSImage(texture: texture, featureChannels: sourceImage.featureChannels)
+                
+                var ustride = UInt32(stride)
+                let strideBuf = ShaderRegistry.getDevice().makeBuffer(
+                    bytes: &ustride,
+                    length: MemoryLayout<UInt32>.stride,
+                    options: MTLResourceOptions.cpuCacheModeWriteCombined)
+                let encoder = commandBuffer.makeComputeCommandEncoder()
+                let pipelineState = ShaderRegistry.getOrLoad(name: "deconvolution_interpixel_stride")
+                encoder.setComputePipelineState(pipelineState)
+                encoder.setTexture(sourceImage.texture, at: 0)
+                encoder.setTexture(intermediateImage.texture, at: 1)
+                encoder.setBuffer(strideBuf, offset: 0, at: 2)
+                let threadGroupWidth = pipelineState.threadExecutionWidth
+                let threadGroupHeight = pipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
+                let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
+                let gridShape = MTLSize(
+                    width: (sourceImage.width + threadGroupWidth - 1) / threadGroupWidth,
+                    height: (sourceImage.height + threadGroupHeight - 1) / threadGroupHeight,
+                    depth: sourceImage.texture.arrayLength)
+                encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
+                encoder.endEncoding()
+            }
+            
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
-            convolution.encode(commandBuffer: commandBuffer, sourceImage: sourceImage, destinationImage: destinationImage)
+            convolution.encode(commandBuffer: commandBuffer, sourceImage: intermediateImage, destinationImage: destinationImage)
             outputMemoId = commandBuffer.hash
             outputMemo = destinationImage
             return outputMemo!
@@ -158,27 +189,24 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
         weights w: ParameterBuffer,
         channelsOut co: Int,
         kernelSize nk: Int,
-        channelsIn nci: Int,
-        stride s: Int) -> ParameterBuffer {
+        channelsIn nci: Int) -> ParameterBuffer {
         
-        let nkOut = ((nk - 1) * s) + 1
-        let outCount = co * nkOut * nkOut * nci
+        let outCount = co * nk * nk * nci
         
         /* 4D array with dimensions (c_o, h, w, c_i) */
         let in_w = UnsafeBufferPointer<Float>(start: w.pointer, count: w.count)
         let out_w = UnsafeMutablePointer<Float>.allocate(capacity: outCount)
         for co in 0 ..< co {
-            let co_in_off = co * (nk * nk * nci)
-            let co_out_off = co * (nkOut * nkOut * nci)
+            let co_off = co * (nk * nk * nci)
             for kh in 0 ..< nk {
                 let kh_in_off = kh * (nk * nci)
-                let kh_out_off = (nk - 1 - kh) * s * (nkOut * nci)
+                let kh_out_off = (nk - 1 - kh) * (nk * nci)
                 for kw in 0 ..< nk {
                     let kw_in_off = kw * nci
-                    let kw_out_off = (nk - 1 - kw) * s * nci
+                    let kw_out_off = (nk - 1 - kw) * nci
                     for ci in 0 ..< nci {
-                        out_w[co_out_off + kh_out_off + kw_out_off + ci] =
-                            in_w[co_in_off + kh_in_off + kw_in_off + ci]
+                        out_w[co_off + kh_out_off + kw_out_off + ci] =
+                            in_w[co_off + kh_in_off + kw_in_off + ci]
                     }
                 }
             }
@@ -187,43 +215,5 @@ class DeconvolutionLayerV2: UnaryCommandEncoder {
         return MemoryParameterBuffer(
             buffer: UnsafeBufferPointer<Float>.init(start: out_w, count: outCount))
     }
-    
-//    /*  Inject stride so we can use convolution to calculate deconvolution.
-//        The transform is a vertical flip of the kernel height axis,
-//        then a horizontal flip of the kernel width axis. */
-//    static func transformWeightsNoFlip(
-//        weights w: ParameterBuffer,
-//        channelsOut co: Int,
-//        kernelSize nk: Int,
-//        channelsIn nci: Int,
-//        stride s: Int) -> ParameterBuffer {
-//        
-//        let nkOut = ((nk - 1) * s) + 1
-//        let outCount = co * nkOut * nkOut * nci
-//        
-//        /* 4D array with dimensions (c_o, h, w, c_i) */
-//        let in_w = UnsafeBufferPointer<Float>(start: w.pointer, count: w.count)
-//        let out_w = UnsafeMutablePointer<Float>.allocate(capacity: outCount)
-//        for co in 0 ..< co {
-//            let co_in_off = co * (nk * nk * nci)
-//            let co_out_off = co * (nkOut * nkOut * nci)
-//            for kh in 0 ..< nk {
-//                let kh_in_off = kh * (nk * nci)
-//                let kh_out_off = kh * s * (nkOut * nci)
-//                for kw in 0 ..< nk {
-//                    let kw_in_off = kw * nci
-//                    let kw_out_off = kw * s * nci
-//                    for ci in 0 ..< nci {
-//                        out_w[co_out_off + kh_out_off + kw_out_off + ci] =
-//                            in_w[co_in_off + kh_in_off + kw_in_off + ci]
-//                    }
-//                }
-//            }
-//        }
-//        
-//        return MemoryParameterBuffer(
-//            buffer: UnsafeBufferPointer<Float>.init(start: out_w, count: outCount))
-//    }
-    
 }
 

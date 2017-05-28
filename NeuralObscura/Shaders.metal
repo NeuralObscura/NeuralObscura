@@ -289,7 +289,7 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
         return;
     }
     
-    _4d_shape weightsShape = { nc_in, nkh, nkw, nc_out };
+    _4d_shape weightsShape = { nc_out, nkh, nkw, nc_in };
     uint nslices = featureMap.get_array_size();
     
     /* pos[0] is a 1d index into a 2d array with shape (nh, nw) */
@@ -316,7 +316,7 @@ kernel void tensordot(texture2d_array<half, access::read> featureMap [[texture(0
         half4 weightValues;
         uint c_in_base = slice * 4;
         for (uint c_in_offset = 0; c_in_offset < 4; ++c_in_offset) {
-            _4d_index weightsIndex = { c_in_base + c_in_offset, kh, kw, c_out };
+            _4d_index weightsIndex = { c_out, kh, kw, c_in_base + c_in_offset };
             uint index = _4d_index_to_1d_index(weightsShape, weightsIndex);
             weightValues[c_in_offset] = weights[index];
         }

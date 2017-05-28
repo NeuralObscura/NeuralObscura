@@ -33,7 +33,5 @@ class BatchNormalizationNonTestLayerTests: CommandEncoderBaseTest {
         execute()
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
-        print(outputImg)
-        print(expImg)
     }
 }

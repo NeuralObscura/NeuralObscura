@@ -40,8 +40,6 @@ class DeconvolutionLayerV2Tests: CommandEncoderBaseTest {
         let expImg = MPSImage.fromNumpy(expUrl)
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
-        print(outputImg)
-        print(expImg)
     }
     
     func testGroundTruth2() {
@@ -68,11 +66,8 @@ class DeconvolutionLayerV2Tests: CommandEncoderBaseTest {
         let expUrl = Bundle(for: type(of: self))
             .url(forResource: "deconv_expected_output_2", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.fromNumpy(expUrl)
-        print(expImg)
         
         XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
-//        print(outputImg)
-//        print(expImg)
     }
     
     func testLargeDeconv() {

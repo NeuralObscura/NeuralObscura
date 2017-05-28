@@ -216,7 +216,6 @@ extension MPSImage {
         let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
         
         for i in 0 ..< slices {
-            print("slice")
             lhsTexture.getBytes(lhsRawPtr,
                                 bytesPerRow: lhsRowSize,
                                 bytesPerImage: lhsImageSize,
