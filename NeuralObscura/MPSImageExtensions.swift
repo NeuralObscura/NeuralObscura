@@ -21,7 +21,8 @@ extension MPSImage {
                 bytes: &imageBytes,
                 length: imageBytes.count * MemoryLayout<UInt8>.stride))
         let bitmapInfo =
-            CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
+            CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue)
+//                | CGImageAlphaInfo.premultipliedLast.rawValue)
         let imageRef = CGImage(
             width: texture.width,
             height: texture.height,

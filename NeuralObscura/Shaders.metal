@@ -151,10 +151,10 @@ kernel void add(texture2d_array<half, access::read> inTexture1 [[texture(0)]],
  * Formula: output = (tanh(input)+1)*127.5
  */
 kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[texture(0)]],
-                            texture2d_array<half, access::write> outTexture [[texture(1)]],
+                            texture2d<half, access::write> outTexture [[texture(1)]],
                             uint3 gid [[thread_position_in_grid]]) {
     half4 pixel = inTexture.read(gid.xy, gid.z);
-    pixel = (tanh(pixel) + 1) * 127.5;
+    pixel = (tanh(pixel) + 1) / 2;
     pixel = half4(pixel[1], pixel[2], pixel[0], 255);
     outTexture.write(pixel, gid.xy, gid.z);
 }
