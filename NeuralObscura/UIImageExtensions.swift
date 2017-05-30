@@ -20,7 +20,17 @@ extension UIImage {
     }
 
     func toMTLTexture(device: MTLDevice, debug: Bool) -> MTLTexture {
-        let ciContext = CIContext.init(mtlDevice: device)
+
+        let cgImage: CGImage
+        if let img = self.cgImage {
+            cgImage = img
+        } else {
+            let ciImage = CIImage.init(image: self, options: [kCIImageColorSpace: CGColorSpace.adobeRGB1998])!
+            let ciContext = CIContext.init(mtlDevice: device)
+            cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent)!
+        }
+
+        let textureLoader = MTKTextureLoader(device: device)
         var options: [String : NSObject] = [
             MTKTextureLoaderOptionTextureUsage: MTLTextureUsage.shaderRead.rawValue as NSNumber,
             MTKTextureLoaderOptionAllocateMipmaps: false as NSNumber,
@@ -33,16 +43,6 @@ extension UIImage {
         } else {
             options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.private.rawValue as NSNumber
         }
-
-        let cgImage: CGImage
-        if let img = self.cgImage {
-            cgImage = img
-        } else {
-            let ciImage = CIImage.init(image: self)!
-            cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent)!
-        }
-
-        let textureLoader = MTKTextureLoader(device: device)
         let texture = try! textureLoader.newTexture(with: cgImage, options: options)
         return texture
     }

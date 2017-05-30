@@ -27,7 +27,9 @@ class NeuralStyleTests: CommandEncoderBaseTest {
             .url(forResource: "inc_gt_0", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.fromNumpy(expUrl)
         
-        XCTAssert(outImg.isLossyEqual(image: expImg, precision: -1))
+        XCTAssert(outImg.isLossyEqual(image: expImg, precision: 0))
+        print(outImg)
+        print(expImg)
     }
     
     func testStage1() {

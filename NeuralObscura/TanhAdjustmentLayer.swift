@@ -38,7 +38,7 @@ class TanhAdjustmentLayer: UnaryCommandEncoder {
         textureDesc.textureType = .type2D
         textureDesc.usage = MTLTextureUsage(rawValue:
             MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
-        textureDesc.pixelFormat = .bgra8Unorm_srgb
+        textureDesc.pixelFormat = .bgra8Unorm
         
         if useTemporary {
             let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)

@@ -10,6 +10,14 @@ import MetalPerformanceShaders
 import UIKit
 
 extension MPSImage {
+    func toUIImageV2() -> UIImage {
+        let ciImageOptions: [String : Any] = [
+            kCIImageColorSpace: CGColorSpace.sRGB,
+        ]
+        let ciImg = CIImage.init(mtlTexture: self.texture, options: ciImageOptions)!
+        return UIImage(ciImage: ciImg)
+    }
+    
     func toUIImage() -> UIImage {
         let texture = self.texture
         let bytesPerRow = self.pixelSize * texture.width
