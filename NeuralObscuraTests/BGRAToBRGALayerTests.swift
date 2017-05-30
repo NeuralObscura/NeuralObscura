@@ -20,12 +20,10 @@ class BGRAToBRGALayerTests: CommandEncoderBaseTest {
         let image = UIImage.init(data: debugImageData)!
         let testTex = image.toMTLTexture(device: device)
         let testImg = MPSImage(texture: testTex, featureChannels: 4)
-        print(testImg.pixelFormat.rawValue)
 
         let bgraToBRGA = BGRAToBRGALayer()
         let outputImg = bgraToBRGA.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
-        print(outputImg.UnormToString())
 
         let expImg = device.makeMPSImage(
                 width: 4,

@@ -308,6 +308,7 @@ class NeuralStyleModel {
             channelsOut: 64,
             w: modelParams["d1_W"]!,
             b: modelParams["d1_b"]!,
+            relu: true,
             padding: 1,
             stride: 2)
 
@@ -323,6 +324,7 @@ class NeuralStyleModel {
             channelsOut: 32,
             w: modelParams["d2_W"]!,
             b: modelParams["d2_b"]!,
+            relu: true,
             padding: 1,
             stride: 2)
 

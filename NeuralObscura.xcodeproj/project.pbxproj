@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		07030DE21EAD49B200847F26 /* MTLDeviceExtensionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 07030DE11EAD49B200847F26 /* MTLDeviceExtensionsTests.swift */; };
+		070843361EDCDBF200AA951D /* NeuralStyleModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 070843351EDCDBF200AA951D /* NeuralStyleModelTests.swift */; };
 		072D18901E2D7D8B00E3A502 /* testdata in Resources */ = {isa = PBXBuildFile; fileRef = 072D188F1E2D7D8B00E3A502 /* testdata */; };
 		0762E9771E157CF4005EF3EB /* MTLDeviceExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0762E9761E157CF4005EF3EB /* MTLDeviceExtensions.swift */; };
 		0762E9791E157D31005EF3EB /* MPSImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0762E9781E157D31005EF3EB /* MPSImageExtensions.swift */; };
@@ -83,6 +84,7 @@
 
 /* Begin PBXFileReference section */
 		07030DE11EAD49B200847F26 /* MTLDeviceExtensionsTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLDeviceExtensionsTests.swift; sourceTree = "<group>"; };
+		070843351EDCDBF200AA951D /* NeuralStyleModelTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModelTests.swift; sourceTree = "<group>"; };
 		072D188F1E2D7D8B00E3A502 /* testdata */ = {isa = PBXFileReference; lastKnownFileType = folder; path = testdata; sourceTree = "<group>"; };
 		0762E9761E157CF4005EF3EB /* MTLDeviceExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLDeviceExtensions.swift; sourceTree = "<group>"; };
 		0762E9781E157D31005EF3EB /* MPSImageExtensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; lineEnding = 0; path = MPSImageExtensions.swift; sourceTree = "<group>"; xcLanguageSpecificationIdentifier = xcode.lang.swift; };
@@ -286,6 +288,7 @@
 				07030DE11EAD49B200847F26 /* MTLDeviceExtensionsTests.swift */,
 				DA8A6C851DDD5F5800C6D125 /* ImageFormatTests.swift */,
 				DA70CE2C1E308B310057D586 /* MPSImageExtensionsTests.swift */,
+				070843351EDCDBF200AA951D /* NeuralStyleModelTests.swift */,
 				DA0B0C751D8BAB4000ED7982 /* Info.plist */,
 				072D188F1E2D7D8B00E3A502 /* testdata */,
 			);
@@ -493,6 +496,7 @@
 			files = (
 				07030DE21EAD49B200847F26 /* MTLDeviceExtensionsTests.swift in Sources */,
 				07E456DE1EC141140070E9A0 /* BiasLayerTests.swift in Sources */,
+				070843361EDCDBF200AA951D /* NeuralStyleModelTests.swift in Sources */,
 				078969351ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift in Sources */,
 				07E456E21EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift in Sources */,
 				DA70CE2D1E308B310057D586 /* MPSImageExtensionsTests.swift in Sources */,

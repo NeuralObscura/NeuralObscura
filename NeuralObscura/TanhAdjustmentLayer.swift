@@ -38,7 +38,7 @@ class TanhAdjustmentLayer: UnaryCommandEncoder {
         textureDesc.textureType = .type2D
         textureDesc.usage = MTLTextureUsage(rawValue:
             MTLTextureUsage.shaderWrite.rawValue | MTLTextureUsage.shaderRead.rawValue)
-        textureDesc.pixelFormat = .rgba8Unorm_srgb
+        textureDesc.pixelFormat = .bgra8Unorm_srgb
         
         if useTemporary {
             let img = MPSTemporaryImage.init(commandBuffer: commandBuffer, textureDescriptor: textureDesc)
@@ -46,9 +46,8 @@ class TanhAdjustmentLayer: UnaryCommandEncoder {
             return img
         } else {
             let texture = ShaderRegistry.getDevice().makeTexture(descriptor: textureDesc)
-            return MPSImage.init(texture: texture, featureChannels: max(4, sourceImage.featureChannels))
+            return MPSImage.init(texture: texture, featureChannels: 3)
         }
-
     }
     
     func forward(commandBuffer: MTLCommandBuffer) -> MPSImage {
@@ -56,6 +55,7 @@ class TanhAdjustmentLayer: UnaryCommandEncoder {
             return outputMemo!
         } else {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
+            
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
             let encoder = commandBuffer.makeComputeCommandEncoder()
             encoder.setComputePipelineState(ShaderRegistry.getOrLoad(name: "tanh_adjustment"))

@@ -13,15 +13,15 @@ import MetalPerformanceShaders
 
 class MPSImageExtensionsTests: CommandEncoderBaseTest {
 
-    func testToUIImage() {
-        let testUrl = Bundle(for: type(of: self))
-            .url(forResource: "debug", withExtension: "npy", subdirectory: "testdata")!
-        let testMpsImg = MPSImage.fromNumpy(testUrl)
-        
-        let testUiImg = testMpsImg.toUIImage()
-        let outMpsImg = testUiImg.toMPSImage(device: device)
-        XCTAssertEqual(outMpsImg, testMpsImg)
-    }
+//    func testToUIImage() {
+//        let testUrl = Bundle(for: type(of: self))
+//            .url(forResource: "debug", withExtension: "npy", subdirectory: "testdata")!
+//        let testMpsImg = MPSImage.fromNumpy(testUrl)
+//        
+//        let testUiImg = testMpsImg.toUIImage()
+//        let outMpsImg = testUiImg.toMPSImage(device: device)
+//        XCTAssertEqual(outMpsImg, testMpsImg)
+//    }
     
 //    func testFloat32ToString() {
 //        let debug2ImageUrl = Bundle(for: type(of: self))

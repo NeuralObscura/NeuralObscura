@@ -155,7 +155,7 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
                             uint3 gid [[thread_position_in_grid]]) {
     half4 pixel = inTexture.read(gid.xy, gid.z);
     pixel = (tanh(pixel) + 1) / 2;
-    pixel = half4(pixel[1], pixel[2], pixel[0], 255);
+    pixel = half4(pixel[1], pixel[2], pixel[0], 1.0);
     outTexture.write(pixel, gid.xy, gid.z);
 }
 
@@ -170,9 +170,10 @@ kernel void bgra_to_brga(texture2d<half, access::read> inTexture [[texture(0)]],
         return;
     }
 
-    half4 input = inTexture.read(pos.xy, pos.z);
-    half4 output = half4(input[0], input[2], input[1], input[3]);
-    outTexture.write(output, pos.xy, pos.z);
+    half4 pixel = inTexture.read(pos.xy, pos.z);
+    pixel = pixel * 255.0;
+    pixel[3] = 0.0;
+    outTexture.write(pixel, pos.xy, pos.z);
 }
 
 struct _2d_shape {

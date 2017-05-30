@@ -22,26 +22,29 @@ extension UIImage {
     func toMTLTexture(device: MTLDevice, debug: Bool) -> MTLTexture {
         let ciContext = CIContext.init(mtlDevice: device)
         var options: [String : NSObject] = [
-            MTKTextureLoaderOptionTextureUsage:         MTLTextureUsage.shaderRead.rawValue as NSObject,
-            MTKTextureLoaderOptionOrigin:               MTKTextureLoaderOriginTopLeft as NSObject,
+            MTKTextureLoaderOptionTextureUsage: MTLTextureUsage.shaderRead.rawValue as NSNumber,
+            MTKTextureLoaderOptionAllocateMipmaps: false as NSNumber,
+            MTKTextureLoaderOptionGenerateMipmaps: false as NSNumber,
+            MTKTextureLoaderOptionSRGB: false as NSNumber
         ]
 
         if (debug) {
-            options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.shared.rawValue as NSObject
+            options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.shared.rawValue as NSNumber
         } else {
-            options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.private.rawValue as NSObject
+            options[MTKTextureLoaderOptionTextureStorageMode] = MTLStorageMode.private.rawValue as NSNumber
         }
 
         let cgImage: CGImage
         if let img = self.cgImage {
             cgImage = img
         } else {
-            let ciImage = CIImage(image: self)
-            cgImage = ciContext.createCGImage(ciImage!, from: ciImage!.extent)!
+            let ciImage = CIImage.init(image: self)!
+            cgImage = ciContext.createCGImage(ciImage, from: ciImage.extent)!
         }
 
         let textureLoader = MTKTextureLoader(device: device)
-        return try! textureLoader.newTexture(with: cgImage, options: options)
+        let texture = try! textureLoader.newTexture(with: cgImage, options: options)
+        return texture
     }
 
 }

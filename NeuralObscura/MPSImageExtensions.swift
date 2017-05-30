@@ -13,17 +13,16 @@ extension MPSImage {
     func toUIImage() -> UIImage {
         let texture = self.texture
         let bytesPerRow = self.pixelSize * texture.width
-        var imageBytes = [UInt8](repeating: 0, count: texture.width * texture.height * self.pixelSize)
+        var imageBytes = [UInt8](repeating: 0, count: bytesPerRow * texture.height)
         let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
         texture.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
-        let providerRef = CGDataProvider(
+        let providerRef = CGDataProvider.init(
             data: NSData(
                 bytes: &imageBytes,
-                length: imageBytes.count * MemoryLayout<UInt8>.stride))
+                length: imageBytes.count))
         let bitmapInfo =
-            CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue)
-//                | CGImageAlphaInfo.premultipliedLast.rawValue)
-        let imageRef = CGImage(
+            CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.noneSkipLast.rawValue)
+        let imageRef = CGImage.init(
             width: texture.width,
             height: texture.height,
             bitsPerComponent: 8,
@@ -346,23 +345,29 @@ extension MPSImage {
                                                                                             height: self.height))
         var outputString: String = ""
 
-        for i in 0 ..< self.texture.arrayLength {
+        for slice in 0 ..< self.texture.arrayLength {
             self.texture.getBytes(
                     ptr,
                     bytesPerRow: bytesPerRow,
                     bytesPerImage: bytesPerSlice,
                     from: MTLRegionMake2D(0, 0, self.width, self.height),
                     mipmapLevel: 0,
-                    slice: i)
+                    slice: slice)
             let buffer = UnsafeBufferPointer<UInt8>(start: ptr, count: self.pixelFormat.typedSize(width: self.width,
                                                                                                   height: self.height))
             for channel in 0..<self.pixelFormat.channelCount {
-                for i in stride(from: channel, to: buffer.count, by: self.pixelFormat.channelCount) {
-                    outputString += String(format: "%3d ", buffer[i])
+                outputString += "Channel \(slice * 4 + channel):\n"
+                for i in 0 ..< self.texture.height {
+                    for j in 0 ..< self.texture.width {
+                        let index = i * (self.texture.width * 4) + j * 4 + channel
+                        outputString += String(format: "%3d ", buffer[index])
+                    }
+                    outputString += "\n"
                 }
                 outputString += "\n"
             }
         }
+        outputString += "\n"
 
         return outputString
     }
@@ -377,22 +382,28 @@ extension MPSImage {
 
         let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
 
-        for i in 0...(slices-1) {
+        for slice in 0...(slices-1) {
             self.texture.getBytes(ptr,
                                   bytesPerRow: bytesPerRow,
                                   bytesPerImage: bytesPerImage,
                                   from: MTLRegionMake2D(0, 0, self.width, self.height),
                                   mipmapLevel: 0,
-                                  slice: i)
+                                  slice: slice)
             let buffer = UnsafeBufferPointer<Float32>(start: ptr, count: self.pixelFormat.typedSize(width: self.width,
                                                                                                     height: self.height))
             for channel in 0..<self.pixelFormat.channelCount {
-                for i in stride(from: channel, to: buffer.count, by: self.pixelFormat.channelCount) {
-                    outputString += String(format: "%.2f ", buffer[i])
+                outputString += "Channel \(slice * 4 + channel):\n"
+                for i in 0 ..< self.texture.height {
+                    for j in 0 ..< self.texture.width {
+                        let index = i * (self.texture.width * 4) + j * 4 + channel
+                        outputString += String(format: "%.2f", buffer[index])
+                    }
+                    outputString += "\n"
                 }
                 outputString += "\n"
             }
         }
+        outputString += "\n"
 
         return outputString
     }
@@ -407,21 +418,27 @@ extension MPSImage {
 
         let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
 
-        for i in 0...(slices-1) {
+        for slice in 0 ..< slices {
             self.texture.getBytes(ptr,
                                   bytesPerRow: bytesPerRow,
                                   bytesPerImage: bytesPerImage,
                                   from: MTLRegionMake2D(0, 0, self.width, self.height),
                                   mipmapLevel: 0,
-                                  slice: i)
+                                  slice: slice)
             let convertedBuffer = Conversions.float16toFloat32(pointer: ptr, count: self.width * self.height * self.pixelFormat.channelCount)
             for channel in 0..<self.pixelFormat.channelCount {
-                for i in stride(from: channel, to: convertedBuffer.count, by: self.pixelFormat.channelCount) {
-                    outputString += String(format: "%.2f ", convertedBuffer[i])
+                outputString += "Channel \(slice * 4 + channel):\n"
+                for i in 0 ..< self.texture.height {
+                    for j in 0 ..< self.texture.width {
+                        let index = i * (self.texture.width * 4) + j * 4 + channel
+                        outputString += String(format: "%.2f ", convertedBuffer[index])
+                    }
+                    outputString += "\n"
                 }
                 outputString += "\n"
             }
         }
+        outputString += "\n"
         return outputString
     }
 }

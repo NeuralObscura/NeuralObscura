@@ -36,8 +36,8 @@ class TanhAdjustmentLayerTests: CommandEncoderBaseTest {
                                                    0,0],
                                                   [0,0,
                                                    0,0],
-                                                  [0,0,
-                                                   0,0]])
+                                                  [255,255,
+                                                   255,255]])
         XCTAssertEqual(outputImg, expImg)
     }
 }
