@@ -159,21 +159,18 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
     outTexture.write(pixel, gid.xy, gid.z);
 }
 
-/* BGRA -> BRGA
- *
+/* Convert rgba8Unorm into rgba16Float
  */
-kernel void bgra_to_brga(texture2d<half, access::read> inTexture [[texture(0)]],
-                         texture2d<half, access::write> outTexture [[texture(1)]],
-                         uint3 pos [[thread_position_in_grid]]) {
+kernel void unorm_to_half(texture2d<half, access::read> inTexture [[texture(0)]],
+                          texture2d<half, access::write> outTexture [[texture(1)]],
+                          uint2 pos [[thread_position_in_grid]]) {
     
     if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
         return;
     }
 
-    half4 pixel = inTexture.read(pos.xy, pos.z);
-    pixel = pixel * 255.0;
-    pixel[3] = 0.0;
-    outTexture.write(pixel, pos.xy, pos.z);
+    half4 pixel = inTexture.read(pos.xy);
+    outTexture.write(half4(pixel.x * 255.0, pixel.y * 255.0, pixel.z * 255.0, 0.0), pos.xy);
 }
 
 struct _2d_shape {

@@ -12,13 +12,35 @@ import MetalPerformanceShaders
 @testable import NeuralObscura
 
 class NeuralStyleTests: CommandEncoderBaseTest {
+
+    func testImageLoad() {
+        let testUrl = Bundle(for: type(of: self))
+            .url(forResource: "tubingen", withExtension: "jpg", subdirectory: "testdata")!
+        let testImg = UIImage.init(contentsOfFile: testUrl.path)!.toMPSImage(device: device)
+
+        let outImg = UnormToHalfLayer()
+            .chain(MPSImageVariable(testImg))
+            .forward(commandBuffer: commandBuffer)
+        execute()
+
+        let expUrl = Bundle(for: type(of: self))
+            .url(forResource: "tubingen", withExtension: "npy", subdirectory: "testdata")!
+        let expImg = MPSImage.fromNumpy(expUrl)
+
+        print(outImg)
+        print("-----------------------------------------------------------------------")
+        print(expImg)
+        print("-----------------------------------------------------------------------")
+        XCTAssert(testImg.isLossyEqual(image: expImg, precision: 0))
+    }
+
     
     func testStage0() {
         let testUrl = Bundle(for: type(of: self))
             .url(forResource: "tubingen", withExtension: "jpg", subdirectory: "testdata")!
         let testImg = UIImage.init(contentsOfFile: testUrl.path)!.toMPSImage(device: device)
         
-        let outImg = BGRAToBRGALayer()
+        let outImg = UnormToHalfLayer()
             .chain(MPSImageVariable(testImg))
             .forward(commandBuffer: commandBuffer)
         execute()
@@ -40,7 +62,7 @@ class NeuralStyleTests: CommandEncoderBaseTest {
         let c1_w = FileParameterBuffer(modelName: "composition", rawFileName: "c1_W")
         let c1_b = FileParameterBuffer(modelName: "composition", rawFileName: "c1_b")
         
-        let preprocess = BGRAToBRGALayer()
+        let preprocess = UnormToHalfLayer()
         let c1 = ConvolutionLayer(
             kernelSize: 9,
             channelsIn: 3,

@@ -1,5 +1,5 @@
 //
-//  BGRAToBRGALayer.swift
+//  UnormToHalfLayer.swift
 //  NeuralObscura
 //
 //  Created by Paul Bergeron on 11/26/16.
@@ -9,7 +9,7 @@
 import Foundation
 import MetalPerformanceShaders
 
-class BGRAToBRGALayer: UnaryCommandEncoder {
+class UnormToHalfLayer: UnaryCommandEncoder {
     private let useTemporary: Bool
     private var consumerCount: Int = 0
     var input: AnyCommandEncoder<MPSImage>!
@@ -58,11 +58,11 @@ class BGRAToBRGALayer: UnaryCommandEncoder {
             let sourceImage = input.forward(commandBuffer: commandBuffer)
             let destinationImage = self.destinationImage(sourceImage: sourceImage, commandBuffer: commandBuffer)
             let encoder = commandBuffer.makeComputeCommandEncoder()
-            let pipelineState = ShaderRegistry.getOrLoad(name: "bgra_to_brga")
+            let pipelineState = ShaderRegistry.getOrLoad(name: "unorm_to_half")
             encoder.setComputePipelineState(pipelineState)
             encoder.setTexture(sourceImage.texture, at: 0)
             encoder.setTexture(destinationImage.texture, at: 1)
-            
+
             let threadGroupWidth = pipelineState.threadExecutionWidth
             let threadGroupHeight = pipelineState.maxTotalThreadsPerThreadgroup / threadGroupWidth
             let threadGroupShape = MTLSizeMake(threadGroupWidth, threadGroupHeight, 1)
@@ -70,7 +70,7 @@ class BGRAToBRGALayer: UnaryCommandEncoder {
                 width: (destinationImage.width + threadGroupWidth - 1) / threadGroupWidth,
                 height: (destinationImage.height + threadGroupHeight - 1) / threadGroupHeight,
                 depth: destinationImage.texture.arrayLength)
-            
+
             encoder.dispatchThreadgroups(gridShape, threadsPerThreadgroup: threadGroupShape)
             encoder.endEncoding()
             

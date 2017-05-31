@@ -20,7 +20,7 @@ class NeuralStyleModel {
     let r1, r2, r3, r4, r5: ResidualBlock
     let d1, d2, d3: DeconvolutionLayerV2
     let tanhAdj: TanhAdjustmentLayer
-    let bgra_to_brga: BGRAToBRGALayer
+    let unorm_to_half: UnormToHalfLayer
     let model: AnyCommandEncoder<MPSImage>
 
     init(modelName: String,
@@ -216,7 +216,7 @@ class NeuralStyleModel {
         /* Init model encoders */
         src = MPSImageVariable()
         
-        bgra_to_brga = BGRAToBRGALayer()
+        unorm_to_half = UnormToHalfLayer()
 
         // c1=L.Convolution2D(3, 32, 9, stride=1, pad=4),
         c1 = ConvolutionLayer(
@@ -348,7 +348,7 @@ class NeuralStyleModel {
 
         /* Chain model encoders together */
         var h: AnyCommandEncoder<MPSImage>
-        h = bgra_to_brga.chain(src)
+        h = unorm_to_half.chain(src)
 
         // h = self.b1(F.elu(self.c1(top)), test=test)
         h = b1.chain(c1.chain(h))

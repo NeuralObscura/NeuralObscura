@@ -48,8 +48,8 @@
 		DA0B0C691D8BAB4000ED7982 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = DA0B0C671D8BAB4000ED7982 /* LaunchScreen.storyboard */; };
 		DA0B0C7F1D8BAB4000ED7982 /* NeuralObscuraUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */; };
 		DA445C531EB82516006FF8C3 /* MTLBufferUtil.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA445C521EB82516006FF8C3 /* MTLBufferUtil.swift */; };
-		DA6942651DEAAADE00285327 /* BGRAToBRGALayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942641DEAAADE00285327 /* BGRAToBRGALayerTests.swift */; };
-		DA6942671DEAAB2900285327 /* BGRAToBRGALayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942661DEAAB2900285327 /* BGRAToBRGALayer.swift */; };
+		DA6942651DEAAADE00285327 /* UnormToHalfLayerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942641DEAAADE00285327 /* UnormToHalfLayerTests.swift */; };
+		DA6942671DEAAB2900285327 /* UnormToHalfLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6942661DEAAB2900285327 /* UnormToHalfLayer.swift */; };
 		DA6D1FB01D92352C00CD3F49 /* composition_model_data in Resources */ = {isa = PBXBuildFile; fileRef = DA6D1FAF1D92352C00CD3F49 /* composition_model_data */; };
 		DA6D1FB21D923BB500CD3F49 /* ParameterBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */; };
 		DA6D1FB41D92461400CD3F49 /* NeuralStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */; };
@@ -130,8 +130,8 @@
 		DA0B0C7E1D8BAB4000ED7982 /* NeuralObscuraUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NeuralObscuraUITests.swift; sourceTree = "<group>"; };
 		DA0B0C801D8BAB4000ED7982 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		DA445C521EB82516006FF8C3 /* MTLBufferUtil.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MTLBufferUtil.swift; sourceTree = "<group>"; };
-		DA6942641DEAAADE00285327 /* BGRAToBRGALayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BGRAToBRGALayerTests.swift; sourceTree = "<group>"; };
-		DA6942661DEAAB2900285327 /* BGRAToBRGALayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BGRAToBRGALayer.swift; sourceTree = "<group>"; };
+		DA6942641DEAAADE00285327 /* UnormToHalfLayerTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnormToHalfLayerTests.swift; sourceTree = "<group>"; };
+		DA6942661DEAAB2900285327 /* UnormToHalfLayer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UnormToHalfLayer.swift; sourceTree = "<group>"; };
 		DA6D1FAF1D92352C00CD3F49 /* composition_model_data */ = {isa = PBXFileReference; lastKnownFileType = folder; path = composition_model_data; sourceTree = "<group>"; };
 		DA6D1FB11D923BB500CD3F49 /* ParameterBuffer.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ParameterBuffer.swift; sourceTree = "<group>"; };
 		DA6D1FB31D92461400CD3F49 /* NeuralStyleModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NeuralStyleModel.swift; sourceTree = "<group>"; };
@@ -186,7 +186,7 @@
 				077BB3CB1D98E0890022578C /* FullyConnectedLayer.swift */,
 				077BB3D41D9B063F0022578C /* BatchNormalizationLayer.swift */,
 				078642CD1DDAE596006A3AFB /* SummationLayer.swift */,
-				DA6942661DEAAB2900285327 /* BGRAToBRGALayer.swift */,
+				DA6942661DEAAB2900285327 /* UnormToHalfLayer.swift */,
 				0782F4A71E5BA961005A6FBD /* TensorDotLayer.swift */,
 				07CB823B1E7FA944007BD0BC /* Col2ImLayer.swift */,
 				07E456DB1EC13F960070E9A0 /* BiasLayer.swift */,
@@ -235,7 +235,7 @@
 				07E456E11EC16AEF0070E9A0 /* BatchNormalizationNonTestLayerTests.swift */,
 				DA8A6C871DDD5F5800C6D125 /* TanhAdjustmentLayerTests.swift */,
 				07C8C0791DADAB7900C49827 /* ConvolutionLayerTests.swift */,
-				DA6942641DEAAADE00285327 /* BGRAToBRGALayerTests.swift */,
+				DA6942641DEAAADE00285327 /* UnormToHalfLayerTests.swift */,
 				07F68DA01DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift */,
 				078969341ED670F6001F4B1D /* DeconvolutionLayerV2Tests.swift */,
 				07E456DD1EC141140070E9A0 /* BiasLayerTests.swift */,
@@ -382,18 +382,18 @@
 				TargetAttributes = {
 					DA0B0C5A1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = FJQDM4N4ZQ;
+						DevelopmentTeam = DFVY326C5E;
 						ProvisioningStyle = Automatic;
 					};
 					DA0B0C6E1D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = FJQDM4N4ZQ;
+						DevelopmentTeam = DFVY326C5E;
 						ProvisioningStyle = Automatic;
 						TestTargetID = DA0B0C5A1D8BAB4000ED7982;
 					};
 					DA0B0C791D8BAB4000ED7982 = {
 						CreatedOnToolsVersion = 8.0;
-						DevelopmentTeam = FJQDM4N4ZQ;
+						DevelopmentTeam = DFVY326C5E;
 						ProvisioningStyle = Automatic;
 						TestTargetID = DA0B0C5A1D8BAB4000ED7982;
 					};
@@ -455,7 +455,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				DA6942671DEAAB2900285327 /* BGRAToBRGALayer.swift in Sources */,
+				DA6942671DEAAB2900285327 /* UnormToHalfLayer.swift in Sources */,
 				07E456DC1EC13F960070E9A0 /* BiasLayer.swift in Sources */,
 				0782F4A81E5BA961005A6FBD /* TensorDotLayer.swift in Sources */,
 				07CB823C1E7FA944007BD0BC /* Col2ImLayer.swift in Sources */,
@@ -509,7 +509,7 @@
 				DA8A6C8B1DDD5F5800C6D125 /* ReLULayerTests.swift in Sources */,
 				07C8C07A1DADAB7900C49827 /* CommandEncoderBaseTest.swift in Sources */,
 				07F68DA11DCD3FDD0072ABD5 /* DeconvolutionBlockTests.swift in Sources */,
-				DA6942651DEAAADE00285327 /* BGRAToBRGALayerTests.swift in Sources */,
+				DA6942651DEAAADE00285327 /* UnormToHalfLayerTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -654,7 +654,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -669,7 +669,7 @@
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscura/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 10.2;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
@@ -684,7 +684,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraTests;
@@ -699,7 +699,7 @@
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				BUNDLE_LOADER = "$(TEST_HOST)";
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraTests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraTests;
@@ -713,7 +713,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraUITests;
@@ -727,7 +727,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
-				DEVELOPMENT_TEAM = FJQDM4N4ZQ;
+				DEVELOPMENT_TEAM = DFVY326C5E;
 				INFOPLIST_FILE = NeuralObscuraUITests/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.pauldbergeron.NeuralObscuraUITests;
