@@ -31,6 +31,8 @@ class NeuralStyleTests: CommandEncoderBaseTest {
         print("-----------------------------------------------------------------------")
         print(expImg)
         print("-----------------------------------------------------------------------")
+        print(outImg.texture.pixelFormat.description)
+        print(outImg.texture.toBase64())
         XCTAssert(testImg.isLossyEqual(image: expImg, precision: 0))
     }
 

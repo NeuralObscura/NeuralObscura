@@ -13,9 +13,9 @@ import UIKit
 extension MTLTexture {
 
     func toUIImage(orientation: UIImageOrientation) -> UIImage {
-        let bytesPerPixel = 4
+        let bytesPerPixel = pixelFormat.sizeOfDataType
         let bytesPerRow = bytesPerPixel * self.width
-        var imageBytes = [UInt8](repeating: 0, count: self.width * self.height * bytesPerPixel)
+        var imageBytes = [UInt8](repeating: 0, count: self.width * self.height * bytesPerPixel * 4)
         let region = MTLRegionMake2D(0, 0, self.width, self.height)
         self.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
 
@@ -37,5 +37,17 @@ extension MTLTexture {
             withBytes: sourceBytes,
             bytesPerRow: bytesPerRow,
             bytesPerImage: bytesPerSlice)
+    }
+
+    func toBase64() -> String {
+        let bytesPerPixel = pixelFormat.sizeOfDataType
+        let bytesPerRow = bytesPerPixel * self.width
+        var imageBytes = [UInt8](repeating: 0, count: self.width * self.height * bytesPerPixel * 4)
+        let region = MTLRegionMake2D(0, 0, self.width, self.height)
+        self.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
+        print(imageBytes.count)
+
+        return NSData(bytes: imageBytes, length: imageBytes.count)
+            .base64EncodedString(options: NSData.Base64EncodingOptions(rawValue: 0))
     }
 }
