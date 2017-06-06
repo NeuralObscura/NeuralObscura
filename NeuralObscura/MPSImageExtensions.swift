@@ -12,7 +12,7 @@ import UIKit
 extension MPSImage {
     func toUIImageV2() -> UIImage {
         let ciImageOptions: [String : Any] = [
-            kCIImageColorSpace: CGColorSpace.sRGB,
+            kCIImageColorSpace: NSNull(),
         ]
         let ciImg = CIImage.init(mtlTexture: self.texture, options: ciImageOptions)!
         return UIImage(ciImage: ciImg)
@@ -448,5 +448,135 @@ extension MPSImage {
         }
         outputString += "\n"
         return outputString
+    }
+    
+    class CompareResult {
+        private var _mean: Float = 0
+        private var _lastMean: Float = 0
+        private var _S: Float = 0
+        private var _count: Float = 0
+        private var _minError: Float = Float.greatestFiniteMagnitude
+        private var _maxError: Float = 0
+        
+        func record(error: Int) {
+            self.record(error: Float(error))
+        }
+        
+        func record(error: Float) {
+            _count += 1
+            _lastMean = _mean
+            _mean += (error - _mean) / _count
+            _S += (error - _lastMean) * (error - _mean)
+            
+            if error > _maxError {
+                _maxError = error
+            }
+            
+            if error < _minError {
+                _minError = error
+            }
+        }
+        
+        var stddev: Float {
+            return sqrt(_S / _count - 1)
+        }
+        
+        var mean: Float {
+            return _mean
+        }
+        
+        var maxError: Float {
+            return _maxError
+        }
+        
+        var minError: Float {
+            return _minError
+        }
+        
+        var count: Int {
+            return Int(_count)
+        }
+    }
+    
+    func compare(rhs: MPSImage) {
+        let cmp = CompareResult()
+        
+        let lhs = self
+        guard (
+            lhs.width == rhs.width &&
+            lhs.height == rhs.height &&
+            lhs.pixelSize == rhs.pixelSize &&
+            lhs.pixelFormat == rhs.pixelFormat &&
+            lhs.featureChannels == rhs.featureChannels) else {
+                print("MPSImages did not have identical dimensions, pixelFormat, and/or feature channels.")
+                return
+        }
+        
+        let lhsRowSize: Int = lhs.width * lhs.pixelFormat.channelCount * lhs.pixelFormat.sizeOfDataType
+        let lhsImageSize = lhs.height * lhsRowSize
+        let lhsPixelArea = lhs.width * lhs.height * lhs.pixelFormat.channelCount
+        
+        let rhsRowSize: Int = rhs.width * rhs.pixelFormat.channelCount * rhs.pixelFormat.sizeOfDataType
+        let rhsImageSize = rhs.height * rhsRowSize
+        let rhsPixelArea = rhs.width * rhs.height * rhs.pixelFormat.channelCount
+
+        let lhsTexture = lhs.texture
+        let rhsTexture = rhs.texture
+
+        let lhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: lhsImageSize, alignedTo: lhs.pixelSize)
+        let rhsRawPtr = UnsafeMutableRawPointer.allocate(bytes: rhsImageSize, alignedTo: rhs.pixelSize)
+
+        let slices = self.pixelFormat.featureChannelsToSlices(featureChannels)
+        
+        for i in 0 ..< slices {
+            lhsTexture.getBytes(lhsRawPtr,
+                                bytesPerRow: lhsRowSize,
+                                bytesPerImage: lhsImageSize,
+                                from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                mipmapLevel: 0,
+                                slice: i)
+            rhsTexture.getBytes(rhsRawPtr,
+                                bytesPerRow: rhsRowSize,
+                                bytesPerImage: rhsImageSize,
+                                from: MTLRegionMake2D(0, 0, self.width, self.height),
+                                mipmapLevel: 0,
+                                slice: i)
+
+            switch lhs.pixelFormat {
+            case .r16Float, .rgba16Float:
+                let convertedLhs = Conversions.float16toFloat32(pointer: lhsRawPtr, count: lhsPixelArea)
+                let convertedRhs = Conversions.float16toFloat32(pointer: rhsRawPtr, count: rhsPixelArea)
+
+                for j in 0 ..< convertedRhs.count {
+                    cmp.record(error: abs(convertedLhs[j] - convertedRhs[j]))
+                }
+            case .r8Unorm, .rgba8Unorm, .bgra8Unorm, .bgra8Unorm_srgb:
+                let lhsPtr = lhsRawPtr.bindMemory(to: UInt8.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: UInt8.self, capacity: rhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<UInt8>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<UInt8>(start: rhsPtr, count: rhsPixelArea)
+                
+                for j in 0 ..< lhsBufferPtr.count {
+                    cmp.record(error: abs(Int(lhsBufferPtr[j]) - Int(rhsBufferPtr[j])))
+                }
+
+            case .r32Float, .rgba32Float:
+                let lhsPtr = lhsRawPtr.bindMemory(to: Float32.self, capacity: lhsPixelArea)
+                let rhsPtr = rhsRawPtr.bindMemory(to: Float32.self, capacity: rhsPixelArea)
+
+                let lhsBufferPtr = UnsafeBufferPointer<Float32>(start: lhsPtr, count: lhsPixelArea)
+                let rhsBufferPtr = UnsafeBufferPointer<Float32>(start: rhsPtr, count: rhsPixelArea)
+
+                for j in 0 ..< lhsBufferPtr.count {
+                    cmp.record(error: abs(lhsBufferPtr[j] - rhsBufferPtr[j]))
+                }
+            default:
+                print("Unrecognized pixel format \(lhs.pixelFormat)")
+                return
+            }
+        }
+
+        print("Compare results\n\tCount: \(cmp.count)\n\tMean error:\(cmp.mean)\n\tStddev error:\(cmp.stddev)\n\tMin error:\(cmp.minError)\n\tMax error:\(cmp.maxError)\n\n")
     }
 }

@@ -21,7 +21,6 @@ class ResidualBlock: UnaryCommandEncoder {
     private let s1: SummationLayer
     
     /* A property to keep info from init time whether we will pad input image or not for use during encode call */
-    fileprivate var padding = true
     
     init(
         modelParams: [String: ParameterBuffer],
@@ -70,7 +69,7 @@ class ResidualBlock: UnaryCommandEncoder {
             b: c2_b,
             relu: false,
             padding: 1,
-            stride: stride,
+            stride: 1,
             useTemporary: useTemporary)
         
         b2 = BatchNormalizationNonTestLayer(beta: b2_beta, gamma: b2_gamma)

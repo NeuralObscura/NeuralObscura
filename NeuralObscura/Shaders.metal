@@ -15,11 +15,11 @@ kernel void identity(texture2d<float, access::read> inTexture [[texture(0)]],
  *
  * Formula: output[i] = max(0, input[i])
  */
-kernel void rectifier_linear(texture2d_array<float, access::read> inTexture [[texture(0)]],
-                             texture2d_array<float, access::write> outTexture [[texture(1)]],
+kernel void rectifier_linear(texture2d_array<half, access::read> inTexture [[texture(0)]],
+                             texture2d_array<half, access::write> outTexture [[texture(1)]],
                              uint3 gid [[thread_position_in_grid]]) {
-    float4 input = inTexture.read(gid.xy, gid.z);
-    float4 output = float4(fmax(0.0, input.r), fmax(0.0, input.g), fmax(0.0, input.b), fmax(0.0, input.a));
+    float4 pixel = static_cast<float4>(inTexture.read(gid.xy, gid.z));
+    half4 output = half4(fmax(0.0, pixel[0]), fmax(0.0, pixel[1]), fmax(0.0, pixel[2]), fmax(0.0, pixel[3]));
     outTexture.write(output, gid.xy, gid.z);
 }
 
@@ -62,28 +62,27 @@ kernel void batch_normalization(texture2d_array<half, access::read> inTexture [[
  *
  * Formula: output = (gamma * ((input - mean) / stddev)) + beta
  */
-kernel void batch_normalization_nt(texture2d_array<float, access::read> inTexture [[texture(0)]],
-                                   texture2d_array<float, access::write> outTexture [[texture(1)]],
-                                   const device float* gammas [[ buffer(2) ]],
-                                   const device float* betas [[ buffer(3) ]],
-                                   const device float* means [[ buffer(4) ]],
-                                   const device float* stddevs [[ buffer(5) ]],
-                                   uint3 gid [[thread_position_in_grid]]) {
+kernel void batch_normalization_nt(texture2d_array<half, access::read> inTexture [[texture(0)]],
+                                   texture2d_array<half, access::write> outTexture [[texture(1)]],
+                                   const device packed_float4* gammas [[ buffer(2) ]],
+                                   const device packed_float4* betas [[ buffer(3) ]],
+                                   const device packed_float4* means [[ buffer(4) ]],
+                                   const device packed_float4* stddevs [[ buffer(5) ]],
+                                   uint3 pos [[thread_position_in_grid]]) {
     uint height = inTexture.get_height();
     uint width = inTexture.get_width();
-    uint slot = (gid.z * 4);
 
-    float4 working_means = float4(means[slot], means[slot+1], means[slot+2], means[slot+3]);
-    float4 working_stddevs = float4(stddevs[slot], stddevs[slot+1], stddevs[slot+2], stddevs[slot+3]);
-    float4 working_betas = float4(betas[slot], betas[slot+1], betas[slot+2], betas[slot+3]);
-    float4 working_gammas = float4(gammas[slot], gammas[slot+1], gammas[slot+2], gammas[slot+3]);
+    half4 working_means = static_cast<half4>(float4(means[pos.z]));
+    half4 working_stddevs = static_cast<half4>(float4(stddevs[pos.z]));
+    half4 working_betas = static_cast<half4>(float4(betas[pos.z]));
+    half4 working_gammas = static_cast<half4>(float4(gammas[pos.z]));
     
-    /* TODO: Implement numerical error correction here. */
+    /* TODO: Implement numerical error correction */
     for(uint j = 0; j < width; ++j) {
         for(uint i = 0; i < height; ++i) {
-            float4 x_hat = (inTexture.read(uint2(j, i), gid.z) - working_means) / working_stddevs;
-            float4 y = working_gammas * x_hat + working_betas;
-            outTexture.write(y, uint2(j, i), gid.z);
+            half4 x_hat = (inTexture.read(uint2(j, i), pos.z) - working_means) / working_stddevs;
+            half4 y = working_gammas * x_hat + working_betas;
+            outTexture.write(y, uint2(j, i), pos.z);
         }
     }
 }
@@ -93,7 +92,7 @@ kernel void batch_normalization_nt(texture2d_array<float, access::read> inTextur
 kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[texture(0)]],
                          device packed_float4* means [[buffer(1)]],
                          device packed_float4* stddevs [[buffer(2)]],
-                         uint3 gid [[thread_position_in_grid]]) {
+                         uint3 pos [[thread_position_in_grid]]) {
     uint height = inTexture.get_height();
     uint width = inTexture.get_width();
     int count = width * height;
@@ -102,7 +101,7 @@ kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[textur
     float4 error = float4(0,0,0,0);
     for(uint j = 0; j < width; ++j) {
         for(uint i = 0; i < height; ++i) {
-            float4 y = inTexture.read(uint2(j, i), gid.z) - error;
+            float4 y = inTexture.read(uint2(j, i), pos.z) - error;
             float4 t = sum + y;
             error = (t - sum) - y;
             sum = t;
@@ -114,7 +113,7 @@ kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[textur
     error = float4(0.0, 0.0, 0.0, 0.0);
     for(uint j = 0; j < width; ++j) {
         for(uint i = 0; i < height; ++i) {
-            float4 y = pow(inTexture.read(uint2(j, i), gid.z) - mean, 2) - error;
+            float4 y = pow(inTexture.read(uint2(j, i), pos.z) - mean, 2) - error;
             float4 t = vari + y;
             error = (t - vari) - y;
             vari = t;
@@ -127,8 +126,8 @@ kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[textur
     if (stddev[2] == 0) { stddev[2] = 1; }
     if (stddev[3] == 0) { stddev[3] = 1; }
 
-    means[gid.z] = packed_float4(mean);
-    stddevs[gid.z] = packed_float4(stddev);
+    means[pos.z] = packed_float4(mean);
+    stddevs[pos.z] = packed_float4(stddev);
 }
 
 /* Add two matrices together
@@ -138,11 +137,11 @@ kernel void mean_std_dev(texture2d_array<float, access::read> inTexture [[textur
 kernel void add(texture2d_array<half, access::read> inTexture1 [[texture(0)]],
                 texture2d_array<half, access::read> inTexture2 [[texture(1)]],
                 texture2d_array<half, access::write> outTexture [[texture(2)]],
-                uint3 gid [[thread_position_in_grid]]) {
-    half4 input1 = inTexture1.read(gid.xy, gid.z);
-    half4 input2 = inTexture2.read(gid.xy, gid.z);
+                uint3 pos [[thread_position_in_grid]]) {
+    half4 input1 = inTexture1.read(pos.xy, pos.z);
+    half4 input2 = inTexture2.read(pos.xy, pos.z);
     half4 output = input1 + input2;
-    outTexture.write(output, gid.xy, gid.z);
+    outTexture.write(output, pos.xy, pos.z);
 }
 
 
@@ -152,11 +151,11 @@ kernel void add(texture2d_array<half, access::read> inTexture1 [[texture(0)]],
  */
 kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[texture(0)]],
                             texture2d<half, access::write> outTexture [[texture(1)]],
-                            uint3 gid [[thread_position_in_grid]]) {
-    half4 pixel = inTexture.read(gid.xy, gid.z);
+                            uint3 pos [[thread_position_in_grid]]) {
+    half4 pixel = inTexture.read(pos.xy, pos.z);
     pixel = (tanh(pixel) + 1) / 2;
     pixel = half4(pixel[1], pixel[2], pixel[0], 1.0);
-    outTexture.write(pixel, gid.xy, gid.z);
+    outTexture.write(pixel, pos.xy, pos.z);
 }
 
 /* Convert rgba8Unorm into rgba16Float
@@ -379,17 +378,15 @@ kernel void col2im(const device half* input [[ buffer (0) ]],
 
 kernel void add_bias(texture2d_array<half, access::read> inTexture [[texture(0)]],
                      texture2d_array<half, access::write> outTexture [[texture(1)]],
-                     const device half* biases [[buffer(2)]],
-                     uint3 gid [[thread_position_in_grid]]) {
+                     const device packed_half4* biases [[buffer(2)]],
+                     uint3 pos [[thread_position_in_grid]]) {
     
-    if (gid.x > outTexture.get_width() - 1 || gid.y > outTexture.get_height() - 1) {
+    if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
         return;
     }
     
-    uint c_base = gid.z * 4;
-    half4 workingVals = inTexture.read(gid.xy, gid.z);
-    half4 workingBiases = half4(biases[c_base], biases[c_base + 1], biases[c_base + 2], biases[c_base + 3]);
-    outTexture.write(workingVals + workingBiases, gid.xy, gid.z);
+    half4 output = inTexture.read(pos.xy, pos.z) + half4(biases[pos.z]);
+    outTexture.write(output, pos.xy, pos.z);
 }
 
 kernel void deconvolution_interpixel_stride(texture2d_array<half, access::read> inTexture [[texture(0)]],
