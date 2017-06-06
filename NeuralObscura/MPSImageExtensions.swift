@@ -24,12 +24,15 @@ extension MPSImage {
         var imageBytes = [UInt8](repeating: 0, count: bytesPerRow * texture.height)
         let region = MTLRegionMake2D(0, 0, texture.width, texture.height)
         texture.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
+
         let providerRef = CGDataProvider.init(
             data: NSData(
                 bytes: &imageBytes,
                 length: imageBytes.count))
+
         let bitmapInfo =
             CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.noneSkipLast.rawValue)
+
         let imageRef = CGImage.init(
             width: texture.width,
             height: texture.height,
@@ -42,6 +45,7 @@ extension MPSImage {
             decode: nil,
             shouldInterpolate: false,
             intent: .defaultIntent)!
+
         return UIImage(cgImage: imageRef, scale: 0, orientation: .up)
     }
 

@@ -12,18 +12,32 @@ import UIKit
 
 extension MTLTexture {
 
-    func toUIImage(orientation: UIImageOrientation) -> UIImage {
+    func toUIImage() -> UIImage {
         let bytesPerPixel = pixelFormat.sizeOfDataType
-        let bytesPerRow = bytesPerPixel * self.width
-        var imageBytes = [UInt8](repeating: 0, count: self.width * self.height * bytesPerPixel * 4)
+        let bytesPerRow = bytesPerPixel * self.width * 4
+        var imageBytes = [UInt8](repeating: 0, count: bytesPerRow * self.height)
         let region = MTLRegionMake2D(0, 0, self.width, self.height)
         self.getBytes(&imageBytes, bytesPerRow: bytesPerRow, from: region, mipmapLevel: 0)
 
-        let providerRef = CGDataProvider(data: NSData(bytes: &imageBytes, length: imageBytes.count * MemoryLayout<UInt8>.size))
-        let bitmapInfo = CGBitmapInfo(rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
-        let imageRef = CGImage(width: self.width, height: self.height, bitsPerComponent: 8, bitsPerPixel: bytesPerPixel * 8, bytesPerRow: bytesPerRow, space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: bitmapInfo, provider: providerRef!, decode: nil, shouldInterpolate: false, intent: .defaultIntent)!
+        let providerRef = CGDataProvider(
+            data: NSData(bytes: &imageBytes, length: imageBytes.count * pixelFormat.sizeOfDataType))
 
-        return UIImage(cgImage: imageRef, scale: 0, orientation: orientation)
+        let bitmapInfo = CGBitmapInfo(
+            rawValue: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)
+
+        let imageRef = CGImage(width: self.width,
+                               height: self.height,
+                               bitsPerComponent: 8,
+                               bitsPerPixel: 32,
+                               bytesPerRow: bytesPerRow,
+                               space: CGColorSpaceCreateDeviceRGB(),
+                               bitmapInfo: bitmapInfo,
+                               provider: providerRef!,
+                               decode: nil,
+                               shouldInterpolate: false,
+                               intent: .defaultIntent)!
+
+        return UIImage(cgImage: imageRef, scale: 0, orientation: .up)
     }
 
     func fillSlice(_ sourceBytes: UnsafeRawPointer, slice: Int = 0) {

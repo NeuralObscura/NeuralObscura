@@ -64,7 +64,7 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
             .url(forResource: "conv_relu_expected_output", withExtension: "npy", subdirectory: "testdata")!
         let expImg = MPSImage.fromNumpy(expUrl)
         
-        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: -1))
+        XCTAssert(outputImg.isLossyEqual(image: expImg, precision: 0))
     }
     
     func testIdentityNoPadding() {
@@ -128,9 +128,10 @@ class ConvolutionLayerTests: CommandEncoderBaseTest {
                                                   0, 0, 0, 0])
         let outputImg = conv.chain(MPSImageVariable(testImg)).forward(commandBuffer: commandBuffer)
         execute()
-        
+
         XCTAssertEqual(outputImg, expImg)
     }
+
 
     func testIdentityFullPadding() {
         let testImg = device.makeMPSImage(width: 4,

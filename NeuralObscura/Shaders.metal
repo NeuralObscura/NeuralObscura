@@ -154,23 +154,11 @@ kernel void tanh_adjustment(texture2d_array<half, access::read> inTexture [[text
                             uint3 pos [[thread_position_in_grid]]) {
     half4 pixel = inTexture.read(pos.xy, pos.z);
     pixel = (tanh(pixel) + 1) / 2;
-    pixel = half4(pixel[1], pixel[2], pixel[0], 1.0);
+    pixel = half4(pixel[2], pixel[1], pixel[0], 1.0);
     outTexture.write(pixel, pos.xy, pos.z);
 }
 
-/* Convert rgba8Unorm into rgba16Float
- */
-kernel void unorm_to_half(texture2d<half, access::read> inTexture [[texture(0)]],
-                          texture2d<half, access::write> outTexture [[texture(1)]],
-                          uint2 pos [[thread_position_in_grid]]) {
-    
-    if (pos.x > outTexture.get_width() - 1 || pos.y > outTexture.get_height() - 1) {
-        return;
-    }
-
-    half4 pixel = inTexture.read(pos.xy);
-    outTexture.write(half4(pixel.x * 255.0, pixel.y * 255.0, pixel.z * 255.0, 0.0), pos.xy);
-}
+// MARK: 5d indexing
 
 struct _2d_shape {
     uint a;
