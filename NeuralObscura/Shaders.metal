@@ -1,4 +1,5 @@
 #include <metal_stdlib>
+#include <metal_texture>
 
 using namespace metal;
 
@@ -158,3 +159,146 @@ kernel void rgba_to_brga(texture2d<float, access::read> inTexture [[texture(0)]]
     float4 output = float4(input[2], input[0], input[1], input[3]);
     outTexture.write(output, gid.xy, gid.z);
 }
+
+struct _2d_shape {
+    uint a;
+    uint b;
+};
+
+struct _2d_index {
+    uint x;
+    uint y;
+};
+
+struct _3d_shape {
+    uint a;
+    uint b;
+    uint c;
+};
+
+struct _3d_index {
+    uint x;
+    uint y;
+    uint z;
+};
+
+struct _4d_shape {
+    uint a;
+    uint b;
+    uint c;
+    uint d;
+};
+
+struct _4d_index {
+    uint x;
+    uint y;
+    uint z;
+    uint w;
+};
+
+struct _5d_shape {
+    uint a;
+    uint b;
+    uint c;
+    uint d;
+    uint e;
+};
+
+struct _5d_index {
+    uint x;
+    uint y;
+    uint z;
+    uint w;
+    uint v;
+};
+
+uint _4d_index_to_1d_index(_4d_shape shape, _4d_index index);
+uint _4d_index_to_1d_index(_4d_shape shape, _4d_index index) {
+    return  index.x * (shape.b * shape.c * shape.d)
+    + index.y * (shape.c * shape.d)
+    + index.z * (shape.d)
+    + index.w;
+}
+
+int _5d_index_to_1d_index(_5d_shape shape, _5d_index index);
+int _5d_index_to_1d_index(_5d_shape shape, _5d_index index) {
+    return index.x * (shape.b * shape.c * shape.d * shape.e)
+    + index.y * (shape.c * shape.d * shape.e)
+    + index.z * (shape.d * shape.e)
+    + index.w * (shape.e)
+    + index.v;
+}
+
+_2d_index _1d_index_to_2d_index(_2d_shape shape, uint index);
+_2d_index _1d_index_to_2d_index(_2d_shape shape, uint index) {
+    return (_2d_index) { index / shape.b, index % shape.b };
+}
+
+uint _2d_index_to_1d_index(uint shape, _2d_index index);
+uint _2d_index_to_1d_index(uint shape, _2d_index index) {
+    return (shape * index.y)
+    + index.x;
+}
+
+_3d_index _1d_index_to_3d_index(_3d_shape shape, uint index);
+_3d_index _1d_index_to_3d_index(_3d_shape shape, uint index) {
+    uint x = index / (shape.b * shape.c);
+    uint y = (index % (shape.b * shape.c)) / (shape.c);
+    uint z = index % shape.c;
+    return (_3d_index) { x, y, z };
+}
+
+kernel void col2im(const device float* input [[ buffer (0) ]],
+                   texture2d_array<float, access::write> outTexture [[texture(1)]],
+                   const device uint* input_dim [[buffer(2)]],
+                   uint3 id [[thread_position_in_grid]]) {
+
+    //uint nc_out = input_dim[0];
+    uint nh = input_dim[1];
+    uint nw = input_dim[2];
+    //uint inputSize = input_dim[3];
+    uint nkh = input_dim[4];
+    uint nkw = input_dim[5];
+    uint destRowWidth = input_dim[6];
+    uint s = input_dim[7];
+    uint p = input_dim[8];
+
+    int i = id.x;
+    int sy = s;
+    int sx = s;
+    int ph = p;
+    int pw = p;
+    int kh = nkh;
+    int kw = nkw;
+    int out_h = nh;
+    int out_w = nw;
+    int h = nh;
+    int w = nw;
+
+
+    int c0 = i / (h * w);
+    int y  = i / w % h;
+    int x  = i % w;
+
+
+    float val = 0.0;
+    for (int ky = 0; ky < kh; ++ky) {
+        int out_y = (y + ph - ky * 1);
+        if (0 > out_y || out_y >= out_h * sy) continue;
+        if (out_y % sy != 0) continue;
+        out_y /= sy;
+        for (int kx = 0; kx < kw; ++kx) {
+            int out_x = (x + pw - kx * 1);
+            if (0 > out_x || out_x >= out_w * sx) continue;
+            if (out_x % sx != 0) continue;
+            out_x /= sx;
+            int k = out_y + out_h * (kx + kw * (ky + kh * c0));
+            val = val + input[out_x + out_w * k];
+        }
+    }
+    uint dest_y = i / destRowWidth;
+    uint dest_x = i % destRowWidth;
+    uint2 idx = {dest_x, dest_y};
+    outTexture.write(val, idx, c0);
+}
+
